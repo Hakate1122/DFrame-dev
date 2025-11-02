@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Ứng dụng PHP</title>
+<style>
+  :root{--bg:#fff8e6;--accent:#d97706;--muted:#666}
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+       margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+       background:#f6f7fb;color:#111;padding:24px}
+  .notice{max-width:820px;border-radius:12px;padding:20px 22px;box-shadow:0 6px 30px rgba(30,40,80,.08);
+          background:linear-gradient(180deg,var(--bg),#fff);border:1px solid #ffe4b5;display:flex;gap:18px}
+  .icon{flex:0 0 72px;height:72px;border-radius:12px;background:rgba(217,119,6,.12);
+        display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--accent)}
+  .content{flex:1}
+  .title{font-size:18px;font-weight:600;margin:0 0 6px}
+  .desc{color:var(--muted);margin:0 0 12px;line-height:1.45}
+  .commands{display:flex;gap:8px;flex-wrap:wrap}
+  .cmd{background:#111;padding:8px 10px;color:#fff;border-radius:8px;font-family:monospace;font-size:13px}
+  .btn{appearance:none;border:0;padding:8px 12px;border-radius:8px;background:#1f2937;color:#fff;
+       font-weight:600;cursor:pointer}
+  .link{background:transparent;border:1px solid #e6e6e6;padding:8px 12px;border-radius:8px;color:#111;cursor:pointer}
+  .small{font-size:13px;color:#777;margin-top:12px}
+  .help{margin-top:10px;padding:10px;border-radius:8px;background:#fffbe6;border:1px dashed #ffe6a5;color:#6b4a00}
+  @media (max-width:520px){.notice{flex-direction:column}.icon{width:56px;height:56px;font-size:26px}}
+</style>
+</head>
+<body>
+<?php if ($composerMissing): ?>
+  <div class="notice" role="alert" aria-live="polite">
+    <div class="icon">⚠️</div>
+    <div class="content">
+      <h1 class="title">Thiếu Composer packages</h1>
+      <p class="desc">
+        Ứng dụng chưa tìm thấy thư mục `vendor/` hoặc tệp `vendor/autoload.php`. 
+        Điều này nghĩa là các package cài qua <strong>Composer</strong> chưa được cài đặt — trang có thể hoạt động không đúng.
+      </p>
+
+      <div class="commands" aria-hidden="false">
+        <div class="cmd" id="cmdInstall">composer install</div>
+        <div class="cmd" id="cmdRequire">composer require &lt;vendor/package&gt;</div>
+      </div>
+
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" onclick="copyCmd('composer install')">Sao chép lệnh cài</button>
+        <button class="link" onclick="showHelp()">Xem hướng dẫn</button>
+        <form style="display:inline">
+          <button class="link" name="retry" value="1" type="submit">Thử lại</button>
+        </form>
+      </div>
+
+      <div class="small">
+        Nếu bạn có quyền truy cập vào terminal/SSH, chạy <code>composer install</code> trong thư mục dự án.
+        Nếu không có Composer, cài Composer theo <a href="https://getcomposer.org/" target="_blank" rel="noopener">hướng dẫn chính thức</a>.
+      </div>
+
+      <div id="helpBox" class="help" style="display:none">
+        <strong>Hướng dẫn nhanh:</strong>
+        <ol style="margin:8px 0 0 18px;padding:0">
+          <li>SSH vào server, điều hướng tới thư mục chứa dự án (nơi có composer.json).</li>
+          <li>Chạy <code>composer install</code> để cài tất cả package.</li>
+          <li>Nếu thiếu gói cụ thể: <code>composer require vendor/package</code>.</li>
+          <li>Trong môi trường shared-hosting, nếu không có SSH: upload thư mục <code>vendor/</code> đã cài từ máy local lên server (không khuyến khích nhưng là phương án tạm).</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function copyCmd(text){
+      navigator.clipboard?.writeText(text).then(()=>{
+        alert('Đã sao chép: ' + text);
+      }, ()=>{ prompt('Sao chép thủ công:', text); });
+    }
+    function showHelp(){
+      const h = document.getElementById('helpBox');
+      h.style.display = h.style.display === 'none' ? 'block' : 'none';
+    }
+  </script>
+</body>
+</html>

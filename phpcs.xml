@@ -1,0 +1,5 @@
+<ruleset>
+    <description>Custom coding standards for PHP CodeSniffer</description>
+    <rule ref="PSR12"/>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+</ruleset>

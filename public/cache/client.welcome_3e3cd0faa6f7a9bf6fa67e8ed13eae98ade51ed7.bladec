@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+ <meta charset="utf-8">
+ <meta http-equiv="X-UA-Compatible" content="IE=edge">
+ <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+ <title>Đọc Truyện Online</title>
+
+ <!-- Bootstrap 3 -->
+ <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+ <style>
+ /* ---------- Tông màu & reset nhẹ ---------- */
+ body {
+ background: #0d0f12;
+ color: #e8edf2;
+ }
+
+ a {
+ color: #8fd3ff;
+ }
+
+ a:hover,
+ a:focus {
+ color: #bfe7ff;
+ text-decoration: none;
+ }
+
+ .navbar-inverse {
+ background: #10141a;
+ border-color: #0b0e13;
+ }
+
+ .navbar-inverse .navbar-brand {
+ color: #e8edf2;
+ }
+
+ .navbar-inverse .navbar-nav>li>a {
+ color: #c9d3dc;
+ }
+
+ /* ---------- Card truyện ---------- */
+ .comic-card {
+ background: #141a22;
+ border: 1px solid #121821;
+ border-radius: 10px;
+ overflow: hidden;
+ margin-bottom: 15px;
+ }
+
+ .comic-thumb {
+ display: block;
+ width: 100%;
+ aspect-ratio: 3/4;
+ background: #11161d;
+ }
+
+ .comic-thumb img {
+ width: 100%;
+ height: 100%;
+ object-fit: cover;
+ display: block;
+ }
+
+ .comic-body {
+ padding: 10px;
+ }
+
+ .comic-title {
+ font-size: 14px;
+ line-height: 1.3;
+ margin: 0 0 6px;
+ white-space: nowrap;
+ overflow: hidden;
+ text-overflow: ellipsis;
+ }
+
+ .comic-meta {
+ font-size: 12px;
+ color: #a7b5c2;
+ }
+
+ /* ---------- Carousel/hero ---------- */
+ .hero {
+ margin-bottom: 20px;
+ }
+
+ /* Banner cố định kích thước 1280x280px, luôn căn giữa, ảnh cover */
+ .hero {
+ width: 100%;
+ max-width: 1280px;
+ min-width: 320px;
+ height: 280px;
+ margin-left: auto;
+ margin-right: auto;
+ }
+ .hero .item {
+ width: 100%;
+ height: 280px;
+ background: #11161d;
+ color: #e8edf2;
+ position: relative;
+ overflow: hidden;
+ }
+ .hero .item img {
+ width: 100%;
+ height: 100%;
+ object-fit: cover;
+ object-position: center;
+ display: block;
+ }
+ .hero .item .caption {
+ position: absolute;
+ left: 15px;
+ right: 15px;
+ bottom: 15px;
+ background: rgba(0, 0, 0, .35);
+ padding: 10px;
+ border-radius: 8px;
+ }
+
+ /* ---------- Sidebar ---------- */
+ .sidebar-box {
+ background: #141a22;
+ border: 1px solid #121821;
+ border-radius: 10px;
+ padding: 10px;
+ margin-bottom: 15px;
+ }
+
+ .sidebar-box h4 {
+ margin-top: 0;
+ font-size: 14px;
+ }
+
+ /* ---------- Footer ---------- */
+ .site-footer {
+ margin-top: 30px;
+ padding: 20px 0;
+ color: #9fb0c2;
+ border-top: 1px solid #121821;
+ }
+
+ /* ---------- Siêu nhỏ (≤ 240px, bao phủ 127x160) ---------- */
+ @media (max-width: 240px) {
+
+ /* Ẩn các phần nặng để giảm tải */
+ .xxs-hide,
+ .hidden-xxs {
+ display: none !important;
+ }
+
+ /* Nén navbar: chỉ logo + nút menu */
+ .navbar-brand {
+ font-size: 10px;
+ padding: 4px 6px;
+ }
+
+ .navbar-toggle {
+ margin-right: 4px;
+ }
+
+ /* Grid 1 cột, thu nhỏ card */
+ .comic-title {
+ font-size: 10px;
+ }
+ .comic-meta {
+ font-size: 8px;
+ }
+ .comic-card {
+ border-radius: 4px;
+ margin-bottom: 4px;
+ min-width: 0;
+ max-width: 100%;
+ }
+ .comic-thumb {
+ aspect-ratio: 3/5;
+ }
+
+ /* Thu nhỏ hero (hoặc ẩn bằng .xxs-hide trên container) */
+ .hero .item {
+ height: 60px;
+ }
+
+ /* Giảm padding để hiển thị được nhiều nội dung hơn */
+ .comic-body {
+ padding: 3px;
+ }
+ /* ---------- 2K/4K tinh chỉnh chữ lớn hơn chút ---------- */
+ @media (min-width: 1920px) {
+ body {
+ font-size: 20px;
+ }
+ .comic-title {
+ font-size: 24px;
+ }
+ .comic-meta {
+ font-size: 18px;
+ }
+ .sidebar-box h4 {
+ font-size: 20px;
+ }
+ .site-footer {
+ font-size: 18px;
+ }
+ .hero .item {
+ height: 400px;
+ }
+ .comic-body {
+ padding: 24px;
+ }
+ }
+ }
+
+ /* ---------- Siêu nhỏ (≤ 160px) ---------- */
+ @media (max-width: 160px) {
+ body {
+ font-size: 8px;
+ }
+ .navbar-brand, .navbar-nav>li>a, .comic-title, .comic-meta, .sidebar-box h4, .sidebar-box ul, .site-footer {
+ font-size: 8px !important;
+ }
+ .comic-body {
+ padding: 1px;
+ }
+ .comic-card {
+ margin-bottom: 2px;
+ border-radius: 2px;
+ min-width: 0;
+ max-width: 100%;
+ width: 100% !important;
+ float: none !important;
+ display: block !important;
+ }
+ .col-xs-6, .col-sm-4, .col-md-3, .col-lg-2 {
+ width: 100% !important;
+ float: none !important;
+ padding-left: 0 !important;
+ padding-right: 0 !important;
+ }
+ .comic-thumb {
+ aspect-ratio: 3/6;
+ }
+ .hero .item {
+ height: 40px;
+ }
+ }
+
+ /* ---------- Nhỏ (≤ 480px) ---------- */
+ @media (max-width: 480px) {
+ /* Ẩn hoàn toàn banner trên thiết bị nhỏ */
+ #heroCarousel {
+ display: none !important;
+ }
+ }
+
+ /* ---------- 2K/4K tinh chỉnh chữ lớn hơn chút ---------- */
+ @media (min-width: 1920px) {
+ .comic-title {
+ font-size: 16px;
+ }
+
+ .comic-meta {
+ font-size: 13px;
+ }
+ }
+ </style>
+</head>
+<body>
+ <!-- NAVBAR -->
+ <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+ <div class="container-fluid">
+ <div class="navbar-header">
+ <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#mainNav">
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ <span class="icon-bar"></span>
+ </button>
+ <a class="navbar-brand" href="<?=route('client.index')?>">DocTruyen</a>
+ </div>
+ <div class="collapse navbar-collapse" id="mainNav">
+ <ul class="nav navbar-nav">
+ <li class="active"><a href="<?=route('client.index')?>">Trang chủ</a></li>
+ <li class="xxs-hide"><a href="<?=route('client.category')?>">Thể loại</a></li>
+ <li class="xxs-hide"><a href="<?=route('client.ranking')?>">Xếp hạng</a></li>
+ <li class="xxs-hide"><a href="<?=route('client.following')?>">Theo dõi</a></li>
+ </ul>
+ <form class="navbar-form navbar-left xxs-hide" role="search">
+ <div class="form-group">
+ <input type="text" class="form-control" placeholder="Tìm truyện…" style="width:220px">
+ </div>
+ <button type="submit" class="btn btn-default">Tìm</button>
+ </form>
+ <ul class="nav navbar-nav navbar-right">
+ <li class="xxs-hide"><a href="#"><span class="glyphicon glyphicon-user"></span> Đăng nhập</a></li>
+ </ul>
+ </div>
+ </div>
+ </nav>
+
+ <div class="container" style="margin-top:70px">
+ <!-- HERO / CAROUSEL (ẩn ở màn cực nhỏ) -->
+ <div id="heroCarousel" class="carousel slide xxs-hide" data-ride="carousel">
+ <ol class="carousel-indicators">
+ <li data-target="#heroCarousel" data-slide-to="0" class="active"></li>
+ <li data-target="#heroCarousel" data-slide-to="1"></li>
+ <li data-target="#heroCarousel" data-slide-to="2"></li>
+ </ol>
+ <div class="carousel-inner hero" role="listbox">
+ <div class="item active">
+ <img class="img-responsive" alt="Banner 1" loading="lazy"
+ src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1280&q=80">
+ <div class="caption">
+ <h3>Siêu phẩm mới cập bến</h3>
+ <p>Đọc ngay chương 1 miễn phí!</p>
+ </div>
+ </div>
+ <div class="item">
+ <img class="img-responsive" alt="Banner 2" loading="lazy"
+ src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1280&q=80">
+ <div class="caption">
+ <h3>Top thịnh hành</h3>
+ <p>Danh sách cập nhật theo thời gian thực.</p>
+ </div>
+ </div>
+ <div class="item">
+ <img class="img-responsive" alt="Banner 3" loading="lazy"
+ src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=1280&q=80">
+ <div class="caption">
+ <h3>Sự kiện giảm giá</h3>
+ <p>Ưu đãi độc quyền cho thành viên.</p>
+ </div>
+ </div>
+ </div>
+ <a class="left carousel-control" href="#heroCarousel" role="button" data-slide="prev">
+ <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+ <span class="sr-only">Trước</span>
+ </a>
+ <a class="right carousel-control" href="#heroCarousel" role="button" data-slide="next">
+ <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+ <span class="sr-only">Sau</span>
+ </a>
+ </div>
+
+ <!-- MAIN LAYOUT -->
+ <div class="row">
+ <!-- CONTENT -->
+ <div class="col-sm-8">
+ <h3 class="page-header" style="border-color:#121821">Mới cập nhật</h3>
+ <div class="row" id="grid-latest">
+ <!-- Card template x12 -->
+ <?php for ($i = 0; $i < 12; $i++): ?>
+ <div class="col-xs-6 col-sm-4 col-md-3 col-lg-2">
+ <article class="comic-card" data-lowres-trim>
+ <a class="comic-thumb" href="<?=route('client.detail')?>" aria-label="Truyện <?= chr(65+$i) ?>">
+ <img loading="lazy" alt="Truyện <?= chr(65+$i) ?>" width="300" height="400"
+ src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='400'%3E%3Crect width='100%25' height='100%25' fill='%2311161d'/%3E%3Ctext x='50%25' y='50%25' fill='%238fd3ff' dominant-baseline='middle' text-anchor='middle' font-size='18'%3E300x400%3C/text%3E%3C/svg%3E">
+ </a>
+ <div class="comic-body">
+ <h4 class="comic-title">Truyện <?= chr(65+$i) ?></h4>
+ <div class="comic-meta">Ch. <?= rand(1,125) ?> • <?= rand(1,24) ?> phút</div>
+ </div>
+ </article>
+ </div>
+ <?php endfor; ?>
+ </div>
+
+ <p class="text-center">
+ <button class="btn btn-default btn-lg" id="btn-loadmore">Tải thêm</button>
+ </p>
+ </div>
+
+ <!-- SIDEBAR (ẩn ở cực nhỏ bằng .xxs-hide) -->
+ <aside class="col-sm-4 xxs-hide">
+ <div class="sidebar-box">
+ <h4><span class="glyphicon glyphicon-fire"></span> Thịnh hành</h4>
+ <ol style="padding-left:18px;">
+ <li><a href="#">Truyện A: Khởi nguyên</a></li>
+ <li><a href="#">Truyện E: Võ hiệp</a></li>
+ <li><a href="#">Truyện H</a></li>
+ <li><a href="#">Truyện L</a></li>
+ </ol>
+ </div>
+ <div class="sidebar-box">
+ <h4><span class="glyphicon glyphicon-th"></span> Thể loại</h4>
+ <div class="row">
+ <div class="col-xs-6">
+ <ul class="list-unstyled">
+ <li><a href="#">Hành động</a></li>
+ <li><a href="#">Huyền bí</a></li>
+ <li><a href="#">Lãng mạn</a></li>
+ </ul>
+ </div>
+ <div class="col-xs-6">
+ <ul class="list-unstyled">
+ <li><a href="#">Kịch tính</a></li>
+ <li><a href="#">Hài hước</a></li>
+ <li><a href="#">Phiêu lưu</a></li>
+ </ul>
+ </div>
+ </div>
+ </div>
+ </aside>
+ </div>
+
+ <!-- FOOTER -->
+ <footer class="site-footer text-center">
+ <div class="row">
+ <div class="col-sm-6 text-left">© 2025 DocTruyen</div>
+ <div class="col-sm-6 text-right xxs-hide">
+ <a href="#">Điều khoản</a> • <a href="#">Riêng tư</a> • <a href="#">Liên hệ</a>
+ </div>
+ </div>
+ </footer>
+ </div>
+
+ <!-- JS: JQuery + Bootstrap -->
+ <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+ <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+ <script>
+ (function () {
+ // 1) Loại bỏ hẳn các block nặng trên thiết bị cực nhỏ để giảm DOM & repaint
+ var w = window.innerWidth || document.documentElement.clientWidth;
+ if (w <= 240) {
+ // Xóa carousel và sidebar thay vì chỉ ẩn
+ var hero = document.getElementById('heroCarousel');
+ if (hero && hero.parentNode) hero.parentNode.removeChild(hero);
+ var side = document.querySelector('aside.col-sm-4');
+ if (side && side.parentNode) side.parentNode.removeChild(side);
+ // Giữ lại tối đa 6 card đầu để nhẹ hơn
+ var cards = document.querySelectorAll('#grid-latest [data-lowres-trim]');
+ for (var i = 6; i < cards.length; i++) {
+ var n = cards[i];
+ if (n && n.parentNode) n.parentNode.removeChild(n);
+ }
+ }
+
+ // 2) Nút tải thêm (demo): thêm 6 item giả lập
+ document.getElementById('btn-loadmore').addEventListener('click', function () {
+ var grid = document.getElementById('grid-latest');
+ for (var i = 0; i < 6; i++) {
+ var col = document.createElement('div');
+ col.className = 'col-xs-6 col-sm-4 col-md-3 col-lg-2';
+ col.innerHTML = '\n            <article class="comic-card">\n              <a class="comic-thumb" href="#">\n                <img loading="lazy" alt="New" width="300" height="400" src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'400\'%3E%3Crect width=\'100%25\' height=\'100%25\' fill=\'%2311161d\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' fill=\'%238fd3ff\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-size=\'18\'%3E300x400%3C/text%3E%3C/svg%3E">\n              </a>\n              <div class="comic-body">\n                <h4 class="comic-title">Truyện mới</h4>\n                <div class="comic-meta">Ch. ngẫu nhiên • vừa xong</div>\n              </div>\n            </article>\n          ';
+ grid.appendChild(col);
+ }
+ });
+ })();
+ </script>
+</body>
+
+</html>
