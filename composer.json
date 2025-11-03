@@ -4,7 +4,7 @@
     "type": "project",
     "license": "MIT",
     "require": {
-        "php": ">=7.1",
+        "php": ">=8.0",
         "datahihi1/tiny-env": "^1.0",
         "eftec/bladeone": "^4.19"
     },

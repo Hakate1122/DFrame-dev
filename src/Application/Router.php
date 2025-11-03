@@ -10,6 +10,7 @@ use Exception;
  * This class handles the routing of HTTP requests to their respective handlers.
  * It supports standard routes and API routes, with middleware for both.
  */
+#[\Attribute]
 class Router
 {
     /** @var array $routes Stores the standard routes with their handlers and middleware. */
@@ -84,6 +85,107 @@ class Router
     public function addApiMiddleware(callable $middleware): void
     {
         $this->globalApiMiddleware[] = $middleware;
+    }
+    // --- SCAN CONTROLLER ATTRIBUTE ---
+
+    /**
+     * Scan controller classes for Router attribute and auto-register routes
+     * @param array $controllerClasses Array of controller class names to scan
+     */
+    public static function scanControllerAttributes(array $controllerClasses)
+    {
+        foreach ($controllerClasses as $controllerClass) {
+            if (!class_exists($controllerClass)) continue;
+            $refClass = new \ReflectionClass($controllerClass);
+            foreach ($refClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
+                $attributes = $method->getAttributes(self::class);
+                foreach ($attributes as $attr) {
+                    $args = $attr->getArguments();
+
+                    // Support various argument names / positional:
+                    $httpMethod = strtoupper($args['method'] ?? $args['httpMethod'] ?? 'GET');
+                    $route = $args['router'] ?? $args['path'] ?? ($args[0] ?? null);
+                    $routeName = $args['name'] ?? null;
+                    $isApi = $args['isApi'] ?? $args['api'] ?? false;
+                    $middleware = $args['middleware'] ?? [];
+
+                    if (!$route) {
+                        continue;
+                    }
+
+                    $handler = [$controllerClass, $method->getName()];
+                    $routeObj = null;
+
+                    if ($isApi) {
+                        switch ($httpMethod) {
+                            case 'GET':
+                                $routeObj = self::apiGet($route, $handler, $middleware);
+                                break;
+                            case 'POST':
+                                $routeObj = self::apiPost($route, $handler, $middleware);
+                                break;
+                            case 'PUT':
+                                $routeObj = self::apiPut($route, $handler, $middleware);
+                                break;
+                            case 'DELETE':
+                                $routeObj = self::apiDelete($route, $handler, $middleware);
+                                break;
+                            case 'PATCH':
+                                $routeObj = self::apiPatch($route, $handler, $middleware);
+                                break;
+                            case 'HEAD':
+                                $routeObj = self::apiHead($route, $handler, $middleware);
+                                break;
+                            case 'OPTIONS':
+                                $routeObj = self::apiOptions($route, $handler, $middleware);
+                                break;
+                            default:
+                                $routeObj = self::apiGet($route, $handler, $middleware);
+                        }
+                    } else {
+                        switch ($httpMethod) {
+                            case 'GET':
+                                $routeObj = self::get($route, $handler, $middleware);
+                                break;
+                            case 'POST':
+                                $routeObj = self::post($route, $handler, $middleware);
+                                break;
+                            case 'PUT':
+                                $routeObj = self::put($route, $handler, $middleware);
+                                break;
+                            case 'DELETE':
+                                $routeObj = self::delete($route, $handler, $middleware);
+                                break;
+                            case 'PATCH':
+                                $routeObj = self::patch($route, $handler, $middleware);
+                                break;
+                            case 'HEAD':
+                                $routeObj = self::head($route, $handler, $middleware);
+                                break;
+                            case 'OPTIONS':
+                                $routeObj = self::options($route, $handler, $middleware);
+                                break;
+                            default:
+                                $routeObj = self::get($route, $handler, $middleware);
+                        }
+                    }
+
+                    if ($routeName && method_exists($routeObj, 'name')) {
+                        $routeObj->name($routeName);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Instance version of scanControllerAttributes
+     * @param array $controllerClasses
+     * @return void
+     */
+    public function scanControllerAttributesInstance(array $controllerClasses)
+    {
+        self::scanControllerAttributes($controllerClasses);
     }
     
     // --- STATIC ROUTE METHODS ---

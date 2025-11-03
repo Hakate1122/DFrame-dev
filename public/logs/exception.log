@@ -156,3 +156,8 @@
 2025-11-02 22:37:23 | Exception: Template not found: app | File: C:\laragon\www\DocTruyenHay\vendor\eftec\bladeone\lib\BladeOne.php | Line: 1434
 2025-11-02 22:39:06 | Exception: Template not found: app | File: C:\laragon\www\DocTruyenHay\vendor\eftec\bladeone\lib\BladeOne.php | Line: 1434
 2025-11-02 22:39:07 | Exception: Template not found: app | File: C:\laragon\www\DocTruyenHay\vendor\eftec\bladeone\lib\BladeOne.php | Line: 1434
+2025-11-02 23:06:18 | Exception: Template not found: home | File: C:\laragon\www\AmazingFastFood\vendor\eftec\bladeone\lib\BladeOne.php | Line: 1434
+2025-11-02 23:06:34 | Exception: Duplicate route detected: GET /app  | File: C:\laragon\www\AmazingFastFood\src\Application\Router.php | Line: 116
+2025-11-02 23:14:49 | Exception: Duplicate route detected: GET /app  | File: C:\laragon\www\AmazingFastFood\src\Application\Router.php | Line: 171
+2025-11-02 23:14:51 | Exception: Duplicate route detected: GET /app  | File: C:\laragon\www\AmazingFastFood\src\Application\Router.php | Line: 171
+2025-11-02 23:20:29 | Exception: 405 Method Not Allowed: The requested URL /haha exists but does not support GET method.Allowed: POST | File: C:\laragon\www\AmazingFastFood\src\Application\Router.php | Line: 795
