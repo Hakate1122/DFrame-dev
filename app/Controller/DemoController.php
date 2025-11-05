@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use Core\Application\Router;
+use Core\Application\Route;
 use Core\Application\View;
 use Gregwar\Captcha\CaptchaBuilder;
 
@@ -14,7 +15,7 @@ class DemoController extends Controller
     {
         return "oke";
     }
-    #[Router(path: '/captcha', method: 'GET', name: 'show.captcha')]
+    #[Route(path: '/captcha', method: 'GET', name: 'show.captcha')]
     public function captcha()
     {
         $builder = new CaptchaBuilder();
@@ -25,7 +26,7 @@ class DemoController extends Controller
 
         return View::render('captcha', ['builder' => $builder]);
     }
-    #[Router(path: '/verify-captcha', method: 'POST', name: 'verify.captcha')]
+    #[Route(path: '/api/verify-captcha', method: 'POST', name: 'verify.captcha', isApi: true)]
     public function verifyCaptcha()
     {
         $captcha = $_POST['captcha'] ?? '';

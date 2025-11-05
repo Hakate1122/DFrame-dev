@@ -10,7 +10,8 @@ return [
                 'compiled_path' => INDEX_DIR . 'cache/view/compiled/',
                 'cache' => true,
                 'debug' => true,
-            ]
-        ]
+            ],
+        ],
+        // You can add more view drives here
     ]
 ];

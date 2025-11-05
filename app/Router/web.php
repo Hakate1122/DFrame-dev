@@ -8,8 +8,8 @@ UserAuthencation::registerSelf();
 $router = new Core\Application\Router();
 
 $router->get('/', function () {
-return View::render('app');
-})->name('app');
+return View::render('home');
+})->name('home');
 
 $router->get('/app', function () {
 return View::render('app');
