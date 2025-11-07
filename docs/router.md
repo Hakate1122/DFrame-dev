@@ -26,7 +26,7 @@ Hai thành phần chính:
 ### Đăng ký route qua code
 
 ```php
-use Core\Application\Router;
+use DFrame\Application\Router;
 
 $router = new Router();
 $router->get('/', fn() => 'Home')->name('home');
@@ -37,8 +37,8 @@ $router->default(fn() => '404 Not Found');
 ### Đăng ký route qua attribute (tag) trên controller
 
 ```php
-use Core\Application\Router;
-use Core\Application\Route;
+use DFrame\Application\Router;
+use DFrame\Application\Route;
 
 class DemoController {
     #[Router(path: '/haha', method: 'GET', isApi: false, name: 'demo.haha')]
@@ -56,7 +56,7 @@ class DemoController {
 
 ```php
 // app/Router/web.php
-$router = new Core\Application\Router();
+$router = new DFrame\Application\Router();
 $router->scanControllerAttributes([
     '\App\Controller\DemoController',
     '\App\Controller\AnotherController',

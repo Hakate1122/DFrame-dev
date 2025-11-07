@@ -1,5 +1,5 @@
 <?php
-namespace Core\Database\Interfaces;
+namespace DFrame\Database\Interfaces;
 
 /**
  * Interface for database adapters (e.g., PDO, MySQLi).

@@ -1,10 +1,11 @@
 <?php
-namespace Core\Application;
 
-use \Core\Reports\CraftParse;
-use \Core\Reports\CraftError;
-use \Core\Reports\CraftException;
-use \Core\Reports\CraftRuntime;
+namespace DFrame\Application;
+
+use \DFrame\Reports\CraftParse;
+use \DFrame\Reports\CraftError;
+use \DFrame\Reports\CraftException;
+use \DFrame\Reports\CraftRuntime;
 use \Datahihi1\TinyEnv\TinyEnv;
 use \Exception;
 
@@ -44,6 +45,14 @@ class App
      */
     public function __construct()
     {
+        // Nếu chạy CLI thì chỉ cần ROOT_DIR
+        if (php_sapi_name() === 'cli' || PHP_SAPI === 'cli') {
+            if (!defined('ROOT_DIR')) {
+                throw new Exception('ROOT_DIR must be defined before initializing CraftPHP Framework (CLI mode).');
+            }
+            return;
+        }
+        // Nếu chạy web thì cần cả ROOT_DIR và INDEX_DIR
         if (!defined('ROOT_DIR') || !defined('INDEX_DIR')) {
             throw new Exception('ROOT_DIR and INDEX_DIR must be defined before initializing CraftPHP Framework.');
         }
@@ -152,6 +161,10 @@ class App
         }
 
         if (filter_var($maintenanceMode, FILTER_VALIDATE_BOOLEAN)) {
+            if(php_sapi_name() === 'cli' || PHP_SAPI === 'cli') {
+                echo "The application is currently under maintenance. Please try again later.\n";
+                exit();
+            }
             header('HTTP/1.1 503 Service Unavailable');
             header('Retry-After: 3600');
             $startStr = $startTime ? date('H:i:s d/m/Y', (int) $startTime) : null;
@@ -376,7 +389,7 @@ class App
      * 
      * @return self
      */
-    public static function initializeWeb(?string $logDir = null)
+    public static function initialize(?string $logDir = null)
     {
         try {
 
@@ -392,9 +405,6 @@ class App
 
             // Initialize configuration
             self::initializeConfig();
-
-            // Set maintenance mode if enabled
-            self::setMaintenanceMode();
 
             // Configure error reporting
             self::configureErrorReporting();
@@ -423,7 +433,7 @@ class App
             // Validate required environment variables for services
             self::validateServiceConfig();
         } catch (Exception $e) {
-            if (self::isDebug()) {
+            if (self::isDebug() && $logDir) {
                 self::initializeErrorReporting(INDEX_DIR . 'logs/');
                 throw $e;
             }
@@ -439,17 +449,43 @@ class App
      */
     public static function bootWeb($getTimeLoad = false)
     {
+        // Set maintenance mode if enabled
+        self::setMaintenanceMode();
+
         // // Set security headers
         // self::setSecurityHeaders();
 
         // Start run route handler
         self::initializeRoute();
 
-        \Core\Application\Router::run();
+        \DFrame\Application\Router::run();
+
         if ($getTimeLoad) {
-            if (!defined('CRAFT_LOADED')) {
-                define('CRAFT_LOADED', microtime(true) - CRAFT_RUN);
+            if (!defined('D_LOADED')) {
+                define('D_LOADED', microtime(true) - D_RUN);
             }
+        }
+        jslog(json_encode("Time load: " . (defined('D_LOADED') ? D_LOADED : 'N/A') . " seconds"));
+        exit;
+    }
+
+    /**
+     * Starts DLI application.
+     * 
+     * @return void
+     */
+    public static function bootDli($getTimeLoad = false)
+    {
+        if (headers_sent()) {
+            return;
+        }
+        echo "DFramework CLI Application\n";
+        echo "Version: " . self::version . "\n";
+        if ($getTimeLoad) {
+            if (!defined('D_LOADED')) {
+                define('D_LOADED', microtime(true) - D_RUN);
+            }
+            echo "Time load: " . (defined('D_LOADED') ? D_LOADED : 'N/A') . " seconds\n";
         }
         exit;
     }

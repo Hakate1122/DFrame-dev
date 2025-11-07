@@ -1,5 +1,5 @@
 <?php
-namespace Core\Application;
+namespace DFrame\Application;
 
 /**
  * #### Class Middleware is for handling middleware functionality

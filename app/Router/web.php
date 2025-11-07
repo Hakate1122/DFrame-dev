@@ -1,14 +1,14 @@
 <?php
 
 use App\Middleware\UserAuthencation;
-use Core\Application\View;
+use DFrame\Application\View;
 
 UserAuthencation::registerSelf();
 
-$router = new Core\Application\Router();
+$router = new DFrame\Application\Router();
 
 $router->get('/', function () {
-return View::render('home');
+return View::render('app');
 })->name('home');
 
 $router->get('/app', function () {
@@ -20,7 +20,5 @@ $router->default(function () {
 });
 
 $router->scanControllerAttributes([
-    '\App\Controller\DemoController',
-    '\App\Controller\AnotherController',
-    '\App\Controller\ThirdController',
+    \App\Controller\DemoController::class
 ]);

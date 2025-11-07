@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\Reports;
+namespace DFrame\Reports;
 
 /**
  * #### ErrorReporting class for handling PHP errors and rendering error pages.
@@ -369,7 +369,7 @@ class CraftError extends \ErrorException
         echo "<div class='error-title'>";
         echo "<h2>Error</h2>";
         echo "<div class='error-message'>" . htmlspecialchars($message, ENT_NOQUOTES) . "</div>";
-        echo "<div>" . 'version:' . \Core\Application\App::version . "</div>";
+        echo "<div>" . 'version:' . \DFrame\Application\App::version . "</div>";
         echo "</div>";
 
         if ($file && $line && file_exists($file)) {

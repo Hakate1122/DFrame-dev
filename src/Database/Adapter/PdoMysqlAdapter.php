@@ -1,7 +1,7 @@
 <?php
-namespace Core\Database\Adapter;
+namespace DFrame\Database\Adapter;
 
-use Core\Database\Interfaces\AdapterInterface;
+use DFrame\Database\Interfaces\AdapterInterface;
 
 /**
  * #### PDO MySQL Database Adapter using pdo_mysql extension

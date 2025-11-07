@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\Application;
+namespace DFrame\Application;
 
 /**
  * #### Simple SMTP Mailer
@@ -248,7 +248,7 @@ class Mail
     public function view(string $view, array $data = [])
     {
         // View::render returns the rendered string, so capture and set as body.
-        $content = \Core\Application\View::render($view, $data);
+        $content = \DFrame\Application\View::render($view, $data);
         return $this->body($content);
     }
 }

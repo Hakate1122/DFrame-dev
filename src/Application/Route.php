@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\Application;
+namespace DFrame\Application;
 
 use Attribute;
 

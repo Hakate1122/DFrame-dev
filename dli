@@ -1,0 +1,15 @@
+#! /usr/bin/env php
+<?php
+
+use DFrame\Application\App;
+
+/**
+ * Define the time when the application starts running
+ */
+define('D_RUN', microtime(true));
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+define('ROOT_DIR', __DIR__ . DIRECTORY_SEPARATOR);
+
+App::initialize()->bootDli(true);

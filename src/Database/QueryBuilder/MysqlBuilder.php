@@ -1,5 +1,5 @@
 <?php
-namespace Core\Database\QueryBuilder;
+namespace DFrame\Database\QueryBuilder;
 
 class MysqlBuilder extends BaseBuilder {
     public function toSql(): string {

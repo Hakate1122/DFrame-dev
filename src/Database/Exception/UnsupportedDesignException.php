@@ -1,5 +1,5 @@
 <?php
-namespace Core\Database\Exception;
+namespace DFrame\Database\Exception;
 
 /**
  * Exception thrown when an unsupported design pattern is requested.

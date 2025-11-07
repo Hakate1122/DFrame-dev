@@ -1,7 +1,7 @@
 <?php
-namespace Core\Database\QueryBuilder;
+namespace DFrame\Database\QueryBuilder;
 
-use Core\Database\Interfaces\BuilderInterface;
+use DFrame\Database\Interfaces\BuilderInterface;
 
 abstract class BaseBuilder implements BuilderInterface {
     protected $adapter;

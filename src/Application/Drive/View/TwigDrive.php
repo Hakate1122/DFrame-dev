@@ -1,8 +1,8 @@
 <?php
 // not available yet
-namespace Core\Application\Drive\View;
+namespace DFrame\Application\Drive\View;
 
-use Core\Application\Interfaces\ViewEngine;
+use DFrame\Application\Interfaces\ViewEngine;
 
 /**
  * TwigDrive class for rendering Twig templates.

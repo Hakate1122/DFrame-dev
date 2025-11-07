@@ -1,5 +1,5 @@
 <?php
-namespace Core\Application\Interfaces;
+namespace DFrame\Application\Interfaces;
 
 /**
  * ViewEngine interface for rendering templates.

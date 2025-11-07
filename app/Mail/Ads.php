@@ -1,7 +1,7 @@
 <?php
 namespace App\Mail; 
 
-use Core\Application\Mail;
+use DFrame\Application\Mail;
 
 class Ads extends Mail{
     public function build(array $data = []){

@@ -1,5 +1,5 @@
 <?php
-namespace Core\Application;
+namespace DFrame\Application;
 
 /**
  * #### Session management class

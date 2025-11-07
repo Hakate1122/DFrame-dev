@@ -1,7 +1,7 @@
 <?php
 namespace App\Controller;
 
-use Core\Application\View;
+use DFrame\Application\View;
 use Exception;
 
 class Controller

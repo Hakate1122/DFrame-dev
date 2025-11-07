@@ -1,7 +1,7 @@
 <?php
-namespace Core\Reports\Render;
+namespace DFrame\Reports\Render;
 
-use Core\Reports\Interface\RenderInterface;
+use DFrame\Reports\Interface\RenderInterface;
 
 class Cli implements RenderInterface
 {

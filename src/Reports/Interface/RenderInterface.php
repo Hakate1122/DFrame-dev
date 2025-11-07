@@ -1,5 +1,5 @@
 <?php
-namespace Core\Reports\Interface;
+namespace DFrame\Reports\Interface;
 
 interface RenderInterface
 {

@@ -1,5 +1,5 @@
 <?php
-namespace Core\Application\Drive\Cache;
+namespace DFrame\Application\Drive\Cache;
 
 class Memcached
 {

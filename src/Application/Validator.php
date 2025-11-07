@@ -1,5 +1,5 @@
 <?php
-namespace Core\Application;
+namespace DFrame\Application;
 
 /**
  * #### Validator class for validating data.

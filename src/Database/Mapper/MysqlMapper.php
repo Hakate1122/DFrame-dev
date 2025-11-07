@@ -1,5 +1,5 @@
 <?php
-namespace Core\Database\Mapper;
+namespace DFrame\Database\Mapper;
 
 class MysqlMapper extends BaseMapper {
     public function find($id) {

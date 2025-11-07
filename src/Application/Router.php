@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\Application;
+namespace DFrame\Application;
 
 use Attribute;
 use Closure;
@@ -262,7 +262,7 @@ class Router
             foreach ($ref->getMethods(ReflectionMethod::IS_PUBLIC) as $m) {
                 foreach ($m->getAttributes() as $attr) {
                     $attrClass = $attr->getName();
-                    if ($attrClass !== self::class && $attrClass !== \Core\Application\Route::class) continue;
+                    if ($attrClass !== self::class && $attrClass !== \DFrame\Application\Route::class) continue;
                     $args = $attr->getArguments();
 
                     $http   = strtoupper($args['method'] ?? $args['httpMethod'] ?? 'GET');
@@ -445,7 +445,7 @@ class Router
 
         foreach ($mw as $m) {
             $res = is_string($m)
-                ? \Core\Application\Middleware::run($m, $context)
+                ? \DFrame\Application\Middleware::run($m, $context)
                 : $m($context);
 
             if ($res === false) return;

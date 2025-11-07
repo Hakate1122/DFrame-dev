@@ -1,6 +1,6 @@
 <?php
 
-use Core\Application\Session;
+use DFrame\Application\Session;
 
 if (!function_exists('old')) {
     /**
@@ -97,7 +97,7 @@ if (!function_exists('route')) {
      */
     function route(string $name, array $params = []): ?string
     {
-        return \Core\Application\Router::route($name, $params);
+        return \DFrame\Application\Router::route($name, $params);
     }
 }
 
@@ -195,6 +195,6 @@ if (!function_exists('view')) {
      */
     function view(string $view, array $data = []): string
     {
-        return \Core\Application\View::render($view, $data);
+        return \DFrame\Application\View::render($view, $data);
     }
 }

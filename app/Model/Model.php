@@ -1,7 +1,7 @@
 <?php
 namespace App\Model;
 
-use Core\Database\DatabaseManager;
+use DFrame\Database\DatabaseManager;
 
 /**
  * Dynamic model proxy to Mapper/Builder.

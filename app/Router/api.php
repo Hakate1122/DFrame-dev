@@ -2,7 +2,7 @@
 
 use App\Controller\OrderController;
 
-$router = new Core\Application\Router();
+$router = new DFrame\Application\Router();
 
 $router->apiGet('/orders', [OrderController::class,'getOrders']);
 $router->apiGet('/demo', 'App\Controller\OrderController@createOrder');

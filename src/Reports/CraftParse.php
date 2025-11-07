@@ -1,5 +1,5 @@
 <?php
-namespace Core\Reports;
+namespace DFrame\Reports;
 
 /**
  * #### ParseReporting class for handling PHP parse analysis and reporting.

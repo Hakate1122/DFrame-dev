@@ -1,7 +1,7 @@
 <?php
 namespace App\Mail;
 
-use Core\Application\Mail;
+use DFrame\Application\Mail;
 
 /**
  * Mail class for handling password reset emails.

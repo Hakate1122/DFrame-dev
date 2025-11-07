@@ -1,8 +1,12 @@
 <?php
 
-namespace Core\Application;
+namespace DFrame\Application;
 
-use Core\Database\DatabaseManager;
+use DFrame\Database\Adapter\MysqliAdapter;
+use DFrame\Database\Adapter\Sqlite3Adapter;
+use DFrame\Database\Adapter\PdoMysqlAdapter;
+use DFrame\Database\Adapter\PdoSqliteAdapter;
+use DFrame\Database\DatabaseManager;
 
 /**
  * #### Database handler
@@ -91,7 +95,7 @@ class DB extends DatabaseManager
 
     /**
      * Get the database adapter instance.
-     * @return \Core\Database\Adapter\MysqliAdapter|\Core\Database\Adapter\PdoMysqlAdapter|\Core\Database\Adapter\PdoSqliteAdapter|\Core\Database\Adapter\Sqlite3Adapter
+     * @return MysqliAdapter|PdoMysqlAdapter|PdoSqliteAdapter|Sqlite3Adapter
      */
     public function getAdapter()
     {

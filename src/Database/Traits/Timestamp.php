@@ -1,5 +1,5 @@
 <?php
-namespace Core\Database\Traits;
+namespace DFrame\Database\Traits;
 
 /**
  * #### Timestamp trait

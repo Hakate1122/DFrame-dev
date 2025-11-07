@@ -5,7 +5,7 @@ return [
     'drives' => [
         // BladeOne view drive configuration
         'bladeone' => [
-            'class' => \Core\Application\Drive\View\BladeOneDrive::class,
+            'class' => \DFrame\Application\Drive\View\BladeOneDrive::class,
             'options' => [
                 'compiled_path' => INDEX_DIR . 'cache/view/compiled/',
                 'cache' => true,

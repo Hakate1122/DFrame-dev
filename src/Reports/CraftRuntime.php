@@ -1,5 +1,5 @@
 <?php
-namespace Core\Reports;
+namespace DFrame\Reports;
 
 /**
  * #### RuntimeReporting class for handling fatal errors in web applications.
@@ -135,7 +135,7 @@ class CraftRuntime
         echo "<div class='error-type' style='display:none'>FATAL ERROR [" . ($errno ?? 'Unknown') . "]</div>";
         echo "<h2>Runtime Error</h2>";
         echo "<div class='error-message'>" . htmlspecialchars($message, ENT_NOQUOTES) . "</div>";
-        echo "<div style='margin-top:8px;color:#9ca3af;font-size:12px'>version: " . \Core\Application\App::version . "</div>";
+        echo "<div style='margin-top:8px;color:#9ca3af;font-size:12px'>version: " . \DFrame\Application\App::version . "</div>";
         echo "</div>";
 
         if ($file && $line && file_exists($file)) {

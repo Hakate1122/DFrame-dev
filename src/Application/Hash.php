@@ -1,5 +1,5 @@
 <?php
-namespace Core\Application;
+namespace DFrame\Application;
 
 /**
  * #### Class Hash extends from password PHP functions

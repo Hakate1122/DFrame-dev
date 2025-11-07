@@ -1,14 +1,14 @@
 <?php
-namespace Core\Database;
+namespace DFrame\Database;
 
-use Core\Database\Adapter\MysqliAdapter;
-use Core\Database\Adapter\PdoMysqlAdapter;
-use Core\Database\Adapter\Sqlite3Adapter;
-use Core\Database\Adapter\PdoSqliteAdapter;
-use Core\Database\Mapper\MysqlMapper;
-use Core\Database\Mapper\SqliteMapper;
-use Core\Database\QueryBuilder\MysqlBuilder;
-use Core\Database\QueryBuilder\SqliteBuilder;
+use DFrame\Database\Adapter\MysqliAdapter;
+use DFrame\Database\Adapter\PdoMysqlAdapter;
+use DFrame\Database\Adapter\Sqlite3Adapter;
+use DFrame\Database\Adapter\PdoSqliteAdapter;
+use DFrame\Database\Mapper\MysqlMapper;
+use DFrame\Database\Mapper\SqliteMapper;
+use DFrame\Database\QueryBuilder\MysqlBuilder;
+use DFrame\Database\QueryBuilder\SqliteBuilder;
 
 /**
  * #### DatabaseManager class

@@ -1,8 +1,8 @@
 <?php
 
-namespace Core\Application\Drive\View;
+namespace DFrame\Application\Drive\View;
 
-use Core\Application\Interfaces\ViewEngine;
+use DFrame\Application\Interfaces\ViewEngine;
 use eftec\bladeone\BladeOne;
 
 /**

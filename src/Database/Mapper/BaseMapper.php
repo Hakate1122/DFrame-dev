@@ -1,7 +1,7 @@
 <?php
-namespace Core\Database\Mapper;
+namespace DFrame\Database\Mapper;
 
-use Core\Database\Interfaces\MapperInterface;
+use DFrame\Database\Interfaces\MapperInterface;
 
 abstract class BaseMapper implements MapperInterface {
     protected $adapter;

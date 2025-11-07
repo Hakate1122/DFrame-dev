@@ -1,5 +1,5 @@
 <?php
-namespace Core\Reports;
+namespace DFrame\Reports;
 
 /**
  * #### ExceptionReporting class for handling uncaught exceptions in PHP applications.
@@ -178,7 +178,7 @@ class CraftException extends \Exception
         echo "<div class='error-title'>";
         echo "<h2>Exception</h2>";
         echo "<div class='error-message'>" . htmlspecialchars($message, ENT_NOQUOTES) . "</div>";
-        echo "<div class='version'>CraftPHP: " . \Core\Application\App::version . "| PHP: " . PHP_VERSION . "</div>";
+        echo "<div class='version'>CraftPHP: " . \DFrame\Application\App::version . "| PHP: " . PHP_VERSION . "</div>";
         echo "</div>";
 
         if ($file && $line && file_exists($file)) {

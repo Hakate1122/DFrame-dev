@@ -1,8 +1,8 @@
 <?php
 
-namespace Core\Reports;
+namespace DFrame\Reports;
 
-use Core\Reports\Interface\HandlerInterface;
+use DFrame\Reports\Interface\HandlerInterface;
 
 /**
  * #### ErrorReporting class for handling PHP errors and rendering error pages.

@@ -3,12 +3,12 @@
 /*
 | Basic Configuration
 |--------------------------------------------------------------------------
-| This file serves as the entry point for the CraftLite web application.
+| This file serves as the entry point for the DFrame web application.
 | It sets up the environment, handles autoloading, and initializes the application.
 */
 
 ob_start();
-define('CRAFT_RUN', microtime(true));
+define('D_RUN', microtime(true));
 
 /*
 | Define ROOT_DIR (Base of the framework)
@@ -24,7 +24,7 @@ if (!defined('ROOT_DIR')) {
         http_response_code(500);
         die('Application root directory not accessible');
     }
-    /** Define the root directory constant of CraftLite application */
+    /** Define the root directory constant of DFrame application */
     define('ROOT_DIR', $rootDir);
 }
 
@@ -42,7 +42,7 @@ if (!defined('INDEX_DIR')) {
         http_response_code(500);
         die('Index directory not accessible');
     }
-    /** Define the index directory constant of CraftLite application */
+    /** Define the index directory constant of DFrame application */
     define('INDEX_DIR', $indexDir);
 }
 
@@ -66,14 +66,14 @@ require_once $autoloadFile;
 | This checks the environment variable to determine if maintenance mode should be enabled.
 */
 
-// \Craft\Application\App::setMaintenanceMode(true);
+// \DFrame\Application\App::setMaintenanceMode(true);
 
 /*
-| Initialize and boot the Craft web application
+| Initialize and boot the DFrame web application
 |------------------------------------------------------------------------------------------------
 | This sets up the application environment and prepares it for web requests.
 | After initialization, it boots the application to handle incoming requests.
 |------------------------------------------------------------------------------------------------
 */
 
-\Core\Application\App::initializeWeb(INDEX_DIR . '/logs/')->bootWeb(true);
+\DFrame\Application\App::initialize(INDEX_DIR . '/logs/')->bootWeb(true);

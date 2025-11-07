@@ -2,9 +2,9 @@
 
 namespace App\Controller;
 
-use Core\Application\Router;
-use Core\Application\Route;
-use Core\Application\View;
+use DFrame\Application\Router;
+use DFrame\Application\Route;
+use DFrame\Application\View;
 use Gregwar\Captcha\CaptchaBuilder;
 
 class DemoController extends Controller

@@ -1,7 +1,7 @@
 <?php
 namespace App\Middleware;
 
-use Core\Application\Middleware;
+use DFrame\Application\Middleware;
 
 /**
  * #### UserAuthencation Middleware
