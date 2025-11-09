@@ -1,7 +1,6 @@
 <?php
 
 use App\Middleware\UserAuthencation;
-use DFrame\Application\View;
 
 UserAuthencation::registerSelf();
 
