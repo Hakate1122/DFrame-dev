@@ -1,0 +1,7 @@
+2025-11-10 21:39:18 | Exception: Method App\Controller\UserController::addUser() does not exist | File: C:\laragon\www\DFrame\src\Application\Router.php | Line: 502
+2025-11-10 21:46:15 | Exception: App\Controller\UserController::storeUser(): Argument #1 ($validator) must be of type DFrame\Application\Validator, null given | File: C:\laragon\www\DFrame\app\Controller\UserController.php | Line: 27
+2025-11-10 21:47:39 | Exception: htmlspecialchars(): Argument #1 ($string) must be of type string, array given | File: C:\laragon\www\DFrame\resource\view\user1\add.php | Line: 11
+2025-11-10 21:48:39 | Exception: htmlspecialchars(): Argument #1 ($string) must be of type string, array given | File: C:\laragon\www\DFrame\resource\view\user1\add.php | Line: 13
+2025-11-10 21:50:51 | Exception: App\Controller\UserController::storeUser(): Argument #1 ($validator) must be of type DFrame\Application\Validator, null given | File: C:\laragon\www\DFrame\app\Controller\UserController.php | Line: 26
+2025-11-10 21:55:06 | Exception: htmlspecialchars(): Argument #1 ($string) must be of type string, array given | File: C:\laragon\www\DFrame\resource\view\user1\add.php | Line: 11
+2025-11-10 21:55:16 | Exception: htmlspecialchars(): Argument #1 ($string) must be of type string, array given | File: C:\laragon\www\DFrame\resource\view\user1\add.php | Line: 11

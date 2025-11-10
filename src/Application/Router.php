@@ -257,6 +257,7 @@ class Router
     /* -------------------------- ATTRIBUTE SCANNER -------------------------- */
     public static function scanControllerAttributes(array $controllers): void
     {
+        // Quét các attribute của controller
         foreach ($controllers as $class) {
             if (!class_exists($class)) {
                 continue;
@@ -265,7 +266,7 @@ class Router
             foreach ($ref->getMethods(ReflectionMethod::IS_PUBLIC) as $m) {
                 foreach ($m->getAttributes() as $attr) {
                     $attrClass = $attr->getName();
-                    if ($attrClass !== self::class && $attrClass !== \DFrame\Application\Route::class) {
+                    if ($attrClass !== self::class && $attrClass !== \DFrame\Attribute\Route::class) {
                         continue;
                     }
                     $args = $attr->getArguments();
@@ -491,7 +492,10 @@ class Router
 
     private function invokeHandler(mixed $handler, array $params): mixed
     {
-        $args = $params;
+        $ref = null;
+        $instance = null;
+
+        // Chuẩn hóa handler thành dạng callable: nếu là chuỗi "Class@method" thì chuyển thành [Class, method], ngược lại giữ nguyên
         if (is_array($handler)) {
             [$class, $method] = $handler;
             $instance = $this->resolveClass($class);
@@ -500,14 +504,59 @@ class Router
             $ref = new ReflectionFunction(Closure::fromCallable($handler));
         }
 
-        // always inject $request as the **last** argument if the callable expects it
-        if ($ref->getNumberOfParameters() > count($args)) {
-            $args[] = $this->request;
+        // Xây dựng danh sách tham số truyền vào hàm/method
+        $args = [];
+        $routeIdx = 0;
+        foreach ($ref->getParameters() as $p) {
+            // Sử dụng tham số định kiểu class nếu có
+            $pType = $p->getType();
+            $isClass = $pType instanceof ReflectionNamedType && !$pType->isBuiltin();
+
+            if ($isClass) {
+                // Thực hiện giải quyết phụ thuộc từ container/tự động giải quyết
+                $args[] = $this->resolveClass($pType->getName());
+                continue;
+            }
+
+            // sử dụng tham số vị trí từ route nếu có
+            if (array_key_exists($routeIdx, $params)) {
+                $args[] = $params[$routeIdx++];
+                continue;
+            }
+
+            // truyền đối tượng Request nếu tham số tên là 'request'
+            if ($p->getName() === 'request') {
+                $args[] = $this->request;
+                continue;
+            }
+
+            // sử dụng giá trị mặc định nếu có
+            if ($p->isDefaultValueAvailable()) {
+                $args[] = $p->getDefaultValue();
+                continue;
+            }
+
+            // không có gì phù hợp, truyền null
+            $args[] = null;
         }
 
-        return $ref instanceof ReflectionMethod
+        // Xử lý gọi hàm/method
+        $result = $ref instanceof ReflectionMethod
             ? $ref->invokeArgs($instance, $args)
             : $ref->invokeArgs($args);
+
+        // xử lý attribute Viewer nếu có được khai báo trên method (cập nhật 2025-13-11)
+        if ($ref instanceof ReflectionMethod) {
+            $attrs = $ref->getAttributes(\DFrame\Attribute\Viewer::class);
+            if (!empty($attrs)) {
+                $viewer = $attrs[0]->newInstance();
+                if (method_exists($viewer, 'handle')) {
+                    $result = $viewer->handle($result);
+                }
+            }
+        }
+
+        return $result;
     }
 
     private function runDefaultHandler(): void

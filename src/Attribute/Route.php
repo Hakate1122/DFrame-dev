@@ -1,8 +1,9 @@
 <?php
 
-namespace DFrame\Application;
+namespace DFrame\Attribute;
 
 use Attribute;
+use DFrame\Application\Router;
 
 /**
  * Route extends Router to define route attributes for controller methods.
@@ -25,6 +26,5 @@ class Route extends Router
         public bool $isApi = true,
         public ?string $name = null,
         public ?array $middleware = null,
-    ) {
-    }
+    ) {}
 }

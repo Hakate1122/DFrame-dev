@@ -10,6 +10,12 @@ namespace DFrame\Application;
 #region Validator
 class Validator
 {
+    /**
+     * Validation errors collected after make()
+     * @var array<string, list<string>>
+     */
+    private array $errors = [];
+
     public static function required($value): bool
     {
         return !empty($value) || $value === '0';
@@ -36,15 +42,15 @@ class Validator
     }
 
     /**
-     * Make a validation check on the provided data.
+     * Make a validation check on the provided data and store errors on the instance.
      * @param array $data Data to validate.
      * @param array $rules Validation rules in the format 'field' => 'rule1|rule2'.
      * @param array $messages Custom error messages in the format 'field.rule' => 'Error message'.
-     * @return array[]
+     * @return void
      */
-    public static function make(array $data, array $rules, array $messages = []): array
+    public function make(array $data, array $rules, array $messages = []): void
     {
-        $errors = [];
+        $this->errors = [];
 
         foreach ($rules as $field => $ruleString) {
             $value = $data[$field] ?? null;
@@ -85,12 +91,28 @@ class Validator
 
                 if (!$valid) {
                     $key = $field . '.' . $ruleName;
-                    $errors[$field][] = $messages[$key] ?? "$field validation failed for $ruleName";
+                    $this->errors[$field][] = $messages[$key] ?? "$field validation failed for $ruleName";
                 }
             }
         }
+    }
 
-        return $errors;
+    /**
+     * Returns true if any validation errors exist.
+     * @return bool
+     */
+    public function fails(): bool
+    {
+        return !empty($this->errors);
+    }
+
+    /**
+     * Return validation errors collected by make()
+     * @return array<string, list<string>>
+     */
+    public function errors(): array
+    {
+        return $this->errors;
     }
 }
 #endregion

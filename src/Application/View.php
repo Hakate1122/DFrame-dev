@@ -3,11 +3,18 @@
 namespace DFrame\Application;
 
 use Exception;
+/*
+ * Cập nhật 2025-13-11
+*/
 
 /**
  * #### Class View to render views with data
  *
  *  View class for rendering views with data and redirecting to a given URL or route name.
+ * 
+ * **Note:** 
+ * - Default view engine is basic PHP. To use other view engines, set `SUPPORT_VIEW_ENGINE` to `enable` in the `.env` file and configure the view engine in `config/view.php`.
+ * - Default view path is `ROOT_DIR/resource/view/`. You can customize it via constructor or config file.
  */
 #region View
 class View
@@ -21,7 +28,10 @@ class View
 
     /**
      * Constructor to set the view path.
-     * @param string|null $viewPath The path to the view files. If null, uses config or default.
+     * @param string|null $viewPath The path to the view files. If null, uses config or `default`.
+     *                    - Config file: ROOT_DIR/config/view.php
+     *                    - Default: ROOT_DIR/resource/view/
+     * @throws Exception If the specified view engine class does not exist.
      */
     public function __construct($viewPath = null)
     {
@@ -31,7 +41,6 @@ class View
         $this->viewPath = rtrim($viewPath, '/');
         $this->engine = $config['engine'] ?? 'php';
 
-        // Chỉ khởi tạo engine nếu SUPPORT_VIEW_ENGINE là enable
         if (
             env('SUPPORT_VIEW_ENGINE') === 'enable'
             && $this->engine !== 'php'
@@ -49,18 +58,21 @@ class View
 
     /**
      * Render a view file with optional data.
+     *
      * @param string $view The view file to render, relative to the view path.
      * @param array $data Data to be passed to the view.
+     * @param string|null $viewPath The custom view path to use. If null, uses the instance's view path.
      * @return string
      */
-    public static function render($view, $data = [])
+    public static function render($view, $data = [], $viewPath = null)
     {
-        $instance = new self();
+        $instance = new self($viewPath);
         return $instance->view($view, $data);
     }
 
     /**
      * Render a view file with optional data.
+     * 
      * @param string $view The view file to render, relative to the view path.
      * @param array $data Data to be passed to the view.
      * @return string
@@ -73,7 +85,6 @@ class View
                 $view = str_replace('.', '/', $view);
             }
 
-            // List of supported extensions
             $extensions = ['.php', '.blade.php', '.twig', '.tpl', '.html', '.htm'];
             $filePath = null;
             foreach ($extensions as $ext) {
@@ -124,7 +135,7 @@ class View
     }
 
     /**
-     * Include
+     * Include on default view file path with optional data.
      * @param string $view The partial view name (without .php)
      * @param array $data Optional data to pass to the partial
      * @return string
