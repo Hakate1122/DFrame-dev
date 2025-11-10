@@ -6,6 +6,7 @@ namespace DFrame\Database\Interfaces;
  */
 interface MapperInterface {
     public function find($id);
+    public function findOrFail($id);
     public function all();
     public function where($column, $value, $operator);
     public function create(array $data);

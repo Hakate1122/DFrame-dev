@@ -84,111 +84,107 @@ class Router
     }
 
     /* -------------------------- STATIC ROUTE REGISTRATION -------------------------- */
-    private static function registerStaticRoute(string $method, string $path, mixed $handler, array $middleware = []): void
+    /* -------------------------- STATIC ROUTE REGISTRATION -------------------------- */
+    private static function parseRouteSpec(string $spec): array
     {
+        // Hỗ trợ: 'GET|POST /path' hoặc 'GET /path'
+        if (!preg_match('#^([A-Z|]+)\s+(.+)$#', trim($spec), $m)) {
+            throw new Exception("Invalid route spec: $spec. Use 'METHOD|/path' or 'METHOD1|METHOD2 /path'");
+        }
+
+        $methods = array_filter(array_map('trim', explode('|', $m[1])), fn($m) => $m !== '');
+        $path    = $m[2];
+
+        foreach ($methods as $method) {
+            if (!in_array($method, ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'])) {
+                throw new Exception("Invalid HTTP method: $method");
+            }
+        }
+
+        return [
+            'methods' => $methods,
+            'path'    => $path,
+        ];
+    }
+
+    private static function registerStaticRoute(string $spec, mixed $handler, array $middleware = []): void
+    {
+        $parsed = self::parseRouteSpec($spec);
+        $path   = $parsed['path'];
+
         $fullPath = self::$groupContext['prefix']
             ? self::buildGroupPath($path)
             : $path;
 
         $fullMw = array_merge(self::$groupContext['middleware'], $middleware);
 
-        $store = &self::$staticRoutes[$method];
-        if (isset($store[$fullPath])) {
-            throw new Exception("Duplicate route: $method $fullPath");
+        foreach ($parsed['methods'] as $method) {
+            $store = &self::$staticRoutes[$method];
+            if (isset($store[$fullPath])) {
+                throw new Exception("Duplicate route: $method $fullPath");
+            }
+            $store[$fullPath] = ['handler' => $handler, 'middleware' => $fullMw];
         }
-        $store[$fullPath] = ['handler' => $handler, 'middleware' => $fullMw];
-        self::$lastRegisteredRoute = ['method' => $method, 'path' => $fullPath, 'api' => false];
+
+        // Lưu lại route cuối cùng để hỗ trợ ->name()
+        self::$lastRegisteredRoute = [
+            'method' => $parsed['methods'][0], // chỉ lưu method đầu tiên cho tên
+            'path'   => $fullPath,
+            'api'    => false
+        ];
     }
 
-    private static function registerStaticApiRoute(string $method, string $path, mixed $handler, array $middleware = []): void
+    private static function registerStaticApiRoute(string $spec, mixed $handler, array $middleware = []): void
     {
-        $path = self::normalizeApiPath($path);
-        $store = &self::$staticApiRoutes[$method];
-        if (isset($store[$path])) {
-            throw new Exception("Duplicate API route: $method $path");
+        $parsed = self::parseRouteSpec($spec);
+        $path   = self::normalizeApiPath($parsed['path']);
+
+        foreach ($parsed['methods'] as $method) {
+            $store = &self::$staticApiRoutes[$method];
+            if (isset($store[$path])) {
+                throw new Exception("Duplicate API route: $method $path");
+            }
+            $store[$path] = ['handler' => $handler, 'middleware' => $middleware];
         }
-        $store[$path] = ['handler' => $handler, 'middleware' => $middleware];
-        self::$lastRegisteredRoute = ['method' => $method, 'path' => $path, 'api' => true];
+
+        self::$lastRegisteredRoute = [
+            'method' => $parsed['methods'][0],
+            'path'   => $path,
+            'api'    => true
+        ];
     }
 
-    /** Public façade – one line per HTTP verb */
-    public static function get(string $p, $h, array $m = []): self
+    /**
+     * Sign a route specification to a handler with optional middleware.
+     * @param string $spec Route specification in the format 'METHOD /path' or 'METHOD1|METHOD2 /path'.
+     * @param mixed $handler The handler for the route (callable, or 'Class@method' string).
+     * @param array $middleware Optional middleware for the route.
+     * @return static
+     */
+    public static function sign(string $spec, $handler, array $middleware = []): self
     {
-        self::registerStaticRoute('GET', $p, $h, $m);
-        return new self();
-    }
-    public static function post(string $p, $h, array $m = []): self
-    {
-        self::registerStaticRoute('POST', $p, $h, $m);
-        return new self();
-    }
-    public static function put(string $p, $h, array $m = []): self
-    {
-        self::registerStaticRoute('PUT', $p, $h, $m);
-        return new self();
-    }
-    public static function delete(string $p, $h, array $m = []): self
-    {
-        self::registerStaticRoute('DELETE', $p, $h, $m);
-        return new self();
-    }
-    public static function patch(string $p, $h, array $m = []): self
-    {
-        self::registerStaticRoute('PATCH', $p, $h, $m);
-        return new self();
-    }
-    public static function head(string $p, $h, array $m = []): self
-    {
-        self::registerStaticRoute('HEAD', $p, $h, $m);
-        return new self();
-    }
-    public static function options(string $p, $h, array $m = []): self
-    {
-        self::registerStaticRoute('OPTIONS', $p, $h, $m);
+        self::registerStaticRoute($spec, $handler, $middleware);
         return new self();
     }
 
-    public static function apiGet(string $p, $h, array $m = []): self
+    /**
+     * Sign an API route specification to a handler with optional middleware.
+     * @param string $spec Route specification in the format 'METHOD /path' or 'METHOD1|METHOD2 /path'.
+     * @param mixed $handler The handler for the route (callable, or 'Class@method' string).
+     * @param array $middleware Optional middleware for the route.
+     * @return static
+     */
+    public static function signApi(string $spec, $handler, array $middleware = []): self
     {
-        self::registerStaticApiRoute('GET', $p, $h, $m);
-        return new self();
-    }
-    public static function apiPost(string $p, $h, array $m = []): self
-    {
-        self::registerStaticApiRoute('POST', $p, $h, $m);
-        return new self();
-    }
-    public static function apiPut(string $p, $h, array $m = []): self
-    {
-        self::registerStaticApiRoute('PUT', $p, $h, $m);
-        return new self();
-    }
-    public static function apiDelete(string $p, $h, array $m = []): self
-    {
-        self::registerStaticApiRoute('DELETE', $p, $h, $m);
-        return new self();
-    }
-    public static function apiPatch(string $p, $h, array $m = []): self
-    {
-        self::registerStaticApiRoute('PATCH', $p, $h, $m);
-        return new self();
-    }
-    public static function apiHead(string $p, $h, array $m = []): self
-    {
-        self::registerStaticApiRoute('HEAD', $p, $h, $m);
-        return new self();
-    }
-    public static function apiOptions(string $p, $h, array $m = []): self
-    {
-        self::registerStaticApiRoute('OPTIONS', $p, $h, $m);
+        self::registerStaticApiRoute($spec, $handler, $middleware);
         return new self();
     }
 
-    public static function all(string $p, $h, array $m = []): self
+    public static function all(string $path, $handler, array $middleware = []): self
     {
-        foreach (['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'] as $verb) {
-            self::registerStaticRoute($verb, $p, $h, $m);
-        }
+        $methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
+        $spec = implode('|', $methods) . " $path";
+        self::sign($spec, $handler, $middleware);
         return new self();
     }
 
@@ -257,11 +253,8 @@ class Router
     /* -------------------------- ATTRIBUTE SCANNER -------------------------- */
     public static function scanControllerAttributes(array $controllers): void
     {
-        // Quét các attribute của controller
         foreach ($controllers as $class) {
-            if (!class_exists($class)) {
-                continue;
-            }
+            if (!class_exists($class)) continue;
             $ref = new ReflectionClass($class);
             foreach ($ref->getMethods(ReflectionMethod::IS_PUBLIC) as $m) {
                 foreach ($m->getAttributes() as $attr) {
@@ -277,34 +270,17 @@ class Router
                     $isApi  = $args['isApi'] ?? $args['api'] ?? false;
                     $mw     = $args['middleware'] ?? [];
 
-                    if (!$path) {
-                        continue;
-                    }
+                    if (!$path) continue;
 
+                    // Hỗ trợ multi-method trong attribute: method: 'GET|POST'
+                    $spec = "$http $path";
                     $handler = [$class, $m->getName()];
-                    $route   = $isApi
-                        ? match ($http) {
-                            'GET'     => self::apiGet($path, $handler, $mw),
-                            'POST'    => self::apiPost($path, $handler, $mw),
-                            'PUT'     => self::apiPut($path, $handler, $mw),
-                            'DELETE'  => self::apiDelete($path, $handler, $mw),
-                            'PATCH'   => self::apiPatch($path, $handler, $mw),
-                            'HEAD'    => self::apiHead($path, $handler, $mw),
-                            'OPTIONS' => self::apiOptions($path, $handler, $mw),
-                            default   => self::apiGet($path, $handler, $mw),
-                        }
-                        : match ($http) {
-                            'GET'     => self::get($path, $handler, $mw),
-                            'POST'    => self::post($path, $handler, $mw),
-                            'PUT'     => self::put($path, $handler, $mw),
-                            'DELETE'  => self::delete($path, $handler, $mw),
-                            'PATCH'   => self::patch($path, $handler, $mw),
-                            'HEAD'    => self::head($path, $handler, $mw),
-                            'OPTIONS' => self::options($path, $handler, $mw),
-                            default   => self::get($path, $handler, $mw),
-                        };
 
-                    if ($name && method_exists($route, 'name')) {
+                    $route = $isApi
+                        ? self::signApi($spec, $handler, $mw)
+                        : self::sign($spec, $handler, $mw);
+
+                    if ($name) {
                         $route->name($name);
                     }
                 }
@@ -322,7 +298,14 @@ class Router
     {
         $this->mergeStaticRoutes();
 
+        // Detect HTTP method and support method override via header or _method form field
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        // support X-HTTP-Method-Override or HTTP_X_HTTP_METHOD_OVERRIDE
+        $overrideHeader = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ?? $_SERVER['HTTP_X_HTTP_METHOD'] ?? null;
+        $overrideField  = $_POST['_method'] ?? $_REQUEST['_method'] ?? null;
+        if ($method === 'POST' && ($overrideHeader || $overrideField)) {
+            $method = strtoupper($overrideHeader ?: $overrideField);
+        }
         $uri    = $this->cleanUri();
 
         // 1. exact match (standard)
@@ -460,9 +443,7 @@ class Router
                 ? Middleware::run($m, $context)
                 : $m($context);
 
-            if ($res === false) {
-                return;
-            }
+            if ($res === false) return;
             if ($res !== null) {
                 if ($isApi) {
                     $code = is_array($res) && isset($res['code']) ? $res['code'] : 400;
@@ -481,9 +462,7 @@ class Router
             header('Content-Type: application/json');
             $code = is_array($result) && isset($result['code']) ? $result['code'] : 200;
             http_response_code($code);
-            if (isset($result['code'])) {
-                unset($result['code']);
-            }
+            if (isset($result['code'])) unset($result['code']);
             echo json_encode($result, JSON_UNESCAPED_UNICODE);
         } else {
             echo $result;

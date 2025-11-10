@@ -5,11 +5,11 @@ namespace DFrame\Application;
 use DFrame\Application\View;
 
 /**
- * #### Simple SMTP Mailer
+ * #### Simple SMTP Gmail Mailer
  *
  * Mail class to send emails using SMTP protocol.
  *
- * **Note**: Only supports SMTP with STARTTLS.
+ * **Note**: Only supports SMTP Gmail with STARTTLS.
  */
 class Mail
 {
@@ -25,6 +25,17 @@ class Mail
 
     /**
      * Mail configuration can be provided via environment variables or passed as an associative array.
+     * 
+     * Only supports SMTP Gmail.
+     * 
+     * **Example:**
+     * ```php
+     * $mail = new \DFrame\Application\Mail();
+     * $mail->to('recipient@example.com')
+     *      ->subject('Test Email')
+     *      ->body('This is a test email.');
+     *      ->send();
+     * ```
      *
      * @param mixed|null $config Configuration array with keys: username, password, fromname
      */

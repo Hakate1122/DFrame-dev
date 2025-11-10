@@ -13,6 +13,7 @@
                 <th>ID</th>
                 <th>Name</th>
                 <th>Email</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -21,6 +22,14 @@
                     <td><?= htmlspecialchars($user['id']) ?></td>
                     <td><?= htmlspecialchars($user['name']) ?></td>
                     <td><?= htmlspecialchars($user['email']) ?></td>
+                    <td>
+                        <a href="<?= route('user.edit', ['id' => $user['id']]) ?>">Edit</a>
+
+                        <form action="<?= route('user.delete', ['id' => $user['id']]) ?>" method="POST" style="display:inline" onsubmit="return confirm('Are you sure?')">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit">Delete</button>
+                        </form>
+                    </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>

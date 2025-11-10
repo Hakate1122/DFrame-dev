@@ -8,6 +8,14 @@ class SqliteMapper extends BaseMapper {
         return $this->adapter->fetch($result);
     }
 
+    public function findOrFail($id) {
+        $record = $this->find($id);
+        if (!$record) {
+            throw new \Exception("Record not found with ID: $id");
+        }
+        return $record;
+    }
+
     public function all() {
         $sql = "SELECT * FROM \"{$this->table}\"";
         $result = $this->adapter->query($sql);

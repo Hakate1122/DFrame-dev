@@ -469,7 +469,6 @@ class App
                 define('D_LOADED', microtime(true) - D_RUN);
             }
         }
-        jslog(json_encode("Time load: " . (defined('D_LOADED') ? D_LOADED : 'N/A') . " seconds"));
         exit;
     }
 

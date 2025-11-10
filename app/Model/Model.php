@@ -54,18 +54,47 @@ class Model extends DatabaseManager
      */
     public function __call($method, $args)
     {
+        // Adapt common method signatures between Mapper and Builder:
+        // - update($id, array $data)  => Mapper style
+        // - update(array $data)       => Builder style
+        // - delete($id)               => Mapper style
+        // - delete()                  => Builder style
+        if ($method === 'update' && count($args) === 2 && (is_scalar($args[0]) || is_string($args[0])) && is_array($args[1])) {
+            // If mapper's update accepts 2 params, call directly (mapper)
+            if (method_exists($this->mapper, 'update')) {
+                $rm = new \ReflectionMethod($this->mapper, 'update');
+                if ($rm->getNumberOfParameters() > 1) {
+                    return call_user_func_array([$this->mapper, 'update'], $args);
+                }
+            }
+            // Fallback for builder: where('id', $id)->update($data)
+            [$id, $data] = $args;
+            return $this->mapper->where('id', $id)->update($data);
+        }
+
+        if ($method === 'delete' && count($args) === 1 && (is_scalar($args[0]) || is_string($args[0]))) {
+            if (method_exists($this->mapper, 'delete')) {
+                $rm = new \ReflectionMethod($this->mapper, 'delete');
+                if ($rm->getNumberOfParameters() > 0) {
+                    return call_user_func_array([$this->mapper, 'delete'], $args);
+                }
+            }
+            $id = $args[0];
+            return $this->mapper->where('id', $id)->delete();
+        }
+
         return call_user_func_array([$this->mapper, $method], $args);
     }
 
     /**
      * Handle dynamic static method calls into the model.
-     * @param string $method
-     * @param array $args
-     * @return mixed
+     * Mirrors the instance logic to support static proxying (Model::update($id, $data)).
      */
     public static function __callStatic($method, $args)
     {
         $instance = new static();
-        return call_user_func_array([$instance->mapper, $method], $args);
+
+        // reuse instance adaptation logic
+        return $instance->__call($method, $args);
     }
 }
