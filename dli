@@ -1,16 +1,15 @@
-#! /usr/bin/env php
+#!/usr/bin/env php
 <?php
+require __DIR__ . '/vendor/autoload.php';
 
-use DFrame\Application\App;
+use DFrame\Command\Console;
+use App\Console\VersionCommand;
 
-/**
- * Define the time when the application starts running
- */
-define('D_RUN', microtime(true));
+// Khởi tạo console
+$console = new Console();
 
-require_once __DIR__ . '/vendor/autoload.php';
+// Đăng ký command
+$console->register(new VersionCommand());
 
-define('ROOT_DIR', __DIR__ . DIRECTORY_SEPARATOR);
-define('INDEX_DIR', __DIR__ . DIRECTORY_SEPARATOR);
-
-App::initialize(INDEX_DIR . '/public/logs/')->bootDli();
+// Chạy command từ CLI
+$console->run($argv);

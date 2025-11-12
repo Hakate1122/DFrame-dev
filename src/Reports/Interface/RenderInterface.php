@@ -3,5 +3,5 @@ namespace DFrame\Reports\Interface;
 
 interface RenderInterface
 {
-    public function render(string $type, string $message, string $file, int $line): void;
+    public function render(string $type, string $message, string $file, int $line, array $context = []): void;
 }

@@ -88,8 +88,9 @@ class Command
         printf("  %-15s Enable debug mode\n\n", "--debug");
 
         echo $cyan . "Commands:" . $reset . "\n";
-        // foreach ($this->commands as $name => $cmd) {
-        //     printf("  %-15s %s\n", $name);
-        // }
+        foreach ($this->commands as $name => $cmd) {
+            printf("  %-15s %s\n", $name, get_class($cmd));
+
+        }
     }
 }

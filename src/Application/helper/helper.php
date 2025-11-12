@@ -23,36 +23,6 @@ if (!function_exists('old')) {
     }
 }
 
-if (!function_exists('source')) {
-    /**
-     * Get the URL for a source file (located in public_html/source).
-     *
-     * @param string $path
-     * @return string
-     */
-    function source(string $path = ''): string
-    {
-        $baseUrl = getBaseUrl();
-
-        $host = $_SERVER['HTTP_HOST'] ?? '';
-        $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
-        $path = ltrim(str_replace(['..', '\\'], '', $path), '/');
-
-        if (strpos($baseUrl, '/public/') !== false) {
-            return $baseUrl . 'source/' . $path;
-        }
-
-        if (
-            preg_match('/^([a-zA-Z0-9\-\.]+)(:\d+)?$/', $host) &&
-            (strpos($scriptName, '/public/') === false)
-        ) {
-            return $baseUrl . 'source/' . $path;
-        }
-
-        return $baseUrl . 'source/' . $path;
-    }
-}
-
 if (!function_exists('redirect')) {
     /**
      * Redirect helper:
@@ -198,5 +168,49 @@ if (!function_exists('view')) {
     function view(string $view, array $data = []): string
     {
         return View::render($view, $data);
+    }
+}
+
+if (!function_exists('df_config')) {
+    /**
+     * DFrame configuration helper.
+     *
+     * - df_config()               → get all config
+     * - df_config('app.name')     → get specific config value
+     * @param string|null $name The config key (dot notation for nested).
+     * @return mixed|null The config value or null if not found.
+     */
+    function df_config(?string $key = null)
+    {
+        static $configs = null;
+
+        if ($configs === null) {
+            if (!defined('ROOT_DIR')) {
+                throw new \Exception("ROOT_DIR is not defined.");
+            }
+
+            $configPath = rtrim(ROOT_DIR, '/\\') . '/config/';
+            $configs = [];
+
+            foreach (glob($configPath . '*.php') as $file) {
+                $name = basename($file, '.php');
+                $configs[$name] = include $file;
+            }
+        }
+
+        if ($key === null) {
+            return $configs;
+        }
+
+        $segments = explode('.', $key);
+        $value = $configs;
+        foreach ($segments as $segment) {
+            if (!is_array($value) || !array_key_exists($segment, $value)) {
+                return null;
+            }
+            $value = $value[$segment];
+        }
+
+        return $value;
     }
 }

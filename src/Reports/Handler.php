@@ -1,67 +1,85 @@
 <?php
-
 namespace DFrame\Reports;
 
 use DFrame\Reports\Interface\HandlerInterface;
+use DFrame\Reports\Interface\RenderInterface;
 
-/**
- * #### ErrorReporting class for handling PHP errors and rendering error pages.
- *
- * This class provides functionality to log errors, render error pages, and handle PHP errors gracefully.
- */
-class Handler extends \Exception implements HandlerInterface
+class Handler extends HandlerInterface
 {
-    private $saveLog;
-    private $logFile;
+    private bool $saveLog;
+    private string $logFile;
+    private RenderInterface $renderer;
 
-    /**
-     * Constructor for error handling setup or throwing exceptions.
-     *
-     * When used for error handling setup, it registers the error handler.
-     * When used for throwing exceptions, it constructs an exception with the provided details.
-     *
-     * @param mixed $messageOrSaveLog Error message or saveLog flag (default: false).
-     * @param mixed $codeOrLogFile Error code or log file name (default: 'error.log').
-     * @param int $severity Error severity (default: 0).
-     * @param string|null $filename File where the error occurred (default: null).
-     * @param int|null $line Line number where the error occurred (default: null).
-     * @param \Throwable|null $previous Previous exception (default: null).
-     */
-    public function __construct($messageOrSaveLog = false, $codeOrLogFile = 'error.log', $severity = 0, $filename = null, $line = null, ?\Throwable $previous = null)
+    public function __construct(bool $saveLog = false, string $logFile = 'errors.log', ?RenderInterface $renderer = null)
     {
-        // Check if the constructor is used for error handling setup
-        if (is_bool($messageOrSaveLog) && is_string($codeOrLogFile)) {
-            $this->saveLog = $messageOrSaveLog;
-            $this->logFile = $codeOrLogFile;
-            set_error_handler([$this, 'handleError']);
-        } else {
-            // Used for throwing an exception
-            parent::__construct($messageOrSaveLog, is_int($codeOrLogFile) ? $codeOrLogFile : 0, $previous);
-            if ($this->saveLog) {
-                $this->logError($severity ?: $this->getCode(), $messageOrSaveLog, $filename ?: $this->getFile(), $line ?: $this->getLine());
-            }
-            self::render($messageOrSaveLog, $filename ?: $this->getFile(), $line ?: $this->getLine(), $severity ?: $this->getCode());
+        $this->saveLog = $saveLog;
+        $this->logFile = $logFile;
+        $this->renderer = $renderer ?? $this->detectRenderer();
+
+        set_error_handler([$this, 'handleError']);
+        set_exception_handler([$this, 'handleException']);
+        register_shutdown_function([$this, 'handleRuntime']);
+    }
+
+    private function detectRenderer(): RenderInterface
+    {
+        return php_sapi_name() === 'cli'
+            ? new \DFrame\Reports\Render\Cli()
+            : new \DFrame\Reports\Render\Html();
+    }
+
+    public function handleError(int $errno, string $errstr, string $errfile, int $errline): bool
+    {
+        if (!(error_reporting() & $errno)) return false;
+
+        $type = match ($errno) {
+            E_PARSE => 'parse',
+            E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR => 'runtime',
+            default => 'error',
+        };
+
+        $this->log($type, $errstr, $errfile, $errline, ['code' => $errno]);
+        $this->renderer->render($type, $errstr, $errfile, $errline, ['code' => $errno]);
+        return true;
+    }
+
+    public function handleException(\Throwable $exception): void
+    {
+        $this->log('exception', $exception->getMessage(), $exception->getFile(), $exception->getLine());
+        $this->renderer->render('exception', $exception->getMessage(), $exception->getFile(), $exception->getLine());
+    }
+
+    public function handleParse(): void
+    {
+        // Handled via shutdown
+    }
+
+    public function handleRuntime(): void
+    {
+        $error = error_get_last();
+        if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+            $type = $error['type'] === E_PARSE ? 'parse' : 'runtime';
+            $this->log($type, $error['message'], $error['file'], $error['line'], ['code' => $error['type']]);
+            $this->renderer->render($type, $error['message'], $error['file'], $error['line'], ['code' => $error['type']]);
         }
     }
-    public static function sign()
+
+    public function log(string $type, string $message, string $file, int $line, array $context = []): void
     {
-    }
-    public function handleError()
-    {
-    }
-    public function handleException()
-    {
-    }
-    public function handlerParse()
-    {
-    }
-    public function handlerRuntime()
-    {
-    }
-    public function logError($severity, $message, $file, $line)
-    {
-    }
-    public function render(string $type, string $message, string $file, int $line): void
-    {
+        if (!$this->saveLog) return;
+
+        $dir = dirname($this->logFile);
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
+
+        $log = sprintf(
+            "[%s] %s | %s:%d | %s | %s\n",
+            date('Y-m-d H:i:s'),
+            strtoupper($type),
+            $file,
+            $line,
+            $message,
+            json_encode($context)
+        );
+        file_put_contents($this->logFile, $log, FILE_APPEND | LOCK_EX);
     }
 }

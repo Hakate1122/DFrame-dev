@@ -4,6 +4,10 @@ namespace DFrame\Application;
 
 use DFrame\Application\Router;
 use DFrame\Application\Session;
+use DFrame\Reports\CraftParse;
+use DFrame\Reports\CraftError;
+use DFrame\Reports\CraftException;
+use DFrame\Reports\CraftRuntime;
 use Datahihi1\TinyEnv\TinyEnv;
 use Exception;
 
@@ -238,6 +242,42 @@ class App
     }
 
     /**
+     * Initialize error reporting with validation
+     *
+     * @param string|null $logDir
+     * @return void
+     * @throws Exception
+     */
+    private static function initializeErrorReporting(?string $logDir = null)
+    {
+        if (is_null($logDir)) {
+            CraftParse::sign();
+            CraftException::sign();
+            CraftError::sign();
+            CraftRuntime::sign();
+        }
+        // Validate log files can be created
+        $logFiles = [
+            'parse.log',
+            'exception.log',
+            'error.log',
+            'runtime.log'
+        ];
+
+        foreach ($logFiles as $logFile) {
+            $fullPath = $logDir . $logFile;
+            if (!is_writable(dirname($fullPath))) {
+                throw new Exception("Cannot write to log file: {$fullPath}");
+            }
+        }
+
+        CraftParse::sign(true, $logDir . 'parse.log');
+        CraftException::sign(true, $logDir . 'exception.log');
+        CraftError::sign(true, $logDir . 'error.log');
+        CraftRuntime::sign(true, $logDir . 'runtime.log');
+    }
+
+    /**
      * Validate application health
      *
      * @return array
@@ -354,9 +394,15 @@ class App
      *
      * @return self
      */
-    public static function initialize()
+    public static function initialize(?string $logDir = null)
     {
         try {
+            // Initialize error reporting with validation
+            if ($logDir) {
+                self::initializeErrorReporting($logDir);
+            } else {
+                self::initializeErrorReporting();
+            }
 
             // Load environment variables
             self::loadEnvironmentVariables();
@@ -370,13 +416,26 @@ class App
             // Configure timezone
             self::configureTimezone();
 
+            // Validate log directory
+            if ($logDir && !is_dir($logDir)) {
+                if (!mkdir($logDir, 0755, true)) {
+                    throw new Exception("Failed to create log directory: {$logDir}");
+                }
+            }
+
+            // Validate log directory is writable
+            if ($logDir && !is_writable($logDir)) {
+                throw new Exception("Log directory is not writable: {$logDir}");
+            }
+
             // Validate session configuration (moved here)
             self::validateSessionConfig();
 
             // Validate required environment variables for services
             self::validateServiceConfig();
         } catch (Exception $e) {
-            if (self::isDebug()) {
+            if (self::isDebug() && $logDir) {
+                self::initializeErrorReporting(INDEX_DIR . 'logs/');
                 throw $e;
             }
         }
@@ -389,11 +448,9 @@ class App
      *
      * @return void
      */
-    public static function bootWeb()
+    public static function bootWeb($getTimeLoad = false)
     {
-        // Start session
         Session::start();
-        
         // Set maintenance mode if enabled
         self::setMaintenanceMode();
 
@@ -404,6 +461,12 @@ class App
         self::initializeRoute();
 
         Router::run();
+
+        if ($getTimeLoad) {
+            if (!defined('D_LOADED')) {
+                define('D_LOADED', microtime(true) - D_RUN);
+            }
+        }
         exit;
     }
 

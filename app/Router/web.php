@@ -12,7 +12,7 @@ $router->sign('GET /', function () {
     return "Hello, World!";
 })->name('home');
 
-$router->sign('GET /user/list', [UserController::class, 'listUsers'], ['needed'])->name('user.list');
+$router->sign('GET /user/list', [UserController::class, 'listUsers'])->name('user.list');
 
 $router->sign('GET /user/store', [UserController::class, 'addUser'])->name('user.add');
 $router->sign('POST /user/store', [UserController::class, 'storeUser'])->name('user.store');
@@ -29,4 +29,4 @@ $router->scanControllerAttributes(
     [
         App\Controller\UserController::class,
     ]
-);
+    );

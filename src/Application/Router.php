@@ -13,7 +13,10 @@ use ReflectionNamedType;
 use DFrame\Application\Middleware;
 
 /**
- * Router – tiny, attribute-friendly, DI-aware HTTP router.
+ * Router Attribute and Static Router Class
+ * 
+ * A simple HTTP router supporting static route registration,
+ * attribute-based route definitions, middleware, and dependency injection.
  */
 #[Attribute]
 class Router
@@ -83,7 +86,6 @@ class Router
         $this->globalApiMiddleware[] = $mw;
     }
 
-    /* -------------------------- STATIC ROUTE REGISTRATION -------------------------- */
     /* -------------------------- STATIC ROUTE REGISTRATION -------------------------- */
     private static function parseRouteSpec(string $spec): array
     {
@@ -156,7 +158,7 @@ class Router
 
     /**
      * Sign a route specification to a handler with optional middleware.
-     * @param string $spec Route specification in the format 'METHOD /path' or 'METHOD1|METHOD2 /path'.
+     * @param string $spec (`GET`, `POST`, etc.) Route specification in the format 'METHOD /path' or 'METHOD1|METHOD2 /path'.
      * @param mixed $handler The handler for the route (callable, or 'Class@method' string).
      * @param array $middleware Optional middleware for the route.
      * @return static
@@ -169,7 +171,7 @@ class Router
 
     /**
      * Sign an API route specification to a handler with optional middleware.
-     * @param string $spec Route specification in the format 'METHOD /path' or 'METHOD1|METHOD2 /path'.
+     * @param string $spec (`GET`, `POST`, etc.) Route specification in the format 'METHOD /path' or 'METHOD1|METHOD2 /path'.
      * @param mixed $handler The handler for the route (callable, or 'Class@method' string).
      * @param array $middleware Optional middleware for the route.
      * @return static
@@ -180,6 +182,13 @@ class Router
         return new self();
     }
 
+    /**
+     * Sign a route for all HTTP methods to a handler with optional middleware.
+     * @param string $path The route path.
+     * @param mixed $handler The handler for the route (callable, or 'Class@method' string).
+     * @param array $middleware Optional middleware for the route.
+     * @return static
+     */
     public static function all(string $path, $handler, array $middleware = []): self
     {
         $methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'];
@@ -189,6 +198,11 @@ class Router
     }
 
     /* -------------------------- GROUPING -------------------------- */
+    /**
+     * Start a route group with a common prefix.
+     * @param string $prefix The route prefix for the group.
+     * @return static
+     */
     public static function group(string $prefix): self
     {
         self::$groupStack[] = self::$groupContext;
@@ -204,18 +218,33 @@ class Router
         return new self();
     }
 
+    /**
+     * Set middleware for routes in the current group.
+     * @param string|array $mw The middleware (string or array of strings).
+     * @return static
+     */
     public static function middleware(string|array $mw): self
     {
         self::$groupContext['middleware'] = is_array($mw) ? $mw : [$mw];
         return new self();
     }
 
+    /**
+     * Set name prefix for routes in the current group.
+     * @param string $prefix The name prefix.
+     * @return static
+     */
     public static function namePrefix(string $prefix): self
     {
         self::$groupContext['namePrefix'] = $prefix;
         return new self();
     }
 
+    /**
+     * Name the last registered route.
+     * @param string $name The name for the route.
+     * @return static
+     */
     public static function name(string $name): self
     {
         if (!self::$lastRegisteredRoute) {
@@ -233,6 +262,11 @@ class Router
         return new self();
     }
 
+    /**
+     * Define a group action and end the group context.
+     * @param callable $cb The group action callback.
+     * @return static
+     */
     public static function action(callable $cb): self
     {
         $cb();
@@ -244,6 +278,12 @@ class Router
         return new self();
     }
 
+    /**
+     * Define a default handler for unmatched routes.
+     * @param callable $handler The default handler (callable).
+     * @param int|null $code Optional HTTP status code to return (default: 404).
+     * @return static
+     */
     public static function default(callable $handler, ?int $code = 404): self
     {
         self::$defaultHandler = ['handler' => $handler, 'code' => $code];
@@ -251,6 +291,11 @@ class Router
     }
 
     /* -------------------------- ATTRIBUTE SCANNER -------------------------- */
+    /**
+     * Scan controller classes for route attributes and register them.
+     * @param array $controllers List of controller class names to scan.
+     * @return void
+     */
     public static function scanControllerAttributes(array $controllers): void
     {
         foreach ($controllers as $class) {

@@ -179,3 +179,34 @@ class Source
         return self::upload($newFile, $location);
     }
 }
+
+
+if (!function_exists('source')) {
+    /**
+     * Get the URL for a source file (located in public_html/source).
+     *
+     * @param string $path
+     * @return string
+     */
+    function source(string $path = ''): string
+    {
+        $baseUrl = getBaseUrl();
+
+        $host = $_SERVER['HTTP_HOST'] ?? '';
+        $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
+        $path = ltrim(str_replace(['..', '\\'], '', $path), '/');
+
+        if (strpos($baseUrl, '/public/') !== false) {
+            return $baseUrl . 'source/' . $path;
+        }
+
+        if (
+            preg_match('/^([a-zA-Z0-9\-\.]+)(:\d+)?$/', $host) &&
+            (strpos($scriptName, '/public/') === false)
+        ) {
+            return $baseUrl . 'source/' . $path;
+        }
+
+        return $baseUrl . 'source/' . $path;
+    }
+}

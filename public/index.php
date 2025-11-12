@@ -56,7 +56,7 @@ if (!defined('INDEX_DIR')) {
 $autoloadFile = ROOT_DIR . '/vendor/autoload.php';
 if (!file_exists($autoloadFile)) {
     http_response_code(500);
-    die(file_get_contents('source/mess.html') ?: 'Autoloader not found. Please run <code>composer install</code>.');
+    die(file_get_contents('source/miss.html') ?: 'Autoloader not found. Please run <code>composer install</code>.');
 }
 require_once $autoloadFile;
 
@@ -76,4 +76,8 @@ require_once $autoloadFile;
 |------------------------------------------------------------------------------------------------
 */
 
-\DFrame\Application\App::initialize(INDEX_DIR . '/logs/')->bootWeb(true);
+// script.php
+use DFrame\Reports\Report;
+Report::setup(true, INDEX_DIR . '/logs/html.log', Report::html());
+
+\DFrame\Application\App::initialize(INDEX_DIR . '/logs/')->bootWeb();

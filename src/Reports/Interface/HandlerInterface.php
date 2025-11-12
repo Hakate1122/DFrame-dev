@@ -1,33 +1,12 @@
 <?php
 namespace DFrame\Reports\Interface;
 
-/**
- * HandlerInterface defines the methods required for error handling classes.
- */
-interface HandlerInterface
+abstract class HandlerInterface
 {
-    /**
-     * Constructor to initialize the handler.
-     */
-    public function __construct();
-    /**
-     * Handles PHP errors.
-     */
-    public function handleError();
-    /**
-     * Handles uncaught exceptions.
-     */
-    public function handleException();
-    /**
-     * Handles parse errors.
-     */
-    public function handlerParse();
-    /**
-     * Handles runtime errors.
-     */
-    public function handlerRuntime();
-    /**
-     * Logs an error with given details.
-     */
-    public function logError($severity, $message, $file, $line);
+    abstract public function __construct(bool $saveLog = false, string $logFile = 'errors.log');
+    abstract public function handleError(int $errno, string $errstr, string $errfile, int $errline): bool;
+    abstract public function handleException(\Throwable $exception): void;
+    abstract public function handleParse(): void;
+    abstract public function handleRuntime(): void;
+    abstract public function log(string $type, string $message, string $file, int $line, array $context = []): void;
 }
