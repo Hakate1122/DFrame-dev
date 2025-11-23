@@ -22,9 +22,15 @@ final class Report
     }
 
     /** Get HTML renderer instance */
-    public static function html(): Html { return new Html(); }
+    public static function html(): Html
+    {
+        return new Html();
+    }
     /** Get CLI renderer instance */
-    public static function cli(): Cli { return new Cli(); }
+    public static function cli(): Cli
+    {
+        return new Cli();
+    }
 
     /**
      * Throw a report

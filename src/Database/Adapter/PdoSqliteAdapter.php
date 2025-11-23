@@ -19,7 +19,7 @@ class PdoSqliteAdapter implements AdapterInterface
 		if (!extension_loaded('pdo_sqlite')) {
 			throw new \Exception('PDO SQLite extension is not loaded.');
 		}
-		$dsn = 'sqlite:' . ($config['database'] ?? ':memory:');
+		$dsn = 'sqlite:' . ROOT_DIR . 'app/database/' . ($config['database'] ?? ':memory:');
 		$this->pdo = new \PDO($dsn);
 		$this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 	}

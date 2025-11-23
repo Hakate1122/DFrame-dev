@@ -19,7 +19,7 @@ class Sqlite3Adapter implements AdapterInterface
 		if (!extension_loaded('sqlite3')) {
 			throw new \Exception('SQLite3 extension is not loaded.');
 		}
-		$this->conn = new \SQLite3($config['database'] ?? ':memory:');
+		$this->conn = new \SQLite3(ROOT_DIR . 'app/database/' . ($config['database'] ?? ':memory:'));
 	}
 
 	public function disconnect()
@@ -29,10 +29,42 @@ class Sqlite3Adapter implements AdapterInterface
 		}
 	}
 
+	// Updated query method to support parameter binding (like PdoSqliteAdapter)
 	public function query($sql, $params = [])
 	{
-		// Mush simpler, no param binding
-		return $this->conn->query($sql);
+		$stmt = $this->conn->prepare($sql);
+		if ($stmt === false) {
+			return false;
+		}
+
+		// Bind parameters: support numeric (0-based array) and named (assoc) params
+		foreach ($params as $key => $value) {
+			if (is_int($key)) {
+				// SQLite3 bind indexes are 1-based
+				$stmt->bindValue($key + 1, $value, $this->getSqlite3Type($value));
+			} else {
+				$param = (strpos($key, ':') === 0) ? $key : ':' . $key;
+				$stmt->bindValue($param, $value, $this->getSqlite3Type($value));
+			}
+		}
+
+		return $stmt->execute();
+	}
+
+	// Helper to map PHP value types to SQLITE3_* constants
+	protected function getSqlite3Type($value)
+	{
+		if (is_int($value)) {
+			return \SQLITE3_INTEGER;
+		} elseif (is_float($value)) {
+			return \SQLITE3_FLOAT;
+		} elseif (is_null($value)) {
+			return \SQLITE3_NULL;
+		} elseif (is_string($value)) {
+			return \SQLITE3_TEXT;
+		} else {
+			return \SQLITE3_TEXT;
+		}
 	}
 
 	public function fetch($result, $type = 'assoc')

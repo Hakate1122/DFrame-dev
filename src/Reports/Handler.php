@@ -30,7 +30,8 @@ class Handler extends HandlerInterface
 
     public function handleError(int $errno, string $errstr, string $errfile, int $errline): bool
     {
-        if (!(error_reporting() & $errno)) return false;
+        if (!(error_reporting() & $errno))
+            return false;
 
         $type = match ($errno) {
             E_PARSE => 'parse',
@@ -66,10 +67,12 @@ class Handler extends HandlerInterface
 
     public function log(string $type, string $message, string $file, int $line, array $context = []): void
     {
-        if (!$this->saveLog) return;
+        if (!$this->saveLog)
+            return;
 
         $dir = dirname($this->logFile);
-        if (!is_dir($dir)) mkdir($dir, 0755, true);
+        if (!is_dir($dir))
+            mkdir($dir, 0755, true);
 
         $log = sprintf(
             "[%s] %s | %s:%d | %s | %s\n",

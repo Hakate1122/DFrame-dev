@@ -78,7 +78,9 @@ class Html implements RenderInterface
                 }
 
                 .header {
-                    background: <?= $config['gradient'] ?>;
+                    background:
+                        <?= $config['gradient'] ?>
+                    ;
                     color: white;
                     padding: 15px 20px;
                     font-weight: 500;
@@ -110,7 +112,9 @@ class Html implements RenderInterface
                 }
 
                 .title h2 {
-                    color: <?= $config['color'] ?>;
+                    color:
+                        <?= $config['color'] ?>
+                    ;
                     font-size: 18px;
                     font-weight: 600;
                     display: flex;
@@ -168,8 +172,12 @@ class Html implements RenderInterface
                 }
 
                 .highlight-line {
-                    background: <?= $config['color'] ?>20 !important;
-                    color: <?= $config['color'] ?>;
+                    background:
+                        <?= $config['color'] ?>
+                        20 !important;
+                    color:
+                        <?= $config['color'] ?>
+                    ;
                     font-weight: bold;
                     border-left: 4px solid
                         <?= $config['color'] ?>
@@ -296,22 +304,72 @@ class Html implements RenderInterface
 
         // Keywords
         $keywords = [
-            'abstract','and','array','as',
+            'abstract',
+            'and',
+            'array',
+            'as',
             'break',
-            'callable','case','catch','class','clone','const','continue',
-            'declare','default','die','do',
-            'echo','else','elseif','empty','enddeclare','endfor','endforeach','endif','endswitch','endwhile','eval','exit','extends',
-            'final','finally','for','foreach','function','false',
-            'global','goto', 'get',
-            'if','implements','include','include_once','instanceof','insteadof','interface','isset',
+            'callable',
+            'case',
+            'catch',
+            'class',
+            'clone',
+            'const',
+            'continue',
+            'declare',
+            'default',
+            'die',
+            'do',
+            'echo',
+            'else',
+            'elseif',
+            'empty',
+            'enddeclare',
+            'endfor',
+            'endforeach',
+            'endif',
+            'endswitch',
+            'endwhile',
+            'eval',
+            'exit',
+            'extends',
+            'final',
+            'finally',
+            'for',
+            'foreach',
+            'function',
+            'false',
+            'global',
+            'goto',
+            'get',
+            'if',
+            'implements',
+            'include',
+            'include_once',
+            'instanceof',
+            'insteadof',
+            'interface',
+            'isset',
             'list',
-            'namespace','new','null',
+            'namespace',
+            'new',
+            'null',
             'or',
-            'print','private','protected','public',
-            'require','require_once','return',
-            'static','switch',
-            'throw','trait','try','true',
-            'unset','use',
+            'print',
+            'private',
+            'protected',
+            'public',
+            'require',
+            'require_once',
+            'return',
+            'static',
+            'switch',
+            'throw',
+            'trait',
+            'try',
+            'true',
+            'unset',
+            'use',
             'var',
             'while',
             'xor',
@@ -340,10 +398,26 @@ class Html implements RenderInterface
 
         // Operators
         $operators = [
-            '=', '+', '-', '*', '/',
-            '%', '==', '!=', '&lt;', '&gt;',
-            '&lt;=', '&gt;=', '&amp;&amp;', '||', '!',
-            '&amp;', '|', '^', '&lt;&lt;', '&gt;&gt;'
+            '=',
+            '+',
+            '-',
+            '*',
+            '/',
+            '%',
+            '==',
+            '!=',
+            '&lt;',
+            '&gt;',
+            '&lt;=',
+            '&gt;=',
+            '&amp;&amp;',
+            '||',
+            '!',
+            '&amp;',
+            '|',
+            '^',
+            '&lt;&lt;',
+            '&gt;&gt;'
         ];
         foreach ($operators as $op) {
             $pattern = '/(' . preg_quote($op, '/') . ')(?![^<]*>)/';
