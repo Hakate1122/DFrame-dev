@@ -95,6 +95,9 @@ class Mail
      */
     public function to(string $email): self
     {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException("Invalid recipient email: $email");
+        }
         $this->to[] = $email;
         return $this;
     }
@@ -107,6 +110,7 @@ class Mail
      */
     public function subject(string $subject): self
     {
+        $subject = str_replace(["\r", "\n"], '', $subject);
         $this->subject = $subject;
         return $this;
     }
@@ -139,8 +143,35 @@ class Mail
         $errno = $errstr = null;
         $useImplicitSsl = false;
 
+        $cacertPath = ROOT_DIR . '/cacert.pem';
+        $sslOptions = [
+            'verify_peer'       => true,
+            'verify_peer_name'  => true,
+            'allow_self_signed' => false,
+        ];
+
+        if (file_exists($cacertPath)) {
+            $sslOptions['cafile'] = $cacertPath;
+        } else {
+            trigger_error(
+                "Warning: CA certificate file (cacert.pem) not found. "
+                . "SSL certificate verification will use system defaults. "
+                . "This is NOT recommended for production. "
+                . "Download cacert.pem from https://curl.se/ca/cacert.pem for best security.",
+                E_USER_WARNING
+            );
+        }
+
+        $context = stream_context_create(['ssl' => $sslOptions]);
         // Prefer plain TCP + STARTTLS on configured port (usually 587)
-        $fp = @stream_socket_client("tcp://{$this->smtp_host}:{$this->smtp_port}", $errno, $errstr, 30);
+        $fp = @stream_socket_client(
+            "tcp://{$this->smtp_host}:{$this->smtp_port}",
+            $errno,
+            $errstr,
+            30,
+            STREAM_CLIENT_CONNECT,
+            $context
+        );
         // Fallback: try implicit SSL (port 465)
         if (!$fp) {
             $fp = @stream_socket_client("ssl://{$this->smtp_host}:465", $errno, $errstr, 30);
