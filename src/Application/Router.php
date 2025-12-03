@@ -664,6 +664,7 @@ class Router
         $info = self::$routeNames[$name];
         $path = $info['path'];
 
+        // replace params
         if ($params) {
             foreach ($params as $v) {
                 $path = preg_replace('#\{[^}]+\}#', $v, $path, 1);
@@ -672,9 +673,20 @@ class Router
 
         $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-        $base ??= $scheme . '://' . $host . rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/');
 
+        // Normalize scriptDir
+        $scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '');
+        if ($scriptDir === '/' || $scriptDir === '\\' || $scriptDir === '.') {
+            $scriptDir = '';
+        }
+
+        // Build base
+        $base ??= $scheme . '://' . $host . rtrim($scriptDir, '/');
+
+        // Compose final URL (preserve http:// but remove other excess /)
         $url = rtrim($base, '/') . '/' . ltrim($path, '/');
-        return preg_replace('#(?<!:)//+#', '/', $url);
+        $url = preg_replace('#(?<!:)//+#', '/', $url);
+
+        return $url;
     }
 }

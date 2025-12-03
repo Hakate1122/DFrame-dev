@@ -121,7 +121,7 @@ class View
         http_response_code($statusCode);
         $instance = new self();
 
-        $errorTemplate = $errorTemplate ?? "errors/$statusCode";
+        $errorTemplate ??= "errors/$statusCode";
         $filePath = $instance->viewPath . '/' . $errorTemplate . '.php';
 
         if (file_exists($filePath)) {
