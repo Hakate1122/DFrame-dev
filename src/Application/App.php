@@ -21,7 +21,7 @@ class App
      * Version of DFrame Framework (Mini edition).
      * @var string
      */
-    public const VERSION = '0.1.20251204-mini+dev';
+    public const VERSION = '0.1.20251205-mini+dev';
     /**
      * Alias for version constant
      */
@@ -420,9 +420,9 @@ class App
      *
      * @return void
      */
-    public static function bootDli()
+    public static function bootDli($argv)
     {
         $app = new \DFrame\Application\Command();
-        $app->run();
+        $app->run($argv);
     }
 }

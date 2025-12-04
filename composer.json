@@ -1,10 +1,15 @@
 {
     "name": "datahihi1/dframe",
-    "description": "This is a framework created by Datahihi1.",
+    "description": "This is a PHP framework created by Datahihi1.",
     "type": "project",
     "license": "MIT",
     "require": {
         "php": ">=8.0",
+        "ext-openssl": "*",
+        "ext-pdo": "*",
+        "ext-mbstring": "*",
+        "ext-json": "*",
+        "ext-xml": "*",
         "eftec/bladeone": "^4.19",
         "twig/twig": "*",
         "datahihi1/tiny-env": "^1.0"
@@ -15,6 +20,7 @@
             "DFrame\\": "src/"
         },
         "files": [
+            "src/Application/helper/cli.php",
             "src/Application/helper/helper.php",
             "src/Application/helper/source.php",
             "src/Application/helper/TokenGenerator.php",
