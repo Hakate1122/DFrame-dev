@@ -10,9 +10,8 @@ namespace DFrame\Database\Traits;
  */
 trait SoftDelete
 {
-    protected function checkDeletedAtColumn()
+    protected function checkColumns()
     {
-        // Lấy adapter và tên bảng từ $this
         $adapter = $this->adapter ?? ($this->db ?? null);
         $table = $this->table ?? null;
         if (!$adapter || !$table) {
@@ -65,7 +64,7 @@ trait SoftDelete
      */
     public function softDelete()
     {
-        $this->checkDeletedAtColumn();
+        $this->checkColumns();
         if ($this->isDeleted()) {
             return false;
         }
@@ -79,7 +78,7 @@ trait SoftDelete
      */
     public function restore($id = null)
     {
-        $this->checkDeletedAtColumn();
+        $this->checkColumns();
         if (!$this->isDeleted()) {
             return false;
         }

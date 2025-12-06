@@ -1,0 +1,23 @@
+{
+  "name": "dframe",
+  "version": "1.0.0",
+  "description": "JS fragment for dframe",
+  "homepage": "https://github.com/datahihi1/DFrame-project#readme",
+  "bugs": {
+    "url": "https://github.com/datahihi1/DFrame-project/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/datahihi1/DFrame-project.git"
+  },
+  "license": "MIT",
+  "author": "datahihi1",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "live-server": "^1.2.2"
+  }
+}

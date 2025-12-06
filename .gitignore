@@ -4,3 +4,5 @@ composer.lock
 .phpunit.result.cache
 .env
 cacert.pem
+package-lock.json
+node_modules/

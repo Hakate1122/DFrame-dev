@@ -21,7 +21,7 @@ class App
      * Version of DFrame Framework (Mini edition).
      * @var string
      */
-    public const VERSION = '0.1.20251205-mini+dev';
+    public const VERSION = '0.1.20251205-dev';
     /**
      * Alias for version constant
      */
@@ -45,14 +45,14 @@ class App
      */
     public function __construct()
     {
-        // Nếu chạy CLI thì chỉ cần ROOT_DIR
+
         if (php_sapi_name() === 'cli' || PHP_SAPI === 'cli') {
             if (!defined('ROOT_DIR')) {
                 throw new Exception('ROOT_DIR must be defined before initializing CraftPHP Framework (CLI mode).');
             }
             return;
         }
-        // Nếu chạy web thì cần cả ROOT_DIR và INDEX_DIR
+
         if (!defined('ROOT_DIR') || !defined('INDEX_DIR')) {
             throw new Exception('ROOT_DIR and INDEX_DIR must be defined before initializing CraftPHP Framework.');
         }
@@ -66,12 +66,10 @@ class App
         self::$environment = env('APP_ENVIRONMENT', 'production');
         self::$debug = env('APP_DEBUG', 'false');
 
-        // Validate environment
         if (!in_array(self::$environment, ['local', 'development', 'staging', 'production'])) {
             self::$environment = 'production';
         }
 
-        // Security: Disable debug in production
         if (self::$environment === 'production') {
             self::$debug = false;
         }
@@ -107,23 +105,20 @@ class App
     private static function setSecurityHeaders(): void
     {
         if (headers_sent()) {
-            return; // Headers already sent
+            return;
         }
 
-        // Security headers
         header('X-Content-Type-Options: nos niff');
         header('X-Frame-Options: DENY');
         header('X-XSS-Protection: 1; mode=block');
         header('Referrer-Policy: strict-origin-when-cross-origin');
 
-        // Content Security Policy (basic)
         if (self::isProduction()) {
             header(
                 "Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
             );
         }
 
-        // Remove server information
         header_remove('X-Powered-By');
     }
 
@@ -138,7 +133,6 @@ class App
             return;
         }
 
-        // Allow access from localhost
         $serverIps = ['127.0.0.1', '::1'];
         $clientIp = $_SERVER['REMOTE_ADDR'] ?? '';
 
@@ -146,7 +140,6 @@ class App
             return;
         }
 
-        // Nếu $noEnv = true, luôn bật bảo trì
         if ($noEnv === true) {
             $maintenanceMode = true;
             $startTime = null;
@@ -207,15 +200,13 @@ class App
      */
     private static function validateSessionConfig()
     {
-        // Set secure session configuration
         if (self::isProduction()) {
             ini_set('session.cookie_httponly', '1');
             ini_set('session.cookie_secure', '1');
             ini_set('session.use_strict_mode', '1');
-            ini_set('session.cookie_same site', 'Strict');
+            ini_set('session.cookie_same_site', 'Strict');
         }
 
-        // Validate session save path
         $sessionPath = ini_get('session.save_path');
         if ($sessionPath && !is_writable($sessionPath)) {
             throw new Exception('Session save path is not writable: ' . $sessionPath);
@@ -230,7 +221,6 @@ class App
      */
     private static function validateServiceConfig()
     {
-        // Validate required environment variables for services
         $requiredVars = ['APP_NAME', 'APP_TIMEZONE'];
         foreach ($requiredVars as $var) {
             if (!env($var)) {
@@ -255,7 +245,6 @@ class App
             'checks' => []
         ];
 
-        // Check required directories
         $requiredDirs = [
             'logs' => INDEX_DIR . 'logs/',
             'vendor' => ROOT_DIR . 'vendor/',
@@ -269,7 +258,6 @@ class App
             ];
         }
 
-        // Check if any checks failed
         foreach ($health['checks'] as $check) {
             if ($check['status'] === 'error') {
                 $health['status'] = 'unhealthy';
@@ -336,7 +324,6 @@ class App
      */
     private static function initializeRoute()
     {
-        // Initialize routing configuration
         $routeConfigPath = ROOT_DIR . 'app/Router/web.php';
         $apiRouteConfigPath = ROOT_DIR . 'app/Router/api.php';
         if (file_exists($routeConfigPath)) {

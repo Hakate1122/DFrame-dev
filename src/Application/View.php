@@ -63,7 +63,6 @@ class View
     public static function render($view, $data = [], $viewPath = null)
     {
         $instance = new self($viewPath);
-        // Default HTML title
         $data['title'] ??= '<title>Default Title</title>';
         return $instance->view($view, $data);
     }

@@ -76,7 +76,6 @@ require_once $autoloadFile;
 |------------------------------------------------------------------------------------------------
 */
 
-// script.php
 use DFrame\Reports\Report;
 Report::setup(true, INDEX_DIR . '/logs/html.log', Report::html());
 

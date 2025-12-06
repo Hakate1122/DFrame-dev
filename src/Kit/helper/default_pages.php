@@ -1,14 +1,14 @@
 <?php
 if (!function_exists('getErrorPage')) {
-    /**
-     * Get error page content
-     * @param int $code
-     * @param string $message
-     * @return string
-     */
-    function getErrorPage(int $code, string $message): string
-    {
-        $html = <<<HTML
+  /**
+   * Get error page content
+   * @param int $code
+   * @param string $message
+   * @return string
+   */
+  function getErrorPage(int $code, string $message): string
+  {
+    $html = <<<HTML
   <!doctype html>
   <html lang="vi">
   <head>
@@ -36,50 +36,50 @@ if (!function_exists('getErrorPage')) {
   </body>
   </html>
   HTML;
-        return $html;
-    }
+    return $html;
+  }
 }
 
 if (!function_exists('get404pages')) {
-    /**
-     * Get 404 page content
-     * @return bool|string
-     */
-    function get404pages()
-    {
-        return getErrorPage(404, 'Not Found');
-    }
+  /**
+   * Get 404 page content
+   * @return bool|string
+   */
+  function get404pages()
+  {
+    return getErrorPage(404, 'Not Found');
+  }
 }
 
 if (!function_exists('get403pages')) {
-    /**
-     * Get 403 page content
-     * @return bool|string
-     */
-    function get403pages()
-    {
-        return getErrorPage(403, 'Forbidden');
-    }
+  /**
+   * Get 403 page content
+   * @return bool|string
+   */
+  function get403pages()
+  {
+    return getErrorPage(403, 'Forbidden');
+  }
 }
 
 if (!function_exists('get500pages')) {
-    /**
-     * Get 500 page content
-     * @return bool|string
-     */
-    function get500pages()
-    {
-        return getErrorPage(500, 'Internal Server Error');
-    }
+  /**
+   * Get 500 page content
+   * @return bool|string
+   */
+  function get500pages()
+  {
+    return getErrorPage(500, 'Internal Server Error');
+  }
 }
 
 if (!function_exists('get503pages')) {
-    /**
-     * Get 503 page content
-     * @return bool|string
-     */
-    function get503pages()
-    {
-        return getErrorPage(503, 'Service Unavailable');
-    }
+  /**
+   * Get 503 page content
+   * @return bool|string
+   */
+  function get503pages()
+  {
+    return getErrorPage(503, 'Service Unavailable');
+  }
 }

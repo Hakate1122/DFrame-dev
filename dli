@@ -1,6 +1,9 @@
 #!/usr/bin/env php
 <?php
 
+define('ROOT_DIR', __DIR__);
+define('INDEX_DIR', __DIR__ . '/public/');
+
 require __DIR__ . '/vendor/autoload.php';
 
 use DFrame\Application\Command;

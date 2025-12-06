@@ -5,7 +5,7 @@ namespace DFrame\Application;
 use DFrame\Application\View;
 
 /**
- * #### Simple SMTP Gmail Mailer (v0.1.20251204-mini+dev)
+ * #### Simple SMTP Gmail Mailer (v0.1.20251204-dev)
  *
  * Secure Mail class supporting Gmail SMTP, CC, BCC, and Attachments.
  */
@@ -39,6 +39,9 @@ class Mail
      */
     public function __construct(?array $config = null)
     {
+        if ($config === null && file_exists(ROOT_DIR . '/config/mail.php')) {
+            $config = include_once ROOT_DIR . '/config/mail.php';
+        }
         $this->username   = env('MAIL_USERNAME') ?? $config['username'] ?? '';
         $this->password   = env('MAIL_PASSWORD') ?? $config['password'] ?? '';
         $this->from       = env('MAIL_FROM_ADDRESS') ?? $config['from'] ?? $this->username;

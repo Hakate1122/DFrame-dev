@@ -88,7 +88,6 @@ class Router
     /* -------------------------- STATIC ROUTE REGISTRATION -------------------------- */
     private static function parseRouteSpec(string $spec): array
     {
-        // Hỗ trợ: 'GET|POST /path' hoặc 'GET /path'
         if (!preg_match('#^([A-Z|]+)\s+(.+)$#', trim($spec), $m)) {
             throw new Exception("Invalid route spec: $spec. Use 'METHOD|/path' or 'METHOD1|METHOD2 /path'");
         }
@@ -127,9 +126,8 @@ class Router
             $store[$fullPath] = ['handler' => $handler, 'middleware' => $fullMw];
         }
 
-        // Lưu lại route cuối cùng để hỗ trợ ->name()
         self::$lastRegisteredRoute = [
-            'method' => $parsed['methods'][0], // chỉ lưu method đầu tiên cho tên
+            'method' => $parsed['methods'][0],
             'path' => $fullPath,
             'api' => false
         ];
@@ -247,7 +245,6 @@ class Router
     public static function name(string $name): self
     {
         if (!self::$lastRegisteredRoute) {
-            // name applies to the whole group (rare)
             return new self();
         }
 
@@ -323,7 +320,6 @@ class Router
                     if (!$path)
                         continue;
 
-                    // Hỗ trợ multi-method trong attribute: method: 'GET|POST'
                     $spec = "$http $path";
                     $handler = [$class, $m->getName()];
 
@@ -349,9 +345,7 @@ class Router
     {
         $this->mergeStaticRoutes();
 
-        // Detect HTTP method and support method override via header or _method form field
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-        // support X-HTTP-Method-Override or HTTP_X_HTTP_METHOD_OVERRIDE
         $overrideHeader = $_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ?? $_SERVER['HTTP_X_HTTP_METHOD'] ?? null;
         $overrideField = $_POST['_method'] ?? $_REQUEST['_method'] ?? null;
         if ($method === 'POST' && ($overrideHeader || $overrideField)) {
@@ -525,7 +519,6 @@ class Router
         $ref = null;
         $instance = null;
 
-        // Chuẩn hóa handler thành dạng callable: nếu là chuỗi "Class@method" thì chuyển thành [Class, method], ngược lại giữ nguyên
         if (is_array($handler)) {
             [$class, $method] = $handler;
             $instance = $this->resolveClass($class);
@@ -534,48 +527,39 @@ class Router
             $ref = new ReflectionFunction(Closure::fromCallable($handler));
         }
 
-        // Xây dựng danh sách tham số truyền vào hàm/method
         $args = [];
         $routeIdx = 0;
         foreach ($ref->getParameters() as $p) {
-            // Sử dụng tham số định kiểu class nếu có
             $pType = $p->getType();
             $isClass = $pType instanceof ReflectionNamedType && !$pType->isBuiltin();
 
             if ($isClass) {
-                // Thực hiện giải quyết phụ thuộc từ container/tự động giải quyết
                 $args[] = $this->resolveClass($pType->getName());
                 continue;
             }
 
-            // sử dụng tham số vị trí từ route nếu có
             if (array_key_exists($routeIdx, $params)) {
                 $args[] = $params[$routeIdx++];
                 continue;
             }
 
-            // truyền đối tượng Request nếu tham số tên là 'request'
             if ($p->getName() === 'request') {
                 $args[] = $this->request;
                 continue;
             }
 
-            // sử dụng giá trị mặc định nếu có
             if ($p->isDefaultValueAvailable()) {
                 $args[] = $p->getDefaultValue();
                 continue;
             }
 
-            // không có gì phù hợp, truyền null
             $args[] = null;
         }
 
-        // Xử lý gọi hàm/method
         $result = $ref instanceof ReflectionMethod
             ? $ref->invokeArgs($instance, $args)
             : $ref->invokeArgs($args);
 
-        // xử lý attribute Viewer nếu có được khai báo trên method (cập nhật 2025-13-11)
         if ($ref instanceof ReflectionMethod) {
             $attrs = $ref->getAttributes(\DFrame\Attribute\Viewer::class);
             if (!empty($attrs)) {
@@ -662,7 +646,6 @@ class Router
         $info = self::$routeNames[$name];
         $path = $info['path'];
 
-        // replace params
         if ($params) {
             foreach ($params as $v) {
                 $path = preg_replace('#\{[^}]+\}#', $v, $path, 1);
@@ -672,16 +655,13 @@ class Router
         $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
-        // Normalize scriptDir
         $scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '');
         if ($scriptDir === '/' || $scriptDir === '\\' || $scriptDir === '.') {
             $scriptDir = '';
         }
 
-        // Build base
         $base ??= $scheme . '://' . $host . rtrim($scriptDir, '/');
 
-        // Compose final URL (preserve http:// but remove other excess /)
         $url = rtrim($base, '/') . '/' . ltrim($path, '/');
         $url = preg_replace('#(?<!:)//+#', '/', $url);
 
@@ -689,10 +669,9 @@ class Router
     }
 
     /**
-     * Trả về routes đã đăng ký (dùng cho sitemap / debug).
-     * Gồm static routes, api routes và tên route.
+     * Return registered routes for debugging or sitemap generation.
      *
-     * NOTE: chỉ đọc, không thay đổi trạng thái của Router.
+     * NOTE: Read-only, does not change Router state.
      *
      * @return array{static:array, api:array, names:array}
      */

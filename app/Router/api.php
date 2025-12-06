@@ -42,12 +42,12 @@ $router->signApi('GET /demo/cache', function () {
         // cleanup example
         $cache->delete('temp');
 
-        return json_encode([
+        return [
             'ok'       => true,
             'counter'  => $counter,
             'user'     => $user,
             'has_user' => $hasUser,
-        ]);
+        ];
 })->name('api.demo.cache');
 
 $router->signApi('GET /products', function(){

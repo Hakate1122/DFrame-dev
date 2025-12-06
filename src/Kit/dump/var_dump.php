@@ -15,8 +15,8 @@ if (!function_exists('dd')) {
         $src = '';
         if ($file && $line) {
             $lines = @file($file);
-            if ($lines && isset($lines[$line-1])) {
-                $src = $lines[$line-1];
+            if ($lines && isset($lines[$line - 1])) {
+                $src = $lines[$line - 1];
             }
         }
         $varNames = [];
@@ -75,8 +75,8 @@ if (!function_exists('dump')) {
         $src = '';
         if ($file && $line) {
             $lines = @file($file);
-            if ($lines && isset($lines[$line-1])) {
-                $src = $lines[$line-1];
+            if ($lines && isset($lines[$line - 1])) {
+                $src = $lines[$line - 1];
             }
         }
         $varNames = [];

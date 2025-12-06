@@ -1,7 +1,7 @@
 <?php
 return [
     'view_path' => ROOT_DIR . 'resource/view/',
-    'engine' => 'twig', // Choose default view engine: 'php', 'bladeone', 'twig', etc.
+    'engine' => 'twig', // Access default view engine: 'php', 'bladeone', 'twig', etc.
     'drives' => [
         // BladeOne view drive configuration
         'bladeone' => [

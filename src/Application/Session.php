@@ -124,10 +124,8 @@ class Session
     {
         self::start();
 
-        // Clear session data
         $_SESSION = [];
 
-        // Remove session cookie
         if (ini_get("session.use_cookies")) {
             $params = session_get_cookie_params();
             setcookie(
@@ -141,7 +139,6 @@ class Session
             );
         }
 
-        // Destroy session
         session_destroy();
     }
 }

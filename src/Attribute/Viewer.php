@@ -36,24 +36,20 @@ class Viewer
      */
     public function handle($result)
     {
-        // If user returned a string => treat as view name
         if (is_string($result)) {
             $viewName = $this->view ?? $result;
             return View::render($viewName, [], $this->viewPath);
         }
 
-        // If user returned an array => treat as data for view
         if (is_array($result)) {
             $viewName = $this->view ?? 'index';
             return View::render($viewName, $result, $this->viewPath);
         }
 
-        // If null => render view if provided
         if ($result === null && $this->view !== null) {
             return View::render($this->view, [], $this->viewPath);
         }
 
-        // Other types (Response object, scalar not intended as view, etc.) pass through
         return $result;
     }
 }

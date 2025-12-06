@@ -29,7 +29,6 @@ class TwigDrive implements ViewEngine
 
     public function render(string $template, array $data = []): string
     {
-        // Tự động thêm đuôi .twig nếu chưa có
         if (!str_ends_with($template, '.twig')) {
             $template .= '.twig';
         }

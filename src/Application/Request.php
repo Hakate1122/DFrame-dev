@@ -26,12 +26,10 @@ class Request
         $this->query = $_GET ?? [];
         $this->cookies = $_COOKIE ?? [];
 
-        // Normalize headers to lowercase keys
         $this->headers = $this->normalizeHeaders(
             function_exists('getallheaders') ? getallheaders() : []
         );
 
-        // Parse body depending on content-type
         $this->body = $this->parseBody();
     }
 
@@ -66,7 +64,6 @@ class Request
             return $_POST ?? [];
         }
 
-        // RAW input fallback
         $raw = file_get_contents('php://input');
         if (!empty($raw)) {
             return ['_raw' => $raw];

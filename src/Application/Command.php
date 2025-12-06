@@ -22,14 +22,12 @@ class Command
 
         $handler = $this->commands[$cmd];
 
-        // Handler dạng class
         if (is_string($handler) && class_exists($handler)) {
             $instance = new $handler();
             $instance($argv);
             return;
         }
 
-        // Handler dạng callable
         if (is_callable($handler)) {
             $handler($argv);
             return;

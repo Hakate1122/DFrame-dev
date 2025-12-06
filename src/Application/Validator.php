@@ -16,9 +16,7 @@ class Validator
      */
     private ?string $firstError = null;
 
-    /* ========================================================
-     * BASIC RULES
-     * ======================================================== */
+    /* --- BASIC RULES --- */
 
     public static function required($value): bool
     {
@@ -86,9 +84,7 @@ class Validator
         return strtotime($value) !== false;
     }
 
-    /* ========================================================
-     * FILE UPLOAD RULES
-     * ======================================================== */
+    /* --- FILE UPLOAD RULES --- */
 
     public static function isFile($value): bool
     {
@@ -150,9 +146,7 @@ class Validator
         return $sizeKB >= $min && $sizeKB <= $max;
     }
 
-    /* ========================================================
-     * VALIDATION ENGINE
-     * ======================================================== */
+    /* --- VALIDATION --- */
 
     public function make(array $data, array $rules, array $messages = []): void
     {
@@ -172,7 +166,6 @@ class Validator
                     [$ruleName, $param] = explode(':', $rule, 2);
                 }
 
-                /** FILE RULES FIRST - only when value looks like an uploaded file */
                 $fileRuleCheck = null;
                 if (self::isFile($value)) {
                     $fileRuleCheck = match ($ruleName) {
@@ -189,7 +182,6 @@ class Validator
                 if ($fileRuleCheck !== null) {
                     $valid = $fileRuleCheck;
                 } else {
-                    /** NORMAL RULES */
                     $valid = match ($ruleName) {
                         'required' => self::required($value),
                         'email' => self::email($value),
@@ -210,7 +202,6 @@ class Validator
                     };
                 }
 
-                /** Store error */
                 if (!$valid) {
                     $key = $field . '.' . $ruleName;
                     $msg = $messages[$key] ?? "$field validation failed for $ruleName";
@@ -224,9 +215,7 @@ class Validator
         }
     }
 
-    /* ========================================================
-     * RESULTS
-     * ======================================================== */
+    /* --- RESULTS --- */
 
     public function fails(): bool
     {

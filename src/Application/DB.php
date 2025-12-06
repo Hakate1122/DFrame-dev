@@ -52,7 +52,6 @@ class DB extends DatabaseManager
     public function __construct()
     {
         parent::__construct();
-        // Chỉ khởi tạo mapper nếu $table đã có giá trị
         if ($this->table) {
             $this->mapper = $this->getMapper($this->table);
         }

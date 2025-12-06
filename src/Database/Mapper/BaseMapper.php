@@ -7,7 +7,6 @@ abstract class BaseMapper implements MapperInterface {
     protected $adapter;
     protected $table;
 
-    // cache for existence of deleted_at column
     protected ?bool $hasDeletedAt = null;
 
     public function __construct($adapter, $table) {
@@ -25,7 +24,6 @@ abstract class BaseMapper implements MapperInterface {
         }
 
         try {
-            // Kiểm tra adapter là MySQL hay SQLite
             $adapterClass = get_class($this->adapter);
             if (stripos($adapterClass, 'sqlite') !== false) {
                 // SQLite

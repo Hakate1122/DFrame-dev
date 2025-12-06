@@ -31,5 +31,6 @@ interface BuilderInterface {
     public function fetch(string $type = 'assoc');
     /** Fetch the first result */
     public function first(string $type = 'assoc');
+    /** Get all results as an array */
     public function get(): array;
 }
