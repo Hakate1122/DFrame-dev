@@ -12,8 +12,10 @@ class Register
         $cli->register('-h', Core::help());
         $cli->register('version', Core::version());
         $cli->register('-v', Core::version());
-        $cli->register('server', Core::server());
-        $cli->register('-s', Core::server());
+        $cli->register('server', Server::server());
+        $cli->register('-s', Server::server());
         $cli->register('list', Core::list($cli->list()));
+        // $cli->register('npm-install', Core::npmInstall());
+        $cli->register('vite', Vite::vite());
     }
 }

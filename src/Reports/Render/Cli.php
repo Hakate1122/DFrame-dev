@@ -34,7 +34,8 @@ class Cli implements RenderInterface
         echo "$color PHP Version: $reset$phpversion" . PHP_EOL;
         echo PHP_EOL;
         echo "DFrame Report detected a bug!" . PHP_EOL;
-        echo "$color{$bold}===== $type =====$reset" . PHP_EOL;
+        echo "Type: $color{$bold}$type$reset" . PHP_EOL;
+        echo "$color{$bold}==============================$reset" . PHP_EOL;
         echo "$color Message: $reset$message" . PHP_EOL;
         echo "$color File:    $reset$file" . PHP_EOL;
         echo "$color Line:    $reset$line" . PHP_EOL;
@@ -56,7 +57,7 @@ class Cli implements RenderInterface
             }
         }
 
-        echo "$color{$bold}=================$reset" . PHP_EOL . PHP_EOL;
+        echo "$color{$bold}==============================$reset" . PHP_EOL . PHP_EOL;
         exit(1);
     }
 }

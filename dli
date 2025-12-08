@@ -1,24 +1,15 @@
 #!/usr/bin/env php
 <?php
 
-define('ROOT_DIR', __DIR__);
+define('ROOT_DIR', __DIR__ . '/');
 define('INDEX_DIR', __DIR__ . '/public/');
 
-require __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
-use DFrame\Application\Command;
-use DFrame\Command\Register;
+use DFrame\Application\App;
+use DFrame\Reports\Report;
 
-// Kernel
-$cli = new Command();
+Report::setup(true, INDEX_DIR . 'logs/cli.log', Report::cli());
 
-// Load core commands
-(new Register())->core($cli);
-
-// Load user commands
-$router = __DIR__ . '/app/Router/command.php';
-if (file_exists($router)) {
-    require $router;
-}
-
-$cli->run($argv);
+// Initialize the DFrame CLI application
+App::initialize()->bootDli($argv);

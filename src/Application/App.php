@@ -4,6 +4,7 @@ namespace DFrame\Application;
 
 use DFrame\Application\Router;
 use DFrame\Application\Session;
+use DFrame\Command\Register;
 use Datahihi1\TinyEnv\TinyEnv;
 use Exception;
 
@@ -21,7 +22,7 @@ class App
      * Version of DFrame Framework (Mini edition).
      * @var string
      */
-    public const VERSION = '0.1.20251205-dev';
+    public const VERSION = '0.1.20251208-dev';
     /**
      * Alias for version constant
      */
@@ -368,6 +369,7 @@ class App
             // Perform health check (optional, can log or act on results)
             $healthStatus = self::healthCheck();
             if ($healthStatus['status'] === 'unhealthy') {
+                dump($healthStatus);
                 throw new Exception('Application health check failed.');
             }
         } catch (Exception $e) {
@@ -409,7 +411,19 @@ class App
      */
     public static function bootDli($argv)
     {
-        $app = new \DFrame\Application\Command();
-        $app->run($argv);
+        // Kernel
+        $cli = new Command();
+
+        // Load core commands
+        (new Register())->core($cli);
+
+        // Load user commands
+        $router = ROOT_DIR . '/app/Router/command.php';
+        if (file_exists($router)) {
+            require_once $router;
+        }
+
+        // Boot the CLI application
+        $cli->run($argv);
     }
 }

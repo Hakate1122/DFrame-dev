@@ -74,6 +74,8 @@ class UserController extends Controller
         $name = $_POST['name'] ?? '';
         $email = $_POST['email'] ?? '';
 
+        $user = $this->users->where('id', $id)->first();
+
         $validator->make(
             [
                 'name' => $name,
@@ -94,7 +96,7 @@ class UserController extends Controller
         );
 
         if ($validator->fails()) {
-            return $this->render('user1/edit', ['error' => $validator->errors()]);
+            return $this->render('user1/edit', ['error' => $validator->errors(), 'user' => $user]);
         }
 
         DB::table('users')

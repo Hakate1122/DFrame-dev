@@ -66,7 +66,7 @@ require_once $autoloadFile;
 | This checks the environment variable to determine if maintenance mode should be enabled.
 */
 
-// \DFrame\Application\App::setMaintenanceMode(true);
+\DFrame\Application\App::setMaintenanceMode(true);
 
 /*
 | Initialize and boot the DFrame web application

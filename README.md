@@ -1,4 +1,4 @@
-# DFrame 
+# DFrame PHP v8
 
 **DFrame** is a minimalist PHP framework designed for small projects, learning, or as a foundation for personal framework development.
 
@@ -77,3 +77,8 @@ $mail->to('recipient@example.com')
     ->body('This is a test email.')
     ->send();
 ```
+
+## System Requirements
+- PHP 8.0 to 8.5 (Update at 22:16 2025-12-08 UTC+7)
+- Composer
+- Web Server (Apache, Nginx, etc.)
