@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Model\Users;
 use DFrame\Application\DB;
+use DFrame\Application\Log;
 use DFrame\Application\Validator;
 
 class UserController extends Controller
@@ -111,9 +112,11 @@ class UserController extends Controller
     }
     public function deleteUser($id)
     {
+        Log::fast(ROOT_DIR . '/logs/app.log', 'debug', "Deleting user with ID: {$id}");
         $this->users
              ->delete($id)
              ->execute();
+        Log::fast(ROOT_DIR . '/logs/app.log', 'info', "User with ID: {$id} has been deleted.");
         header('Location: ' . route('user.list'));
         exit;
     }

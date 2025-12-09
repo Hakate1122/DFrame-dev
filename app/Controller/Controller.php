@@ -6,7 +6,6 @@ use Exception;
 
 class Controller
 {
-
     /**
      * Render view with data.
      * @param string $view View name to render (directory at: resource/view/)
