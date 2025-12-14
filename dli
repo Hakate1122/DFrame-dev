@@ -11,4 +11,6 @@ use DFrame\Reports\Report;
 
 Report::setup(true, INDEX_DIR . 'logs/cli.log', Report::cli());
 
-App::initialize()->bootDli($argv);
+App::initialize()
+	->setUpDliRoutes(ROOT_DIR . 'app/Router/command.php')
+	->bootDli($argv);

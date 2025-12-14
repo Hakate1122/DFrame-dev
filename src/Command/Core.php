@@ -12,8 +12,8 @@ class Core
         $dfver = App::VERSION ?? "unknown";
         return function () use ($dfver) {
             echo "DLI - DFrame CLI Core Help Show\n";
-            echo "Version: " . cli_green($dfver) . " | PHP: " . phpversion() . " (" . php_sapi_name() . ")" . "\n";
-            echo "Usage: dli <command> [options]\n\n";
+            echo "Version: " . cli_green($dfver) . " | PHP: " . phpversion() . "\n";
+            echo "Usage: php dli <command> [options]\n\n";
             echo "Available commands:\n";
             echo "  help, -h        Show this help message\n";
             echo "  version, -v     Show application version\n";

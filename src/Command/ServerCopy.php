@@ -2,7 +2,7 @@
 
 namespace DFrame\Command;
 
-class Server
+class ServerCopy
 {
     public static function server()
     {
@@ -71,7 +71,9 @@ class Server
             echo "Accessible at: http://" . $displayHost . ":" . $port . "\n";
             echo "Press Ctrl+C to stop\n\n";
 
-            passthru(sprintf('php -S %s:%d -t %s', $bindHost, $port, escapeshellarg($public)));
+            // Use a router script so we can customize access logs
+            $router = $public . '/server-router.php';
+            passthru(sprintf('php -S %s:%d -t %s %s', $bindHost, $port, escapeshellarg($public), escapeshellarg($router)));
         };
     }
 }

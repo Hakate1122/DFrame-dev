@@ -130,7 +130,7 @@ class ConsoleInput
 
 
 
-    // --- Validators --- //
+    // --- Validators ---
 
     public static function validateNumber(): callable
     {

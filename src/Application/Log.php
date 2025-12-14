@@ -40,7 +40,7 @@ class Log implements LoggerInterface
             $contextString
         );
 
-        file_put_contents($this->logFilePath, $logEntry, FILE_APPEND);
+        @file_put_contents($this->logFilePath, $logEntry, FILE_APPEND);
     }
 
     // --- Define PSR-3 methods ---

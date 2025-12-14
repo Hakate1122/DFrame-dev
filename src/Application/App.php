@@ -5,6 +5,7 @@ namespace DFrame\Application;
 use DFrame\Application\Router;
 use DFrame\Application\Session;
 use DFrame\Command\Register;
+use DFrame\Reports\Report;
 use Datahihi1\TinyEnv\TinyEnv;
 use Exception;
 
@@ -22,7 +23,7 @@ class App
      * Version of DFrame Framework.
      * @var string
      */
-    public const VERSION = '0.1.20251209-dev';
+    public const VERSION = '0.1.20251214-dev';
     /**
      * Alias for version constant
      */
@@ -31,13 +32,37 @@ class App
      * Application environment
      * @var string
      */
-    private static $environment = 'production';
+    private static $environment;
 
     /**
      * Application debug mode (default true for development)
      * @var bool
      */
-    private static $debug = true;
+    private static $debug;
+
+    /**
+     * Flags to track if web routes have been loaded
+     * @var bool
+     */
+    private bool $webRoutesLoaded = false;
+
+    /**
+     * Flag to track if API routes have been loaded
+     * @var bool
+     */
+    private bool $apiRoutesLoaded = false;
+
+    /**
+     * Flag to track if DLI routes have been loaded
+     * @var bool
+     */
+    private bool $dliRoutesLoaded = false;
+
+    /**
+     * Optional stored path for DLI/command routes when set via `setUpDliRoutes()`.
+     * @var string|null
+     */
+    private ?string $dliRoutesPath = null;
 
     /**
      * Constructor for App class to determine ROOT_DIR and INDEX_DIR
@@ -280,6 +305,7 @@ class App
             throw new Exception('TinyEnv is not installed. Please run "composer require datahihi1/tiny-env"');
         }
         $env = new TinyEnv(ROOT_DIR);
+        $env->envfiles(['.env', '.env.encrypted']);
         $env->load();
     }
 
@@ -318,25 +344,64 @@ class App
     }
 
     /**
-     * Initializes the routing configuration.
+     * Initializes the routing configuration (instance-aware).
+     * Will only include files that haven't been loaded via `setUp*Routes()`.
      *
      * @return void
-     * @throws Exception if the route configuration file is not found or invalid
      */
-    private static function initializeRoute()
+    private function initializeRoute()
     {
         $routeConfigPath = ROOT_DIR . 'app/Router/web.php';
         $apiRouteConfigPath = ROOT_DIR . 'app/Router/api.php';
-        if (file_exists($routeConfigPath)) {
+
+        if (!$this->webRoutesLoaded && file_exists($routeConfigPath)) {
             require $routeConfigPath;
-        } else {
-            throw new Exception("Route configuration file not found: " . $routeConfigPath);
+            $this->webRoutesLoaded = true;
         }
-        if (file_exists($apiRouteConfigPath)) {
+
+        if (!$this->apiRoutesLoaded && file_exists($apiRouteConfigPath)) {
             require $apiRouteConfigPath;
+            $this->apiRoutesLoaded = true;
         }
     }
 
+    /**
+     * Include a web routes file and mark web routes as loaded.
+     *
+     * @param string|null $logDir The directory where log files will be stored.
+     *
+     * @return self
+     */
+    public function setUpWebRoutes(string $path): self
+    {
+        if (file_exists($path)) {
+            require $path;
+            $this->webRoutesLoaded = true;
+        }
+        return $this;
+    }
+
+    /**
+     * Include an api routes file and mark api routes as loaded.
+     */
+    public function setUpApiRoutes(string $path): self
+    {
+        if (file_exists($path)) {
+            require $path;
+            $this->apiRoutesLoaded = true;
+        }
+        return $this;
+    }
+
+    /**
+     * Include a CLI/command routes file and mark dli routes as loaded.
+     */
+    public function setUpDliRoutes(string $path): self
+    {
+        $this->dliRoutesPath = $path;
+        $this->dliRoutesLoaded = false;
+        return $this;
+    }
     /**
      * Initializes the environment.
      *
@@ -347,8 +412,7 @@ class App
     public static function initialize()
     {
         try {
-
-            // Load environment variables
+            // Load environment files (.env, encrypted .env if present)
             self::loadEnvironmentVariables();
 
             // Initialize configuration
@@ -360,7 +424,7 @@ class App
             // Configure timezone
             self::configureTimezone();
 
-            // Validate session configuration (moved here)
+            // Validate session configuration
             self::validateSessionConfig();
 
             // Validate required environment variables for services
@@ -384,10 +448,12 @@ class App
     /**
      * Boots the web application.
      *
+     * @param array|null $argv Optional argv (kept for compatibility)
      * @return void
      */
-    public static function bootWeb()
+    public function bootWeb()
     {
+
         // Start session
         Session::start();
 
@@ -397,8 +463,8 @@ class App
         // // Set security headers
         // self::setSecurityHeaders();
 
-        // Start run route handler
-        self::initializeRoute();
+        // Start run route handler (only include files not already loaded)
+        $this->initializeRoute();
 
         Router::run();
         exit;
@@ -407,20 +473,27 @@ class App
     /**
      * Starts DLI application.
      *
+     * @param array $argv
      * @return void
      */
-    public static function bootDli($argv)
+    public function bootDli($argv)
     {
+        Log::fast(INDEX_DIR . '/logs/app.log', 'info', "Starting DLI application in " . self::environment() . " mode. Debug: " . (self::isDebug() ? 'true' : 'false') ."");
+
+        // Set up reporting for errors, exceptions, and runtime issues
+        Report::setup(self::isDebug(), INDEX_DIR . 'logs/app.log', Report::cli());
+
         // Kernel
         $cli = new Command();
 
         // Load core commands
         (new Register())->core($cli);
 
-        // Load user commands
-        $router = ROOT_DIR . '/app/Router/command.php';
-        if (file_exists($router)) {
-            require_once $router;
+        if ($this->dliRoutesPath) {
+            if (file_exists($this->dliRoutesPath)) {
+                require_once $this->dliRoutesPath;
+                $this->dliRoutesLoaded = true;
+            }
         }
 
         // Boot the CLI application

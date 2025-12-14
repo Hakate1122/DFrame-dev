@@ -66,7 +66,7 @@ require_once $autoloadFile;
 | This checks the environment variable to determine if maintenance mode should be enabled.
 */
 
-\DFrame\Application\App::setMaintenanceMode(true);
+// \DFrame\Application\App::setMaintenanceMode(true);
 
 /*
 | Initialize and boot the DFrame web application
@@ -76,7 +76,10 @@ require_once $autoloadFile;
 |------------------------------------------------------------------------------------------------
 */
 
-use DFrame\Reports\Report;
-Report::setup(true, INDEX_DIR . '/logs/html.log', Report::html());
+\DFrame\Reports\Report::setup(true, INDEX_DIR . 'logs/app.log', \DFrame\Reports\Report::html());
 
-\DFrame\Application\App::initialize()->bootWeb();
+\DFrame\Application\App::initialize()
+    ->setUpWebRoutes(ROOT_DIR . 'app/Router/web.php')
+    ->setUpApiRoutes(ROOT_DIR . 'app/Router/api.php')
+    ->setUpWebRoutes(ROOT_DIR . 'app/Router/dcloud.php')
+    ->bootWeb();

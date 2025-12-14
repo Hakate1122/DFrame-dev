@@ -1,27 +1,33 @@
 <?php
+
 namespace App\Model;
 
+use DFrame\Database\Adapter\MysqliAdapter;
+use DFrame\Database\Adapter\Sqlite3Adapter;
+use DFrame\Database\Adapter\PdoMysqlAdapter;
+use DFrame\Database\Adapter\PdoSqliteAdapter;
 use DFrame\Database\DatabaseManager;
 
 /**
- * Dynamic model proxy to Mapper/Builder.
+ * #### Database handler
+ * Database proxy to Mapper/Builder.
  *
  * The actual implementation behind this model depends on env('DB_DESIGN'):
  * - 'builder': forwards to Query Builder with fluent methods
  * - 'mapper': forwards to Mapper with CRUD helpers
- * 
+ *
  * @method \Craft\Database\Interfaces\BuilderInterface table(string $table)
  * @method \Craft\Database\Interfaces\BuilderInterface select($columns = ['*'])
  * @method \Craft\Database\Interfaces\BuilderInterface where($column, $value = null, $operator = null)
  * @method \Craft\Database\Interfaces\BuilderInterface insert(array $data)
  * @method \Craft\Database\Interfaces\BuilderInterface update(array $data)
  * @method \Craft\Database\Interfaces\BuilderInterface delete()
- * @method \Craft\Database\Interfaces\BuilderInterface execute()
+ * @method mixed execute()
  * @method array fetchAll()
  * @method mixed fetch(string $type = 'assoc')
  * @method mixed first(string $type = 'assoc')
  * @method array get()
- * 
+ *
  * @method array|null find($id)
  * @method array all()
  * @method array where($column, $value, $operator)
@@ -40,10 +46,28 @@ class Model extends DatabaseManager
      */
     protected $table;
 
+    /**
+     * Initialize the DB instance.
+     */
     public function __construct()
     {
         parent::__construct();
-        $this->mapper = $this->getMapper($this->table);
+        if ($this->table) {
+            $this->mapper = $this->getMapper($this->table);
+        }
+    }
+
+    /**
+     * Set the table for the query.
+     * @param string $table
+     * @return static
+     */
+    public static function table(string $table): self
+    {
+        $instance = new static();
+        $instance->table = $table;
+        $instance->mapper = $instance->getMapper($table);
+        return $instance;
     }
 
     /**
@@ -54,47 +78,27 @@ class Model extends DatabaseManager
      */
     public function __call($method, $args)
     {
-        // Adapt common method signatures between Mapper and Builder:
-        // - update($id, array $data)  => Mapper style
-        // - update(array $data)       => Builder style
-        // - delete($id)               => Mapper style
-        // - delete()                  => Builder style
-        if ($method === 'update' && count($args) === 2 && (is_scalar($args[0]) || is_string($args[0])) && is_array($args[1])) {
-            // If mapper's update accepts 2 params, call directly (mapper)
-            if (method_exists($this->mapper, 'update')) {
-                $rm = new \ReflectionMethod($this->mapper, 'update');
-                if ($rm->getNumberOfParameters() > 1) {
-                    return call_user_func_array([$this->mapper, 'update'], $args);
-                }
-            }
-            // Fallback for builder: where('id', $id)->update($data)
-            [$id, $data] = $args;
-            return $this->mapper->where('id', $id)->update($data);
-        }
-
-        if ($method === 'delete' && count($args) === 1 && (is_scalar($args[0]) || is_string($args[0]))) {
-            if (method_exists($this->mapper, 'delete')) {
-                $rm = new \ReflectionMethod($this->mapper, 'delete');
-                if ($rm->getNumberOfParameters() > 0) {
-                    return call_user_func_array([$this->mapper, 'delete'], $args);
-                }
-            }
-            $id = $args[0];
-            return $this->mapper->where('id', $id)->delete();
-        }
-
         return call_user_func_array([$this->mapper, $method], $args);
     }
 
     /**
      * Handle dynamic static method calls into the model.
-     * Mirrors the instance logic to support static proxying (Model::update($id, $data)).
+     * @param string $method
+     * @param array $args
+     * @return mixed
      */
     public static function __callStatic($method, $args)
     {
         $instance = new static();
+        return call_user_func_array([$instance->mapper, $method], $args);
+    }
 
-        // reuse instance adaptation logic
-        return $instance->__call($method, $args);
+    /**
+     * Get the database adapter instance.
+     * @return MysqliAdapter|PdoMysqlAdapter|PdoSqliteAdapter|Sqlite3Adapter
+     */
+    public function getAdapter()
+    {
+        return $this->adapter;
     }
 }

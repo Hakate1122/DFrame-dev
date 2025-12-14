@@ -473,7 +473,7 @@ class Router
         return false;
     }
 
-    private function dispatch(array $route, array $params, bool $isApi): void
+    private function dispatch(array $route, ?array $params, bool $isApi): void
     {
         $handler = $this->normalizeHandler($route['handler']);
         $mwGlobal = $isApi ? $this->globalApiMiddleware : $this->globalMiddleware;

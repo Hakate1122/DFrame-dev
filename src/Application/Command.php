@@ -17,7 +17,7 @@ class Command
 
         if (!isset($this->commands[$cmd])) {
             echo "Unknown command: $cmd\n\n";
-            $cmd = 'help';
+            exit(1);
         }
 
         $handler = $this->commands[$cmd];

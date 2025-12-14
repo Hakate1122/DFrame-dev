@@ -11,6 +11,7 @@
         "eftec/bladeone": "^4",
         "twig/twig": "^3",
         "datahihi1/tiny-env": "^1",
+        "datahihi1/tiny-env-encryptor": "dev-main",
         "psr/log": "^3"
     },
     "require-dev": {
