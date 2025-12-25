@@ -31,8 +31,13 @@ if (!function_exists('jslog')) {
      *
      * @param mixed $data The data to be logged. It will be converted to JSON format.
      */
-    function jslog($data)
+    function jslog($data): void
     {
-        echo '<script>console.log(' . json_encode($data) . ');</script>';
+        echo '<script>';
+        echo 'console.log(' . json_encode(
+            $data,
+            JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+        ) . ');';
+        echo '</script>';
     }
 }

@@ -392,7 +392,7 @@ class Router
 
         // 7. 404
         http_response_code(404);
-        echo "Not Found";
+        echo get404pages();
     }
 
     public static function run(): void

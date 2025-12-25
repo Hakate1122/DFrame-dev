@@ -23,7 +23,7 @@ class App
      * Version of DFrame Framework.
      * @var string
      */
-    public const VERSION = '0.1.20251214-dev';
+    public const VERSION = '0.1.20251225-dev';
     /**
      * Alias for version constant
      */
@@ -32,13 +32,19 @@ class App
      * Application environment
      * @var string
      */
-    private static $environment;
+    private static $environment = 'production';
 
     /**
      * Application debug mode (default true for development)
      * @var bool
      */
-    private static $debug;
+    private static $debug = false;
+
+    /**
+     * Whether the application is running from a PHAR archive
+     * @var bool
+     */
+    private static $runningFromPhar = false;
 
     /**
      * Flags to track if web routes have been loaded
@@ -115,6 +121,14 @@ class App
     public static function isDebug(): bool
     {
         return self::$debug;
+    }
+
+    /**
+     * Check if running from a PHAR archive
+     */
+    public static function isRunningFromPhar(): bool
+    {
+        return self::$runningFromPhar;
     }
 
     /**
@@ -322,6 +336,54 @@ class App
             ini_set('display_startup_errors', '0');
             ini_set('log_errors', '1');
             ini_set('error_log', INDEX_DIR . 'logs/php_errors.log');
+
+            set_exception_handler(function ($e) {
+                if (!headers_sent()) {
+                    http_response_code(500);
+                }
+                $path = ROOT_DIR . 'src/Kit/helper/default_pages.php';
+                if (file_exists($path)) {
+                    require_once $path;
+                    echo function_exists('get500pages') ? get500pages() : 'Internal Server Error';
+                } else {
+                    echo 'Internal Server Error';
+                }
+                if (is_object($e) || is_string($e)) {
+                    error_log((string) $e);
+                }
+                exit(1);
+            });
+
+            set_error_handler(function ($severity, $message, $file, $line) {
+                if (!headers_sent()) {
+                    http_response_code(500);
+                }
+                $path = ROOT_DIR . 'src/Kit/helper/default_pages.php';
+                if (file_exists($path)) {
+                    require_once $path;
+                    echo function_exists('get500pages') ? get500pages() : 'Internal Server Error';
+                } else {
+                    echo 'Internal Server Error';
+                }
+                error_log("PHP Error: [{$severity}] {$message} in {$file} on line {$line}");
+                exit(1);
+            });
+
+            register_shutdown_function(function () {
+                $err = error_get_last();
+                if ($err && in_array($err['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR], true)) {
+                    if (!headers_sent()) {
+                        http_response_code(500);
+                    }
+                    $path = ROOT_DIR . 'src/Kit/helper/default_pages.php';
+                    if (file_exists($path)) {
+                        require_once $path;
+                        echo function_exists('get500pages') ? get500pages() : 'Internal Server Error';
+                    } else {
+                        echo 'Internal Server Error';
+                    }
+                }
+            });
         } else {
             error_reporting(E_ALL);
             ini_set('display_errors', '0');
@@ -412,6 +474,32 @@ class App
     public static function initialize()
     {
         try {
+            // Detect running inside PHAR using several indicators
+            $pharRunning = false;
+            try {
+                if (class_exists('Phar') && \Phar::running(false) !== '') {
+                    $pharRunning = true;
+                }
+            } catch (\Throwable $t) {
+                // ignore
+            }
+
+            if (!$pharRunning) {
+                $a0 = $_SERVER['argv'][0] ?? '';
+                if (is_string($a0) && (str_contains($a0, '.phar') || str_contains($a0, 'phar://'))) {
+                    $pharRunning = true;
+                }
+            }
+
+            if (!$pharRunning) {
+                $selfPath = __FILE__;
+                if (is_string($selfPath) && str_starts_with($selfPath, 'phar://')) {
+                    $pharRunning = true;
+                }
+            }
+
+            self::$runningFromPhar = (bool) $pharRunning;
+
             // Load environment files (.env, encrypted .env if present)
             self::loadEnvironmentVariables();
 
@@ -454,11 +542,14 @@ class App
     public function bootWeb()
     {
 
+        // Set maintenance mode if enabled
+        self::setMaintenanceMode();
+
         // Start session
         Session::start();
 
-        // Set maintenance mode if enabled
-        self::setMaintenanceMode();
+        // Set CORS headers for API requests
+        setApiCorsHeaders();
 
         // // Set security headers
         // self::setSecurityHeaders();
@@ -467,7 +558,6 @@ class App
         $this->initializeRoute();
 
         Router::run();
-        exit;
     }
 
     /**
@@ -478,7 +568,6 @@ class App
      */
     public function bootDli($argv)
     {
-        Log::fast(INDEX_DIR . '/logs/app.log', 'info', "Starting DLI application in " . self::environment() . " mode. Debug: " . (self::isDebug() ? 'true' : 'false') ."");
 
         // Set up reporting for errors, exceptions, and runtime issues
         Report::setup(self::isDebug(), INDEX_DIR . 'logs/app.log', Report::cli());

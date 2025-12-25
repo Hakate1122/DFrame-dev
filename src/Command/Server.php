@@ -2,6 +2,17 @@
 
 namespace DFrame\Command;
 
+/**
+ * A command to start a local development server.
+ *
+ * Usage:
+ *   php dli server[-s] --mode=lan --port=8000 --bind=0.0.0.0
+ * 
+ * Options:
+ ** --mode (-m): 'local' or 'lan' (default: 'lan')
+ ** --port (-p): Port number to listen on (default: 8000)
+ ** --bind: IP address to bind to (default: '0.0.0.0')
+ */
 class Server
 {
     public static function server()

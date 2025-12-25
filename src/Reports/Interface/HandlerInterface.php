@@ -1,12 +1,16 @@
 <?php
+
 namespace DFrame\Reports\Interface;
 
-abstract class HandlerInterface
+/**
+ * HandlerInterface - Interface for error and exception handlers
+ */
+interface HandlerInterface
 {
-    abstract public function __construct(bool $saveLog = false, string $logFile = 'errors.log');
-    abstract public function handleError(int $errno, string $errstr, string $errfile, int $errline): bool;
-    abstract public function handleException(\Throwable $exception): void;
-    abstract public function handleParse(): void;
-    abstract public function handleRuntime(): void;
-    abstract public function log(string $type, string $message, string $file, int $line, array $context = []): void;
+    public function __construct(bool $saveLog = false, string $logFile = 'errors.log');
+    public function handleError(int $errno, string $errstr, string $errfile, int $errline): bool;
+    public function handleException(\Throwable $exception): void;
+    public function handleParse(): void;
+    public function handleRuntime(): void;
+    public function log(string $type, string $message, string $file, int $line, array $context = []): void;
 }

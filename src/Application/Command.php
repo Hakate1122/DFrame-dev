@@ -2,13 +2,23 @@
 
 namespace DFrame\Application;
 
+use DFrame\Command\Helper\CommandEntry;
+
 class Command
 {
-    protected array $commands = [];
+    public array $commands = [];
 
-    public function register(string $name, callable|array|string $handler): void
+    public function register(string $name, callable|array|string $handler, bool $hiddenOnPhar = false): CommandEntry
     {
-        $this->commands[$name] = $handler;
+        $entry = new CommandEntry($this, $name, $handler, $hiddenOnPhar);
+        $this->commands[$name] = $entry;
+        return $entry;
+    }
+
+    public function property(string $name, mixed $default = null){}
+
+    public function hasCommand(string $name): bool{
+        return isset($this->commands[$name]);
     }
 
     public function run(array $argv): void
@@ -16,11 +26,12 @@ class Command
         $cmd = $argv[1] ?? 'help';
 
         if (!isset($this->commands[$cmd])) {
-            echo "Unknown command: $cmd\n\n";
+            echo cli_red("Command not found: $cmd\n");
             exit(1);
         }
 
-        $handler = $this->commands[$cmd];
+        $entry = $this->commands[$cmd];
+        $handler = $entry instanceof CommandEntry ? $entry->getHandler() : $entry;
 
         if (is_string($handler) && class_exists($handler)) {
             $instance = new $handler();
@@ -38,6 +49,15 @@ class Command
 
     public function list(): array
     {
-        return array_keys($this->commands);
+        $list = [];
+        foreach ($this->commands as $name => $entry) {
+            $info = '';
+            if ($entry instanceof CommandEntry && $entry->info !== null) {
+                $info = ' -> ' . $entry->info;
+            }
+            $list[] = $name . $info;
+        }
+        return $list;
     }
 }
+

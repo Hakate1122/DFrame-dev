@@ -15,9 +15,9 @@ class Log implements LoggerInterface
 {
     private $logFilePath;
 
-    public function __construct(string $logFilePath)
+    public function __construct(?string $logFilePath = null)
     {
-        $this->logFilePath = $logFilePath;
+        $this->logFilePath = $logFilePath ?? env('LOG_FILE', INDEX_DIR . 'logs/app.log');
     }
 
     /**
@@ -29,6 +29,10 @@ class Log implements LoggerInterface
      */
     public function log($level, $message, array $context = []): void
     {
+        if (env('LOG_LEVEL') === null) {
+            return;
+        }
+        $level = env('LOG_LEVEL', $level);
         $contextString = !empty($context) ? ' ' . json_encode($context) : '';
 
         $now = (new DateTime())->format('Y-m-d H:i:s');
@@ -95,9 +99,12 @@ class Log implements LoggerInterface
      * @param array $context Additional context data
      * @return void
      */
-    public static function fast(string $logFilePath, string $level, string $message, array $context = []): void
+    public static function fast(string $logFilePath, ?string $level = null, string $message, array $context = []): void
     {
         $logger = new self($logFilePath);
+        if ($level === null) {
+            $level = env('LOG_LEVEL', LogLevel::INFO);
+        }
         $logger->log($level, $message, $context);
     }
 }

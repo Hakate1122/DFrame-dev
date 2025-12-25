@@ -2,6 +2,10 @@
 
 namespace DFrame\Command\Helper;
 
+/**
+ * ConsoleInput provides methods to prompt user input from the console,
+ * including validation and special input types.
+ */
 class ConsoleInput
 {
     /**
@@ -128,10 +132,38 @@ class ConsoleInput
         }
     }
 
+    /**
+     * Prompt for secret input (e.g., password) without echoing.
+     *
+     * @param string $message The prompt message.
+     * @param string|null $default The default value if input is empty.
+     * @return string
+     */
+    public static function promptSecret(
+        string $message,
+        ?string $default = null
+    ): string {
+        if (strncasecmp(PHP_OS, 'WIN', 3) == 0) {
+            // Windows does not support hiding input in console easily.
+            echo "Warning: Secret input may be visible on Windows consoles.\n";
+            return self::prompt($message, $default);
+        } else {
+            $cmd = "/usr/bin/env bash -c 'read -s -p \"" . addslashes($message) . ": \" mypassword && echo \$mypassword'";
+            $input = rtrim(shell_exec($cmd));
+            echo "\n";
+
+            if ($input === '' && $default !== null) {
+                return $default;
+            }
+
+            return $input;
+        }
+    }
 
 
     // --- Validators ---
 
+    /** Validate that input is a number. */
     public static function validateNumber(): callable
     {
         return function ($value) {
@@ -141,6 +173,7 @@ class ConsoleInput
         };
     }
 
+    /** Validate that input is a valid email address. */
     public static function validateEmail(): callable
     {
         return function ($value) {
@@ -150,6 +183,7 @@ class ConsoleInput
         };
     }
 
+    /** Validate that input matches a regex pattern. */
     public static function validateRegex(string $pattern): callable
     {
         return function ($value) use ($pattern) {

@@ -7,6 +7,9 @@ use DFrame\Database\Adapter\PdoMysqlAdapter;
 use DFrame\Database\Adapter\Sqlite3Adapter;
 use DFrame\Database\Adapter\PdoSqliteAdapter;
 
+use DFrame\Database\Exception\UnsupportedDesignException;
+use DFrame\Database\Exception\UnsupportedDriverException;
+
 use DFrame\Database\Mapper\MysqlMapper;
 use DFrame\Database\Mapper\SqliteMapper;
 
@@ -44,7 +47,7 @@ class DatabaseManager
             throw new \InvalidArgumentException("DB_DRIVER is not set.");
         }
         if (!in_array($driver, self::SUPPORTED_DRIVERS, true)) {
-            throw new \InvalidArgumentException("Invalid DB_DRIVER: $driver" . ". Accepts: " . implode(', ', self::SUPPORTED_DRIVERS) . ".");
+            throw new UnsupportedDriverException("Invalid DB_DRIVER: $driver" . ". Accepts: " . implode(', ', self::SUPPORTED_DRIVERS) . ".");
         }
 
         $design = env('DB_DESIGN');
@@ -52,7 +55,7 @@ class DatabaseManager
             throw new \InvalidArgumentException("DB_DESIGN is not set.");
         }
         if (!in_array($design, self::SUPPORTED_DESIGNS, true)) {
-            throw new \InvalidArgumentException("Invalid DB_DESIGN: $design" . ". Accepts: " . implode(', ', self::SUPPORTED_DESIGNS) . ".");
+            throw new UnsupportedDesignException("Invalid DB_DESIGN: $design" . ". Accepts: " . implode(', ', self::SUPPORTED_DESIGNS) . ".");
         }
 
         $config = $this->getConfig($driver);

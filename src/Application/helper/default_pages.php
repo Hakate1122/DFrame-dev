@@ -45,9 +45,9 @@ if (!function_exists('get404pages')) {
    * Get 404 page content
    * @return bool|string
    */
-  function get404pages()
+  function get404pages($message = ''): string
   {
-    return getErrorPage(404, 'Not Found');
+    return getErrorPage(404, $message ?: 'Not Found');
   }
 }
 
@@ -56,9 +56,9 @@ if (!function_exists('get403pages')) {
    * Get 403 page content
    * @return bool|string
    */
-  function get403pages()
+  function get403pages(string $message = ''): string
   {
-    return getErrorPage(403, 'Forbidden');
+    return getErrorPage(403, $message ?: 'Forbidden');
   }
 }
 
@@ -67,9 +67,9 @@ if (!function_exists('get500pages')) {
    * Get 500 page content
    * @return bool|string
    */
-  function get500pages()
+  function get500pages($message = '')
   {
-    return getErrorPage(500, 'Internal Server Error');
+    return getErrorPage(500, $message ?: 'Internal Server Error');
   }
 }
 
@@ -78,8 +78,8 @@ if (!function_exists('get503pages')) {
    * Get 503 page content
    * @return bool|string
    */
-  function get503pages()
+  function get503pages(string $message = ''): string
   {
-    return getErrorPage(503, 'Service Unavailable');
+    return getErrorPage(503, $message ?: 'Service Unavailable');
   }
 }

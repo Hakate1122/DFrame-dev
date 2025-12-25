@@ -27,6 +27,7 @@ $router = new DFrame\Application\Router();
 $router->sign('GET /', [App\Controller\HomeController::class, 'index']); // Single route
 $router->group('/api')->action(function($router) { // Grouped routes
     $router->sign('GET /users', [App\Controller\Api\UserController::class, 'list']);
+    $router->sign('GET /users/{id}', [App\Controller\Api\UserController::class, 'show']);
 });
 $router->sign('GET|POST /demo', [App\Controller\DemoController::class, 'index']); // Multiple methods
 $router->signApi('GET /data', [App\Controller\Api\DataController::class, 'fetch']); // API route

@@ -1,6 +1,13 @@
 #!/usr/bin/env php
 <?php
 
+// dli - DFrame Command Line Interface Bootstrapper
+/*
+ * DFrame - A lightweight PHP framework for web and CLI applications.
+ * 
+ * @author Datahihi1
+*/
+
 define('ROOT_DIR', __DIR__ . '/');
 define('INDEX_DIR', __DIR__ . '/public/');
 
@@ -12,5 +19,5 @@ use DFrame\Reports\Report;
 Report::setup(true, INDEX_DIR . 'logs/cli.log', Report::cli());
 
 App::initialize()
-	->setUpDliRoutes(ROOT_DIR . 'app/Router/command.php')
+	->setUpDliRoutes(ROOT_DIR . "app/Router/command/command.php")
 	->bootDli($argv);

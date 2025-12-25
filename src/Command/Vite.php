@@ -2,9 +2,22 @@
 
 namespace DFrame\Command;
 
+/**
+ * A command to create and start a Vite development server.
+ * 
+ * Usage:
+ *   php dli vite
+ * 
+ * This command will:
+ * 1) Check for Node.js and npm installation.
+ * 2) Prompt the user to select a JavaScript framework (Vanilla, Vue, React, Angular).
+ * 3) Create a Vite project scaffold in 'vite_project/' if it doesn't exist.
+ * 4) Install npm dependencies.
+ * 5) Start the Vite development server.
+ */
 class Vite
 {
-    public static function vite()
+    public static function create()
     {
         return function () {
             $root = defined('ROOT_DIR') ? ROOT_DIR : throw new \Exception('ROOT_DIR is not defined');
@@ -14,7 +27,7 @@ class Vite
 
             // 1) CHECK NODE + NPM
             if (!self::checkNode()) {
-                echo "❌ Node.js or npm not found. Install from https://nodejs.org/\n";
+                echo cli_red("Node.js and npm are required to run the Vite development server.\n");
                 return;
             }
 
@@ -33,11 +46,11 @@ class Vite
                 chdir($cwd);
 
                 if ($exit !== 0) {
-                    echo "❌ npm install failed. Please run manually inside: $viteRoot\n";
+                    echo cli_red("npm install failed. Please check the output above.\n");
                     return;
                 }
             } else {
-                echo "✔ Existing vite_project found. Running dev server...\n";
+                echo cli_green("Vite project already exists. Skipping scaffold creation.\n");
             }
 
             // 4) START DEV SERVER
@@ -48,7 +61,7 @@ class Vite
             chdir($cwd);
 
             if ($devExit !== 0) {
-                echo "❌ Failed to start Vite. Try running npm run dev manually.\n";
+                echo cli_red("Vite dev server exited with errors.\n");
             }
         };
     }
@@ -123,9 +136,7 @@ class Vite
         file_put_contents($viteRoot . '/vite.config.js', self::viteConfig());
     }
 
-    /* ============================================================
-     * SAFE MKDIR
-     * ============================================================ */
+    /* --- HELPER METHODS --- */
     private static function safeMkdir(string $dir)
     {
         if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
@@ -133,9 +144,7 @@ class Vite
         }
     }
 
-    /* ============================================================
-     * TEMPLATE CONFIGS
-     * ============================================================ */
+    /* --- TEMPLATE CONFIGS --- */
     private static function templateDependencies(string $tpl): array
     {
         return match ($tpl) {

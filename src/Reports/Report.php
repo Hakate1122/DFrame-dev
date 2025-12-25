@@ -1,4 +1,5 @@
 <?php
+
 namespace DFrame\Reports;
 
 use DFrame\Reports\Handler;

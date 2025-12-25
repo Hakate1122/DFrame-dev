@@ -5,7 +5,7 @@ namespace DFrame\Application;
 use DFrame\Application\View;
 
 /**
- * #### Simple SMTP Gmail Mailer (v0.1.20251204-dev)
+ * #### Simple SMTP Gmail Mailer
  *
  * Secure Mail class supporting Gmail SMTP, CC, BCC, and Attachments.
  */

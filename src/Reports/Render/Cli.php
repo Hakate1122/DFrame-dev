@@ -1,4 +1,5 @@
 <?php
+
 namespace DFrame\Reports\Render;
 
 use DFrame\Reports\Interface\RenderInterface;
@@ -33,7 +34,7 @@ class Cli implements RenderInterface
         echo "$color Version: $reset$dfversion" . PHP_EOL;
         echo "$color PHP Version: $reset$phpversion" . PHP_EOL;
         echo PHP_EOL;
-        echo "DFrame Report detected a bug!" . PHP_EOL;
+        echo "Oops, DFrame Report detected a bug!" . PHP_EOL;
         echo "Type: $color{$bold}$type$reset" . PHP_EOL;
         echo "$color{$bold}==============================$reset" . PHP_EOL;
         echo "$color Message: $reset$message" . PHP_EOL;

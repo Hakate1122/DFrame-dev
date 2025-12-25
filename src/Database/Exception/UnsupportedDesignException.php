@@ -1,4 +1,5 @@
 <?php
+
 namespace DFrame\Database\Exception;
 
 /**

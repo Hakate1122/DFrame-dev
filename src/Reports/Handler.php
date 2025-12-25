@@ -1,10 +1,14 @@
 <?php
+
 namespace DFrame\Reports;
 
 use DFrame\Reports\Interface\HandlerInterface;
 use DFrame\Reports\Interface\RenderInterface;
 
-class Handler extends HandlerInterface
+/**
+ * Handler - Error and exception handling class
+ */
+class Handler implements HandlerInterface
 {
     private bool $saveLog;
     private string $logFile;
@@ -63,14 +67,27 @@ class Handler extends HandlerInterface
      */
     public function handleParse(): void
     {
-        // Handled via shutdown
+        // This method is intentionally left blank as parse errors are handled in handleRuntime
     }
 
     public function handleRuntime(): void
     {
         $error = error_get_last();
-        if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
-            $type = $error['type'] === E_PARSE ? 'parse' : 'runtime';
+        if ($error === null) {
+            return;
+        }
+
+        $fatalTypes = [
+            E_PARSE             => 'parse',
+            E_ERROR             => 'runtime',
+            E_CORE_ERROR        => 'runtime',
+            E_COMPILE_ERROR     => 'runtime',
+            E_USER_ERROR        => 'runtime',
+            E_RECOVERABLE_ERROR => 'runtime',
+        ];
+
+        if (isset($fatalTypes[$error['type']])) {
+            $type = $fatalTypes[$error['type']];
             $this->log($type, $error['message'], $error['file'], $error['line'], ['code' => $error['type']]);
             $this->renderer->render($type, $error['message'], $error['file'], $error['line'], ['code' => $error['type']]);
         }
@@ -80,6 +97,13 @@ class Handler extends HandlerInterface
     {
         if (!$this->saveLog)
             return;
+
+        // If the configured log file points inside the PHAR archive,
+        // map it to the current working directory so we can write logs.
+        if (strpos($this->logFile, 'phar://') === 0) {
+            $rel = preg_replace('#^phar://[^/]+/#', '', $this->logFile);
+            $this->logFile = getcwd() . DIRECTORY_SEPARATOR . $rel;
+        }
 
         $dir = dirname($this->logFile);
         if (!is_dir($dir))
@@ -94,6 +118,11 @@ class Handler extends HandlerInterface
             $message,
             json_encode($context)
         );
-        file_put_contents($this->logFile, $log, FILE_APPEND | LOCK_EX);
+        $isSupportLockEx = defined('FILE_APPEND') && defined('LOCK_EX');
+        if ($isSupportLockEx) {
+            file_put_contents($this->logFile, $log, FILE_APPEND | LOCK_EX);
+        } else {
+            file_put_contents($this->logFile, $log, FILE_APPEND);
+        }
     }
 }

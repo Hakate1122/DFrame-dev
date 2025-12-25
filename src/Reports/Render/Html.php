@@ -1,4 +1,5 @@
 <?php
+
 namespace DFrame\Reports\Render;
 
 use DFrame\Reports\Interface\RenderInterface;
@@ -10,9 +11,9 @@ class Html implements RenderInterface
 {
     private static $configs = [
         'error' => ['color' => '#7c3aed', 'icon' => 'Oops, an error occurred!', 'title' => 'Error', 'gradient' => 'linear-gradient(135deg, #8b5cf6, #7c3aed)'],
-        'exception' => ['color' => '#dc2626', 'icon' => 'Uncaught exception detected!', 'title' => 'Exception', 'gradient' => 'linear-gradient(135deg, #ef4444, #dc2626)'],
-        'parse' => ['color' => '#2563eb', 'icon' => 'Parsing bug detected!', 'title' => 'Parse', 'gradient' => 'linear-gradient(135deg, #3b82f6, #2563eb)'],
-        'runtime' => ['color' => '#d97706', 'icon' => 'Application shutdown detected!', 'title' => 'Runtime', 'gradient' => 'linear-gradient(135deg, #f59e0b, #d97706)'],
+        'exception' => ['color' => '#dc2626', 'icon' => 'Oops, an uncaught exception detected!', 'title' => 'Exception', 'gradient' => 'linear-gradient(135deg, #ef4444, #dc2626)'],
+        'parse' => ['color' => '#2563eb', 'icon' => 'Oops, a parsing bug detected!', 'title' => 'Parse', 'gradient' => 'linear-gradient(135deg, #3b82f6, #2563eb)'],
+        'runtime' => ['color' => '#d97706', 'icon' => 'Oops, application shutdown detected!', 'title' => 'Runtime', 'gradient' => 'linear-gradient(135deg, #f59e0b, #d97706)'],
     ];
 
     public function render(string $type, string $message, string $file, int $line, array $context = []): void
