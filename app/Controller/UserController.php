@@ -112,11 +112,11 @@ class UserController extends Controller
     }
     public function deleteUser($id)
     {
-        Log::fast(ROOT_DIR . '/logs/app.log', 'debug', "Deleting user with ID: {$id}");
-        $this->users
-             ->delete($id)
-             ->execute();
-        Log::fast(ROOT_DIR . '/logs/app.log', 'info', "User with ID: {$id} has been deleted.");
+        DB::table('users')
+            ->where('id', $id)
+            ->softDelete()
+            ->execute();
+        Log::fast(INDEX_DIR . 'logs/user_deletions.log', "User with ID {$id} has been deleted.");
         header('Location: ' . route('user.list'));
         exit;
     }

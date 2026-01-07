@@ -126,13 +126,14 @@ class DatabaseManager
      * Get a mapper instance for a specific table
      * 
      *  **Note:**
-     * - For 'mapper': the Mapper class receives ($adapter, $table)
-     * - For 'builder': the Builder also receives ($adapter, $table) and executes through the adapter
+     * - For 'mapper': the Mapper class receives ($adapter, $table, $useSoftDelete)
+     * - For 'builder': the Builder also receives ($adapter, $table, $useSoftDelete) and executes through the adapter
      * @param mixed $table
+     * @param bool $useSoftDelete Whether to use soft delete (default: false)
      * @return object
      */
-    public function getMapper($table)
+    public function getMapper($table, $useSoftDelete = false)
     {
-        return new $this->mapperClass($this->adapter, $table);
+        return new $this->mapperClass($this->adapter, $table, $useSoftDelete);
     }
 }

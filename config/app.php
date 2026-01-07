@@ -1,8 +1,8 @@
 <?php
 return [
-    'app_name' => 'DocTruyenHay',
-    'app_url' => 'http://localhost',
-    'app_env' => 'development',
-    'app_debug' => true,
-    'app_timezone' => 'Asia/Ho_Chi_Minh',
+    'app_name' => env('APP_NAME', 'My Application'),
+    'app_url' => env('APP_URL', 'http://localhost'),
+    'app_env' => env('APP_ENV', 'development'),
+    'app_debug' => env('APP_DEBUG', true),
+    'app_timezone' => env('APP_TIMEZONE', 'Asia/Ho_Chi_Minh'),
 ];

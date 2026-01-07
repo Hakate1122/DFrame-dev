@@ -15,6 +15,21 @@ $router->sign('GET /game/air-balloon', function () {
     return View::render('game/air-balloon');
 })->name('game.air-balloon');
 
+$router->sign('GET /game/sudoku', function () {
+    return View::render('game/sudoku');
+})->name('game.sudoku');
+
+$router->group('/demo')::action(function (DFrame\Application\Router $router) {
+    $router->sign('GET /chat', function () {
+        return View::render('demo/chat');
+    })->name('demo.chat');
+
+    $router->sign('GET /editor', function () {
+        return View::render('demo/editor');
+    })->name('demo.editor');
+});
+
+
 $router->sign('GET /demo/ws', function () {
     return View::render('demo/ws');
 })->name('demo.ws');

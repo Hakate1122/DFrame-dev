@@ -3,47 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Khí Cầu - Pro Edition</title>
+    <title>Khí Cầu - Legacy Edition</title>
     <style>
-        /* CSS hỗ trợ Chrome 30+ (Dùng tiền tố -webkit-) */
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             overflow: hidden; background-color: #ffffff;
             font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-            -webkit-user-select: none; /* Cũ cho Chrome 30 */
+            -webkit-user-select: none;
             user-select: none;
+            touch-action: none;
         }
 
         #game-wrapper {
             position: relative;
             width: 100%;
             height: 100%;
-            max-width: 500px; /* Giới hạn chiều rộng cho Desktop để giống Mobile */
+            max-width: 500px;
             margin: 0 auto;
             background: #fff;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
 
-        canvas { display: block; width: 100%; height: 100%; }
+        canvas { display: block; width: 100%; height: 100%; background: #fff; }
 
-        /* UI Styling */
         .score-bar {
             position: absolute; top: 0; left: 0; width: 100%;
             display: -webkit-box; display: -webkit-flex; display: flex;
             -webkit-box-pack: justify; -webkit-justify-content: space-between; justify-content: space-between;
             padding: 20px; box-sizing: border-box;
             color: #666; font-size: 16px; pointer-events: none;
+            z-index: 10;
         }
 
         #game-over {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255,255,255,0.95);
-            display: none; /* Hiện khi thua */
-            -webkit-box-orient: vertical; -webkit-box-direction: normal; 
+            display: none;
+            /* Fallback for old browsers */
+            text-align: center;
+            /* Flexbox for modern browsers */
+            display: -webkit-box; /* OLD - iOS 6-, Safari 3.1-6 */
+            display: -webkit-flex; /* NEW - Chrome */
+            display: flex;
+            -webkit-box-orient: vertical; -webkit-box-direction: normal;
             -webkit-flex-direction: column; flex-direction: column;
             -webkit-box-pack: center; -webkit-justify-content: center; justify-content: center;
             -webkit-box-align: center; -webkit-align-items: center; align-items: center;
             z-index: 100;
+        }
+        /* Fallback for very old browsers (iOS 6/Chrome 37) */
+        @media screen and (max-width: 600px) {
+            #game-over[style*="display: block"], #game-over.fallback-show {
+                display: block !important;
+                position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(255,255,255,0.95);
+                text-align: center;
+            }
+            #game-over > * {
+                position: relative;
+                top: 40%;
+                transform: translateY(-50%);
+                margin-left: auto; margin-right: auto;
+                display: block;
+            }
         }
 
         .btn-play {
@@ -74,19 +96,17 @@
 </div>
 
 <script>
-    // --- KHỞI TẠO BIẾN (ES5 thuần túY) ---
     var cvs = document.getElementById("canvas");
     var ctx = cvs.getContext("2d");
     var scoreLabel = document.getElementById("currentScore");
     var highLabel = document.getElementById("highScoreText");
     var overScreen = document.getElementById("game-over");
 
-    var w, h, ratio;
+    var w, h;
     var gameActive = false;
     var score = 0;
     var highScore = localStorage.getItem("ballon_highscore") || 188;
 
-    // Cấu hình vật thể
     var balloon = { x: 0, y: 0, r: 18 };
     var bubbles = [];
     var spikes = [];
@@ -94,50 +114,39 @@
     var spawnTimer = 0;
 
     function init() {
-        // Responsive chuẩn: Tính toán theo tỉ lệ màn hình
-        w = cvs.width = cvs.offsetWidth;
-        h = cvs.height = cvs.offsetHeight;
+        w = cvs.width = window.innerWidth > 500 ? 500 : window.innerWidth;
+        h = cvs.height = window.innerHeight;
+        
         balloon.x = w / 2;
         balloon.y = h * 0.75;
         highLabel.innerHTML = highScore;
-        
-        // Input: Chrome 30 hỗ trợ TouchEvents tốt
+
         cvs.addEventListener("touchstart", moveHandler, false);
         cvs.addEventListener("touchmove", moveHandler, false);
         cvs.addEventListener("mousemove", moveHandler, false);
         
         resetGame();
+
+        setInterval(gameLoop, 1000 / 60); 
     }
 
     function moveHandler(e) {
         if (!gameActive) return;
-        var clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        
+        var clientX;
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+        } else {
+            clientX = e.clientX;
+        }
+
         var rect = cvs.getBoundingClientRect();
         var targetX = clientX - rect.left;
-        // Lerp mượt mà (Hỗ trợ tốt từ senior perspective)
-        balloon.x += (targetX - balloon.x) * 0.15; 
-        e.preventDefault();
-    }
 
-    // --- LOGIC GAME ---
-
-    function createSpike() {
-        var gap = 100;
-        var width = 70 + Math.random() * 60;
-        spikes.push({
-            x: Math.random() * (w - width),
-            y: -20,
-            w: width,
-            h: 10
-        });
-    }
-
-    function createBubble() {
-        bubbles.push({
-            x: Math.random() * w,
-            y: -10,
-            r: 7 // Bong bóng nhỏ hơn và bằng nhau theo yêu cầu
-        });
+        balloon.x += (targetX - balloon.x) * 0.2; 
+        
+        if(e.preventDefault) e.preventDefault();
+        return false;
     }
 
     function update() {
@@ -147,10 +156,8 @@
         if (spawnTimer % 80 === 0) createSpike();
         if (spawnTimer % 50 === 0) createBubble();
 
-        // Update Gai
         for (var i = spikes.length - 1; i >= 0; i--) {
             spikes[i].y += speed;
-            // Va chạm Gai (AABB simplified)
             if (balloon.x + 10 > spikes[i].x && balloon.x - 10 < spikes[i].x + spikes[i].w &&
                 balloon.y > spikes[i].y && balloon.y < spikes[i].y + 25) {
                 gameOver();
@@ -158,13 +165,15 @@
             if (spikes[i].y > h) spikes.splice(i, 1);
         }
 
-        // Update Bong bóng
         for (var j = bubbles.length - 1; j >= 0; j--) {
             bubbles[j].y += speed;
-            // Va chạm tròn (Euclidean distance)
+
             var dx = balloon.x - bubbles[j].x;
             var dy = balloon.y - bubbles[j].y;
-            if (Math.sqrt(dx*dx + dy*dy) < balloon.r + bubbles[j].r) {
+            var distanceSq = dx * dx + dy * dy;
+            var radiusSumSq = (balloon.r + bubbles[j].r) * (balloon.r + bubbles[j].r);
+
+            if (distanceSq < radiusSumSq) {
                 score++;
                 scoreLabel.innerHTML = score;
                 bubbles.splice(j, 1);
@@ -173,13 +182,15 @@
             }
         }
         
-        if (score % 20 === 0 && score > 0) speed += 0.005; // Khó dần
+        if (score % 20 === 0 && score > 0) speed += 0.005;
     }
 
     function draw() {
-        ctx.clearRect(0, 0, w, h);
+        // Xóa màn hình
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, w, h);
 
-        // Vẽ Khí cầu (Styling theo ảnh 2)
+        // Vẽ Khí cầu
         ctx.fillStyle = "#5f6368";
         ctx.beginPath();
         ctx.arc(balloon.x, balloon.y, balloon.r, 0, Math.PI * 2);
@@ -208,13 +219,25 @@
             ctx.beginPath();
             ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
             ctx.stroke();
-            // Highlight
             ctx.beginPath();
             ctx.arc(b.x - 2, b.y - 2, 1.5, 0, Math.PI * 2);
-            ctx.fillStyle = "#999"; ctx.fill();
+            ctx.fillStyle = "#999"; 
+            ctx.fill();
         }
+    }
 
-        requestAnimationFrame(draw);
+    function gameLoop() {
+        update();
+        draw();
+    }
+
+    function createSpike() {
+        var width = 70 + Math.random() * 60;
+        spikes.push({ x: Math.random() * (w - width), y: -20, w: width });
+    }
+
+    function createBubble() {
+        bubbles.push({ x: Math.random() * w, y: -10, r: 7 });
     }
 
     function gameOver() {
@@ -224,7 +247,6 @@
             localStorage.setItem("ballon_highscore", highScore);
             highLabel.innerHTML = highScore;
         }
-        overScreen.style.display = "-webkit-box";
         overScreen.style.display = "-webkit-flex";
         overScreen.style.display = "flex";
     }
@@ -239,10 +261,7 @@
         overScreen.style.display = "none";
     }
 
-    // Start
     init();
-    draw();
-    setInterval(update, 1000/60); // Đảm bảo logic chạy đều ngay cả khi rAF bị drop frame ở máy cũ
 
 </script>
 </body>

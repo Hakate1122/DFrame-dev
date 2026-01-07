@@ -16,7 +16,8 @@
     "autoload": {
         "psr-4": {
             "App\\": "app/",
-            "DFrame\\": "src/"
+            "DFrame\\": "src/",
+            "DFrame\\Utils\\": "src/Kit/Utils/"
         },
         "files": [
             "src/Application/helper/cli.php",

@@ -35,28 +35,30 @@ class Core
             };
         };
 
-        return function () use ($detectDeviceRuntime, $dfver) {
+        return function ($argv = null) use ($detectDeviceRuntime, $dfver) {
+            $scriptName = isset($argv[0]) ? basename($argv[0]) : '';
             echo "DLI - DFrame CLI Core Helper\n";
-            echo "Version: " . cli_green($dfver) . " | PHP: " . cli_blue(phpversion()) . " on: " . cli_yellow($detectDeviceRuntime()) . "\n";
+            echo "Version: " . cli_green($dfver) . " | PHP: " . cli_blue(phpversion()) . " on " . cli_yellow($detectDeviceRuntime()) . "\n";
             echo "Usage: php dli <command> [options]\n\n";
+
+            if (!App::isRunningFromPhar()) {
+                if ($scriptName !== 'dli' && $scriptName !== 'dli.php') {
+                    echo cli_gray("Don't change name, dli is fast too!\n\n");
+                }
+            }
 
             if (App::isRunningFromPhar()) {
                 echo cli_yellow("Note: DLI is running from a PHAR archive. Some features may not work (e.g., starting the server, npm, or file writing)\n\n");
             }
+            
             echo "Available commands:\n";
             echo "  help, -h        Show this help message\n";
             echo "  version, -v     Show application version\n";
             echo "  server, -s      Start the development server\n";
             echo "  list            List all available commands\n";
-            echo "  npm-install     Run npm install in the project directory\n";
-            echo "  vite            Start the Vite development server\n";
-            echo "  compile:ts      Compile TypeScript files to JavaScript\n";
             echo "\n";
-            echo "Options:\n";
-            echo " Server command options: php dli server[-s] <options>\n";
-            echo "  --host          Bind to a specific host (default: localhost)\n";
-            echo "  --port          Specify a port (default: 8000)\n";
-            echo "  --mode          Specify the mode (default: lan)\n";
+            echo "Available tools:\n";
+            echo "  compile:ts      Compile TypeScript files to JavaScript (requires Node.js + tsc)\n";
             echo "\n";
         };
     }

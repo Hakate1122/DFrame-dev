@@ -12,16 +12,20 @@ abstract class BaseBuilder implements BuilderInterface {
     protected $columns = ['*'];
     protected $wheres = []; // mỗi entry: [column, operator, value, boolean('AND'|'OR')]
     protected $bindings = [];
-    protected $operation = null; // select|insert|update|delete
+    protected $operation = null; // select|insert|update|delete|softDelete
     protected $pendingData = [];
 
     // cache for has deleted_at
     protected ?bool $tableHasDeletedAtCache = null;
+    
+    // Whether to use soft delete automatically
+    protected bool $useSoftDelete = false;
 
-    public function __construct($adapter, string $table)
+    public function __construct($adapter, string $table, bool $useSoftDelete = false)
     {
         $this->adapter = $adapter;
         $this->table = $table;
+        $this->useSoftDelete = $useSoftDelete;
     }
 
     public function table(string $table): BuilderInterface {
@@ -204,6 +208,35 @@ abstract class BaseBuilder implements BuilderInterface {
     {
         $this->operation = 'delete';
         return $this;
+    }
+
+    /**
+     * Soft delete records (set deleted_at timestamp)
+     * Can be called as:
+     * - softDelete() - for chaining with where()->softDelete()->execute()
+     * - softDelete($id) - for direct soft delete by ID
+     * @param int|string|null $id Optional ID to soft delete directly
+     * @return BuilderInterface|int
+     */
+    public function softDelete($id = null)
+    {
+        if ($id !== null) {
+            // Direct soft delete by ID
+            return $this->softDeleteById($id);
+        }
+        // Chainable soft delete
+        $this->operation = 'softDelete';
+        return $this;
+    }
+    
+    /**
+     * Soft delete by ID (internal method, implemented in concrete builders)
+     * @param int|string $id
+     * @return int
+     */
+    protected function softDeleteById($id)
+    {
+        throw new \BadMethodCallException('softDeleteById() must be implemented in the concrete builder.');
     }
 
     /**

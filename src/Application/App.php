@@ -23,7 +23,7 @@ class App
      * Version of DFrame Framework.
      * @var string
      */
-    public const VERSION = '0.1.20251225-dev';
+    public const VERSION = '20260106-dev';
     /**
      * Alias for version constant
      */
@@ -148,7 +148,7 @@ class App
             return;
         }
 
-        header('X-Content-Type-Options: nos niff');
+        header('X-Content-Type-Options: nosniff');
         header('X-Frame-Options: DENY');
         header('X-XSS-Protection: 1; mode=block');
         header('Referrer-Policy: strict-origin-when-cross-origin');
@@ -267,6 +267,38 @@ class App
                 throw new Exception("Required environment variable missing: {$var}");
             }
         }
+    }
+
+    /**
+     * Check if running from a PHAR archive
+     *
+     * @return bool
+     */
+    private static function checkRunningFromPhar()
+    {
+        $pharRunning = false;
+        try {
+            if (class_exists('Phar') && \Phar::running(false) !== '') {
+                $pharRunning = true;
+            }
+        } catch (\Throwable $t) {
+            // ignore
+        }
+
+        if (!$pharRunning) {
+            $a0 = $_SERVER['argv'][0] ?? '';
+            if (is_string($a0) && (str_contains($a0, '.phar') || str_contains($a0, 'phar://'))) {
+                $pharRunning = true;
+            }
+        }
+
+        if (!$pharRunning) {
+            $selfPath = __FILE__;
+            if (is_string($selfPath) && str_starts_with($selfPath, 'phar://')) {
+                $pharRunning = true;
+            }
+        }
+        return $pharRunning;
     }
 
     /**
@@ -467,38 +499,13 @@ class App
     /**
      * Initializes the environment.
      *
-     * @param string|null $logDir The directory where log files will be stored.
-     *
      * @return self
      */
     public static function initialize()
     {
         try {
-            // Detect running inside PHAR using several indicators
-            $pharRunning = false;
-            try {
-                if (class_exists('Phar') && \Phar::running(false) !== '') {
-                    $pharRunning = true;
-                }
-            } catch (\Throwable $t) {
-                // ignore
-            }
 
-            if (!$pharRunning) {
-                $a0 = $_SERVER['argv'][0] ?? '';
-                if (is_string($a0) && (str_contains($a0, '.phar') || str_contains($a0, 'phar://'))) {
-                    $pharRunning = true;
-                }
-            }
-
-            if (!$pharRunning) {
-                $selfPath = __FILE__;
-                if (is_string($selfPath) && str_starts_with($selfPath, 'phar://')) {
-                    $pharRunning = true;
-                }
-            }
-
-            self::$runningFromPhar = (bool) $pharRunning;
+            self::$runningFromPhar = self::checkRunningFromPhar();
 
             // Load environment files (.env, encrypted .env if present)
             self::loadEnvironmentVariables();
@@ -568,9 +575,6 @@ class App
      */
     public function bootDli($argv)
     {
-
-        // Set up reporting for errors, exceptions, and runtime issues
-        Report::setup(self::isDebug(), INDEX_DIR . 'logs/app.log', Report::cli());
 
         // Kernel
         $cli = new Command();

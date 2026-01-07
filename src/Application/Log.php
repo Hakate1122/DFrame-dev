@@ -2,6 +2,7 @@
 
 namespace DFrame\Application;
 
+use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use \DateTime;
@@ -15,6 +16,11 @@ class Log implements LoggerInterface
 {
     private $logFilePath;
 
+    /**
+     * Constructor to initialize the logger with a log file path.
+     * 
+     * @param string|null $logFilePath Path to the log file. If null, defaults to 'logs/app.log' in the INDEX_DIR.
+     */
     public function __construct(?string $logFilePath = null)
     {
         $this->logFilePath = $logFilePath ?? env('LOG_FILE', INDEX_DIR . 'logs/app.log');
@@ -35,7 +41,7 @@ class Log implements LoggerInterface
         $level = env('LOG_LEVEL', $level);
         $contextString = !empty($context) ? ' ' . json_encode($context) : '';
 
-        $now = (new DateTime())->format('Y-m-d H:i:s');
+        $now = (new DateTimeImmutable())->format('Y-m-d H:i:s');
         $logEntry = sprintf(
             '[%s] [%s]: %s%s' . PHP_EOL,
             $now,
@@ -91,20 +97,15 @@ class Log implements LoggerInterface
 
     // ---Fast log methods ---
     /**
-     * Fast log method for quick logging without instantiating the class.
+     * Fast log method for quick logging without instantiating the class. Not implementing context.
      * 
      * @param string $logFilePath Path to the log file
-     * @param string $level Log level
      * @param string $message Log message
-     * @param array $context Additional context data
      * @return void
      */
-    public static function fast(string $logFilePath, ?string $level = null, string $message, array $context = []): void
+    public static function fast(string $logFilePath, string $message): void
     {
         $logger = new self($logFilePath);
-        if ($level === null) {
-            $level = env('LOG_LEVEL', LogLevel::INFO);
-        }
-        $logger->log($level, $message, $context);
+        $logger->log(env('LOG_LEVEL', LogLevel::INFO), $message);
     }
 }

@@ -98,8 +98,6 @@ class Handler implements HandlerInterface
         if (!$this->saveLog)
             return;
 
-        // If the configured log file points inside the PHAR archive,
-        // map it to the current working directory so we can write logs.
         if (strpos($this->logFile, 'phar://') === 0) {
             $rel = preg_replace('#^phar://[^/]+/#', '', $this->logFile);
             $this->logFile = getcwd() . DIRECTORY_SEPARATOR . $rel;

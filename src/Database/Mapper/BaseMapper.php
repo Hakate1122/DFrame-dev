@@ -8,10 +8,14 @@ abstract class BaseMapper implements MapperInterface {
     protected $table;
 
     protected ?bool $hasDeletedAt = null;
+    
+    // Whether to use soft delete automatically
+    protected bool $useSoftDelete = false;
 
-    public function __construct($adapter, $table) {
+    public function __construct($adapter, $table, bool $useSoftDelete = false) {
         $this->adapter = $adapter;
         $this->table = $table;
+        $this->useSoftDelete = $useSoftDelete;
     }
 
     /**

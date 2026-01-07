@@ -29,7 +29,9 @@ class Html implements RenderInterface
             ob_end_clean();
 
         // set HTTP 500 when rendering an error/exception report
-        http_response_code(500);
+        // if(!headers_sent()){
+        //     http_response_code(500);
+        // }
 
         // build a small SVG favicon whose fill color is the same as the error color
         $favColor = $config['color'] ?? '#7c3aed';

@@ -14,15 +14,13 @@ class JsonDB {
 
     public function __construct(string $file) {
         $this->file = $file;
-        // Tự động tạo file nếu chưa tồn tại
         if (!file_exists($file)) {
-            // Sử dụng LOCK_EX để đảm bảo an toàn ngay từ lúc tạo
             file_put_contents($file, json_encode([]), LOCK_EX);
         }
     }
 
     /**
-     * Đọc dữ liệu an toàn và xử lý lỗi JSON
+     * Retrieve all records from the JSON database
      */
     public function all(): array {
         if (!file_exists($this->file)) {
@@ -32,7 +30,6 @@ class JsonDB {
         $content = file_get_contents($this->file);
         $data = json_decode($content, true);
 
-        // Kiểm tra lỗi JSON (ví dụ: file bị sửa bậy bạ)
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new \Exception("Lỗi đọc file JSON: " . json_last_error_msg());
         }
@@ -41,13 +38,11 @@ class JsonDB {
     }
 
     /**
-     * Thêm dữ liệu mới với ID tự tăng
+     * Insert a new record with an auto-incremented ID.
      */
     public function insert(array $data): int {
         $db = $this->all();
-        
-        // Tạo ID tự động (Nếu mảng rỗng thì ID = 1, ngược lại lấy ID cuối + 1)
-        // Lưu ý: Cách này đơn giản, với hệ thống lớn nên dùng UUID
+    
         $lastItem = end($db);
         $newId = isset($lastItem['id']) ? $lastItem['id'] + 1 : 1;
         
@@ -60,18 +55,18 @@ class JsonDB {
     }
 
     /**
-     * Tìm kiếm bản ghi theo Key-Value
+     * Find records by key-value pair.
      */
     public function where(string $key, $value): array {
         $db = $this->all();
-        // Sử dụng array_filter để lọc dữ liệu
+
         return array_values(array_filter($db, function($item) use ($key, $value) {
             return isset($item[$key]) && $item[$key] == $value;
         }));
     }
 
     /**
-     * Tìm 1 bản ghi cụ thể theo ID
+     * Find a specific record by ID.
      */
     public function find(int $id): ?array {
         $result = $this->where('id', $id);
@@ -79,7 +74,7 @@ class JsonDB {
     }
 
     /**
-     * Cập nhật dữ liệu theo ID
+     * Update a record by ID.
      */
     public function update(int $id, array $newData): bool {
         $db = $this->all();
@@ -87,9 +82,7 @@ class JsonDB {
 
         foreach ($db as $key => $item) {
             if (isset($item['id']) && $item['id'] == $id) {
-                // Merge dữ liệu cũ với dữ liệu mới
                 $db[$key] = array_merge($item, $newData);
-                // Đảm bảo ID không bị đổi
                 $db[$key]['id'] = $id; 
                 $found = true;
                 break;
@@ -104,19 +97,18 @@ class JsonDB {
     }
 
     /**
-     * Xóa dữ liệu theo ID
+     * Delete a record by ID.
      */
     public function delete(int $id): bool {
         $db = $this->all();
         $initialCount = count($db);
 
-        // Lọc bỏ phần tử có ID trùng khớp
         $db = array_filter($db, function($item) use ($id) {
             return isset($item['id']) && $item['id'] != $id;
         });
 
         if (count($db) < $initialCount) {
-            // Re-index mảng để tránh tạo mảng thưa (sparse array) trong JSON
+
             $this->save(array_values($db));
             return true;
         }
@@ -125,12 +117,9 @@ class JsonDB {
     }
 
     /**
-     * Hàm lưu private để tái sử dụng logic ghi file
+     * Save the current state of the database back to the JSON file.
      */
     private function save(array $data): void {
-        // JSON_PRETTY_PRINT: Dễ đọc
-        // LOCK_EX: Khóa file độc quyền (Exclusive Lock) - CỰC KỲ QUAN TRỌNG
-        // Ngăn chặn process khác ghi vào file khi đang xử lý
         $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         
         if (file_put_contents($this->file, $json, LOCK_EX) === false) {

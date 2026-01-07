@@ -1,7 +1,8 @@
 <?php
 
-use DFrame\Command\Helper\ConsoleInput;
-use DFrame\Command\Helper\ConsoleOutput;
+use Datahihi1\RakNet\RakNetServer;
+use DFrame\Command\Helper\ConsoleInput as Input;
+use DFrame\Command\Helper\ConsoleOutput as Output;
 
 $cli->register('hello', [\App\Command\Hello::class, 'handle']);
 $cli->register('choice', [\App\Command\Hello::class, 'choice']);
@@ -11,18 +12,25 @@ $cli->register('sample', [\App\Command\Sample::class, 'handle']);
 $cli->register('try-connect-sql', [\App\Command\Sample::class, 'tryConnectSQL']);
 $cli->register('try-connect-db', [\App\Command\Sample::class, 'tryConnectDB']);
 
-$cli->register('demo', function () {
-    $host = ConsoleInput::promptSecret('Enter host:', 'play.cubecraft.net');
-    $port = ConsoleInput::promptSecret('Enter port:', '19132');
+$cli->register('minesv:ping', function () {
+    $host = Input::promptSecret('Enter host:', 'play.cubecraft.net');
+    $port = Input::promptSecret('Enter port:', '19132');
     $client = new \Datahihi1\RakNet\RakNetClient($host, $port);
     $response = $client->ping();
     if ($response !== null) {
-        ConsoleOutput::success("Server is online!");
-        ConsoleOutput::info(json_encode($response, JSON_PRETTY_PRINT));
+        Output::success("Server is online!");
+        Output::info(print_r($response, true));
     } else {
-        ConsoleOutput::error("Server is offline or did not respond.");
+        Output::error("Server is offline or did not respond.");
     }
     $client->close();
+});
+
+$cli->register('minesv:run', function () {
+    $motd = 'MCPE;Demo MOTD;2;0.2.0;0;20;1234567890';
+    $port = '19132';
+    $server = new RakNetServer($motd, $port);
+    $server->run();
 });
 
 $cli->register('jsondb', function () {
@@ -31,7 +39,7 @@ $cli->register('jsondb', function () {
         $db = new DFrame\JsonDB\JsonDB($dbPath);
 
         while (true) {
-            $choice = ConsoleInput::select(
+            $choice = Input::select(
                 "Choose an action",
                 [
                     "1" => "View All Records",
@@ -40,6 +48,7 @@ $cli->register('jsondb', function () {
                     "4" => "Update Record",
                     "5" => "Delete Record",
                     "6" => "Exit",
+                    "7" => "Clear Screen",
                 ],
                 "6"
             );
@@ -48,22 +57,23 @@ $cli->register('jsondb', function () {
                 case "1": // View All
                     $all = $db->all();
                     if (empty($all)) {
-                        ConsoleOutput::info("No records found.");
+                        Output::info("No records found.");
                     } else {
                         foreach ($all as $row) {
-                            ConsoleOutput::info(json_encode($row, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . PHP_EOL);
+                            Output::info(json_encode($row, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . PHP_EOL);
                         }
+                        // Wait for user to press Enter to continue
+                        Input::prompt("Press Enter to continue...", null, function() { return true; });
                     }
                     break;
 
                 case "2": // Add
-                    $name = ConsoleInput::prompt("Name", null, function ($v) {
+                    $name = Input::prompt("Name", null, function ($v) {
                         return $v !== '' ? true : "Name is required.";
                     });
 
-                    $email = ConsoleInput::prompt("Email", null, ConsoleInput::validateEmail());
-
-                    $age = ConsoleInput::prompt("Age", null, ConsoleInput::validateNumber());
+                    $email = Input::prompt("Email", null, Input::validateEmail());
+                    $age = Input::prompt("Age", null, Input::validateNumber());
 
                     $newId = $db->insert([
                         'name' => $name,
@@ -71,29 +81,29 @@ $cli->register('jsondb', function () {
                         'age' => (int) $age,
                     ]);
 
-                    ConsoleOutput::success("Inserted record with ID: {$newId}");
+                    Output::success("Inserted record with ID: {$newId}");
                     break;
 
                 case "3": // Search
-                    $by = ConsoleInput::select("Search by:", [
+                    $by = Input::select("Search by:", [
                         'id' => 'ID',
                         'name' => 'Name',
                         'email' => 'Email',
                     ], 'name');
 
                     if ($by === 'id') {
-                        $id = (int) ConsoleInput::prompt('ID', null, ConsoleInput::validateNumber());
+                        $id = (int) Input::prompt('ID', null, Input::validateNumber());
                         $rec = $db->find($id);
                         if ($rec === null) {
-                            ConsoleOutput::info("Record not found for ID {$id}.");
+                            Output::info("Record not found for ID {$id}.");
                         } else {
-                            ConsoleOutput::ok(json_encode($rec, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . PHP_EOL);
+                            Output::ok(json_encode($rec, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . PHP_EOL);
                         }
                     } else {
-                        $val = ConsoleInput::prompt('Value to search');
+                        $val = Input::prompt('Value to search');
                         $results = $db->where($by, $val);
                         if (empty($results)) {
-                            ConsoleOutput::info("No matching records.");
+                            Output::info("No matching records.");
                         } else {
                             foreach ($results as $r) {
                                 echo json_encode($r, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . PHP_EOL;
@@ -103,16 +113,16 @@ $cli->register('jsondb', function () {
                     break;
 
                 case "4": // Update
-                    $id = (int) ConsoleInput::prompt('ID to update', null, ConsoleInput::validateNumber());
+                    $id = (int) Input::prompt('ID to update', null, Input::validateNumber());
                     $existing = $db->find($id);
                     if ($existing === null) {
-                        ConsoleOutput::error("Record with ID {$id} not found.");
+                        Output::error("Record with ID {$id} not found.");
                         break;
                     }
 
-                    $name = ConsoleInput::prompt('Name', $existing['name'] ?? null);
-                    $email = ConsoleInput::prompt('Email', $existing['email'] ?? null, ConsoleInput::validateEmail());
-                    $age = ConsoleInput::prompt('Age', isset($existing['age']) ? (string)$existing['age'] : null, ConsoleInput::validateNumber());
+                    $name = Input::prompt('Name', $existing['name'] ?? null);
+                    $email = Input::prompt('Email', $existing['email'] ?? null, Input::validateEmail());
+                    $age = Input::prompt('Age', isset($existing['age']) ? (string)$existing['age'] : null, Input::validateNumber());
 
                     $ok = $db->update($id, [
                         'name' => $name,
@@ -121,35 +131,66 @@ $cli->register('jsondb', function () {
                     ]);
 
                     if ($ok) {
-                        ConsoleOutput::success("Record {$id} updated.");
+                        Output::success("Record {$id} updated.");
                     } else {
-                        ConsoleOutput::error("Failed to update record {$id}.");
+                        Output::error("Failed to update record {$id}.");
                     }
                     break;
 
                 case "5": // Delete
-                    $id = (int) ConsoleInput::prompt('ID to delete', null, ConsoleInput::validateNumber());
-                    $confirm = ConsoleInput::askYesNo("Are you sure you want to delete ID {$id}?", false);
+                    $id = (int) Input::prompt('ID to delete', null, Input::validateNumber());
+                    $confirm = Input::askYesNo("Are you sure you want to delete ID {$id}?", false);
                     if ($confirm) {
                         $deleted = $db->delete($id);
-                        if ($deleted) ConsoleOutput::success("Record {$id} deleted.");
-                        else ConsoleOutput::error("Failed to delete record {$id}.");
+                        if ($deleted) Output::success("Record {$id} deleted.");
+                        else Output::error("Failed to delete record {$id}.");
                     } else {
-                        ConsoleOutput::info("Delete cancelled.");
+                        Output::info("Delete cancelled.");
                     }
                     break;
 
                 case "6": // Exit
-                    ConsoleOutput::info("Exiting jsondb CLI.");
+                    Output::info("Exiting jsondb CLI.");
                     return;
 
+                case "7": // Clear Screen
+                    // Attempt to clear screen in a robust way
+                    if (ob_get_level()) {
+                        ob_end_flush();
+                    }
+                    if (strncasecmp(PHP_OS, 'WIN', 3) == 0) {
+                        system('cls');
+                    } else {
+                        system('clear');
+                    }
+                    // Fallback: print newlines if clear did not work
+                    echo str_repeat(PHP_EOL, 40);
+                    if (ob_get_level()) {
+                        ob_flush();
+                    }
+                    break;
+
                 default:
-                    ConsoleOutput::error("Unknown option selected.");
+                    Output::error("Unknown option selected.");
                     break;
             }
         }
 
     } catch (Exception $e) {
         echo "Lỗi: " . $e->getMessage();
+    }
+});
+
+$cli->register('send:mail', function () {
+    try{
+    $mail = new DFrame\Application\Mail();
+    $mail   ->to(email: 'datd5400@gmail.com')
+            ->subject(subject: 'Test Email from DFrame Mailer 2.0')
+            ->body('This is a test email sent from DFrame Mailer 2.0.');
+    $mail->send();
+    echo cli_green("Email sent successfully.\n");
+    }
+    catch(Exception $e){
+        echo cli_red("Failed to send email: " . $e->getMessage() . "\n");
     }
 });

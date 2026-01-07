@@ -22,6 +22,7 @@ use DFrame\Database\DatabaseManager;
  * @method \Craft\Database\Interfaces\BuilderInterface insert(array $data)
  * @method \Craft\Database\Interfaces\BuilderInterface update(array $data)
  * @method \Craft\Database\Interfaces\BuilderInterface delete()
+ * @method \Craft\Database\Interfaces\BuilderInterface softDelete(int|string|null $id = null)
  * @method \Craft\Database\Interfaces\BuilderInterface execute()
  * @method \Craft\Database\Interfaces\BuilderInterface fetchAll()
  * @method \Craft\Database\Interfaces\BuilderInterface fetch(string $type = 'assoc')
@@ -48,13 +49,35 @@ class DB extends DatabaseManager
     protected $table;
 
     /**
+     * Check if this class uses SoftDelete trait
+     * Allows child models extending DB to automatically detect SoftDelete trait
+     * @return bool
+     */
+    protected function usesSoftDelete(): bool
+    {
+        $class = static::class;
+        $softDeleteTrait = \DFrame\Database\Traits\SoftDelete::class;
+        
+        // Check traits in this class and parent classes
+        do {
+            $traits = class_uses($class);
+            if ($traits && in_array($softDeleteTrait, $traits)) {
+                return true;
+            }
+        } while ($class = get_parent_class($class));
+        
+        return false;
+    }
+
+    /**
      * Initialize the DB instance.
      */
     public function __construct()
     {
         parent::__construct();
         if ($this->table) {
-            $this->mapper = $this->getMapper($this->table);
+            // If child class has SoftDelete trait, use soft delete automatically
+            $this->mapper = $this->getMapper($this->table, $this->usesSoftDelete());
         }
     }
 
@@ -67,7 +90,9 @@ class DB extends DatabaseManager
     {
         $instance = new static();
         $instance->table = $table;
-        $instance->mapper = $instance->getMapper($table);
+        // If called from child class with SoftDelete trait, auto-detect
+        // If called directly from DB class, use hard delete (useSoftDelete = false)
+        $instance->mapper = $instance->getMapper($table, $instance->usesSoftDelete());
         return $instance;
     }
 

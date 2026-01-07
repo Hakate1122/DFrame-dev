@@ -46,11 +46,13 @@ class SqliteMapper extends BaseMapper {
     }
 
     public function delete($id) {
-        if ($this->hasDeletedAt()) {
+        // Only auto soft delete if useSoftDelete is true AND table has deleted_at column
+        if ($this->useSoftDelete && $this->hasDeletedAt()) {
             $sql = "UPDATE \"{$this->table}\" SET \"deleted_at\" = ? WHERE id = ?";
             $now = date('Y-m-d H:i:s');
             return $this->adapter->query($sql, [$now, $id]);
         }
+        // Hard delete (even if deleted_at column exists)
         $sql = "DELETE FROM \"{$this->table}\" WHERE id = ?";
         return $this->adapter->query($sql, [$id]);
     }

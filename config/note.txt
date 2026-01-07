@@ -1,3 +1,0 @@
-Config is backup if you don't use .env to store environment variables.
-
-Use it with df_config('namefile.key') helper function to get configuration values.

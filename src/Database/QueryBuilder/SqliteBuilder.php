@@ -22,6 +22,10 @@ class SqliteBuilder extends BaseBuilder implements BuilderInterface {
             }
             return $sql;
         }
+        if ($op === 'softDelete') {
+            // This is handled in execute(), but we can return a placeholder
+            return "UPDATE \"{$this->table}\" SET \"deleted_at\" = ?";
+        }
         if ($op === 'insert') {
             $fields = array_keys($this->pendingData);
             $placeholders = implode(',', array_fill(0, count($fields), '?'));
@@ -90,9 +94,10 @@ class SqliteBuilder extends BaseBuilder implements BuilderInterface {
             return 0;
         }
         if ($op === 'delete') {
-            if ($this->tableHasDeletedAt()) {
+            // Only auto soft delete if useSoftDelete is true AND table has deleted_at column
+            if ($this->useSoftDelete && $this->tableHasDeletedAt()) {
                 $sql = $this->toSql();
-                $sql = preg_replace('/^\s*DELETE\s+FROM\s+[`"]?[^`"]+[`"]?/', "UPDATE `{$this->table}` SET `deleted_at` = ?", $sql);
+                $sql = preg_replace('/^\s*DELETE\s+FROM\s+[`"]?[^`"]+[`"]?/', "UPDATE \"{$this->table}\" SET \"deleted_at\" = ?", $sql);
                 $bindings = array_merge([date('Y-m-d H:i:s')], $this->getBindings());
                 $result = $this->adapter->query($sql, $bindings);
                 if (is_object($result) && method_exists($result, 'rowCount')) {
@@ -101,8 +106,31 @@ class SqliteBuilder extends BaseBuilder implements BuilderInterface {
                 return 0;
             }
 
+            // Hard delete (even if deleted_at column exists)
             $sql = $this->toSql();
             $bindings = $this->getBindings();
+            $result = $this->adapter->query($sql, $bindings);
+            if (is_object($result) && method_exists($result, 'rowCount')) {
+                return (int) $result->rowCount();
+            }
+            return 0;
+        }
+        if ($op === 'softDelete') {
+            // Soft delete with where conditions
+            if (!$this->tableHasDeletedAt()) {
+                throw new \RuntimeException("Table '{$this->table}' does not have 'deleted_at' column for soft delete.");
+            }
+            $sql = "UPDATE \"{$this->table}\" SET \"deleted_at\" = ?";
+            if ($this->wheres) {
+                $whereSql = '';
+                foreach ($this->wheres as $i => $w) {
+                    $col = $w[0]; $operator = $w[1]; $bool = $w[3] ?? 'AND';
+                    $prefix = $i === 0 ? '' : " {$bool} ";
+                    $whereSql .= $prefix . "\"{$col}\" {$operator} ?";
+                }
+                $sql .= " WHERE " . $whereSql;
+            }
+            $bindings = array_merge([date('Y-m-d H:i:s')], $this->getBindings());
             $result = $this->adapter->query($sql, $bindings);
             if (is_object($result) && method_exists($result, 'rowCount')) {
                 return (int) $result->rowCount();
@@ -112,7 +140,15 @@ class SqliteBuilder extends BaseBuilder implements BuilderInterface {
         return null;
     }
     
-    public function softDelete($id): int {
+    /**
+     * Soft delete by ID (internal method)
+     * @param int|string $id
+     * @return int
+     */
+    protected function softDeleteById($id): int {
+        if (!$this->tableHasDeletedAt()) {
+            throw new \RuntimeException("Table '{$this->table}' does not have 'deleted_at' column for soft delete.");
+        }
         $sql = "UPDATE \"{$this->table}\" SET \"deleted_at\" = ? WHERE id = ?";
         $now = date('Y-m-d H:i:s');
         $result = $this->adapter->query($sql, [$now, $id]);

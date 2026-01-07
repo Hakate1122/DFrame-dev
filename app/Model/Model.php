@@ -47,13 +47,33 @@ class Model extends DatabaseManager
     protected $table;
 
     /**
+     * Check if this model uses SoftDelete trait
+     * @return bool
+     */
+    protected function usesSoftDelete(): bool
+    {
+        $class = static::class;
+        $softDeleteTrait = \DFrame\Database\Traits\SoftDelete::class;
+        
+        // Check traits in this class and parent classes
+        do {
+            $traits = class_uses($class);
+            if ($traits && in_array($softDeleteTrait, $traits)) {
+                return true;
+            }
+        } while ($class = get_parent_class($class));
+        
+        return false;
+    }
+
+    /**
      * Initialize the DB instance.
      */
     public function __construct()
     {
         parent::__construct();
         if ($this->table) {
-            $this->mapper = $this->getMapper($this->table);
+            $this->mapper = $this->getMapper($this->table, $this->usesSoftDelete());
         }
     }
 
@@ -66,7 +86,7 @@ class Model extends DatabaseManager
     {
         $instance = new static();
         $instance->table = $table;
-        $instance->mapper = $instance->getMapper($table);
+        $instance->mapper = $instance->getMapper($table, $instance->usesSoftDelete());
         return $instance;
     }
 

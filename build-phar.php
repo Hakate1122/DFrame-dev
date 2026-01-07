@@ -1,8 +1,14 @@
+#!/usr/bin/env php
 <?php
 
 /** Simple PHAR builder CLI */
-class BuildPhar{
-    public const VERSION = '0.0.1-dev';
+class BuildPhar
+{
+    public const VERSION = '0.0.2-dev';
+}
+
+if (PHP_SAPI !== 'cli') {
+    exit('This script only run on CLI.');
 }
 
 const VERSION = BuildPhar::VERSION;
@@ -18,8 +24,7 @@ function show_helper()
     echo "Usage:\n";
     echo "  php build-phar.php help              Show this help and features\n";
     echo "  php build-phar.php build [options]   Build a PHAR\n";
-    echo "  php build-phar.php self-build [options] Build a PHAR containing this builder (self)\n";
-    echo "  php build-phar.php extract [options] Build or list PHAR contents\n";
+    echo "  php build-phar.php extract [options] Extract or list a PHAR's contents\n";
     echo "\n";
     echo "Features:\n";
     echo "  - Core helper: show version and functions\n";
@@ -32,11 +37,15 @@ function show_helper()
     echo "  --stub-string=STRING      Provide stub contents directly\n";
     echo "  --root-extras=FILES       Comma-separated root files to include (default: .env,cacert.pem,composer.json,composer.lock)\n";
     echo "  --force                   Overwrite existing output file without prompt\n";
-    echo "  --self                    Include this builder script into the PHAR and use it as stub\n";
+    echo "\n";
+    echo "Extract options:\n";
+    echo "  --phar=FILE               PHAR file path (relative or absolute)\n";
+    echo "  --output=DIR              Destination directory (default: <pharname>-extracted)\n";
+    echo "  --force                   Overwrite existing files\n";
+    echo "  --list                    Only list files\n";
     echo "\n";
     echo "Examples:\n";
     echo "  php build-phar.php build --output=my.phar --include=app,config,public --stub-file=stubs/boot.php\n";
-    echo "  php build-phar.php self-build --output=my.phar   # build PHAR that includes this builder as stub\n";
 }
 
 /**
@@ -86,6 +95,7 @@ function extract_phar(array $opts)
         $phar = new Phar($pharPath);
 
         if (!empty($opts['list'])) {
+            echo "Listing contents of {$pharPath}:\n";
             foreach ($phar as $file) {
                 /** @var PharFileInfo $file */
                 echo $file->getPathName() . PHP_EOL;
@@ -153,8 +163,11 @@ function collect_files(array $includes, $baseDir)
  */
 function build_phar(array $opts)
 {
+    if (ini_get('phar.readonly')) {
+        exit("ERROR: phar.readonly is enabled in php.ini — disable it to build PHAR files.\n");
+    }
+
     $baseDir = __DIR__;
-    $selfName = basename(__FILE__);
     $output = $opts['output'] ?? '';
 
     // Require the user to provide an output filename if not supplied.
@@ -202,29 +215,28 @@ function build_phar(array $opts)
         $output = '';
     }
 
-    if (ini_get('phar.readonly')) {
-        echo "ERROR: phar.readonly is enabled in php.ini — disable it to build PHAR files.\n";
-        return;
+    $includes = $opts['include'] ?? [];
+    if (empty($includes)) {
+        echo "No includes specified. Please enter comma-separated folders/files to include (e.g. app,public,src): ";
+        $line = trim(fgets(STDIN));
+        if ($line === '') {
+            echo "Aborted. No includes provided.\n";
+            return;
+        }
+        $includes = array_map('trim', explode(',', $line));
     }
 
-    // If building only self, do not include directories or other files
-    $includes = $opts['include'] ?? [];
-    if (!empty($opts['self'])) {
-        $includes = [];
-        echo "Self-build requested: only including {$selfName}\n";
-        // Do not collect other files when building a self PHAR — only add the builder script.
-        $files = [];
-        $rootExtras = [$selfName];
-    } else {
-        if (empty($includes)) {
-            $default = ['app', 'config', 'public', 'resource', 'src', 'vendor', 'dli'];
-            echo "No includes specified. Default candidate folders: " . implode(', ', $default) . "\n";
-            $line = prompt("Enter comma-separated includes, or press Enter to use defaults: ");
-            $includes = $line === '' ? $default : array_map('trim', explode(',', $line));
+    $files = collect_files($includes, $baseDir);
+    $rootExtras = $opts['root-extras'] ?? [];
+    if (empty($rootExtras)) {
+        echo "No root files specified. Please enter comma-separated root files to include (e.g. .env,cacert.pem,composer.json): ";
+        $line = trim(fgets(STDIN));
+        if ($line === '') {
+            echo "No root files will be included.\n";
+            $rootExtras = [];
+        } else {
+            $rootExtras = array_filter(array_map('trim', explode(',', $line)));
         }
-
-        $files = collect_files($includes, $baseDir);
-        $rootExtras = $opts['root-extras'] ?? ['.env', 'cacert.pem', 'composer.json', 'composer.lock'];
     }
     $rootAdd = [];
     foreach ($rootExtras as $fname) {
@@ -268,20 +280,6 @@ function build_phar(array $opts)
         } elseif (!empty($opts['stub-string'])) {
             $stub = $opts['stub-string'];
             echo "Using provided stub string.\n";
-        }
-
-        // If requested, include this builder script itself and use it as the stub
-        if (!empty($opts['self'])) {
-            $selfName = basename(__FILE__);
-            $selfPath = $baseDir . DIRECTORY_SEPARATOR . $selfName;
-            if (is_file($selfPath)) {
-                // ensure it's added at the PHAR root (rootAdd already contains it for self-build)
-                $stubFileRel = normalize_rel($selfName);
-                $stub = file_get_contents($selfPath);
-                echo "Including self as stub: {$selfName}\n";
-            } else {
-                echo "Warning: could not locate builder script to include as self.\n";
-            }
         }
 
         if ($stub === null) {
@@ -366,8 +364,49 @@ if (in_array($cmd, ['-h', '--help', 'help'])) {
 }
 
 if ($cmd === 'build') {
+
     $opts = [];
-    // parse remaining args
+    $baseDir = __DIR__;
+    $jsonPath = $baseDir . DIRECTORY_SEPARATOR . 'build-phar.json';
+    $jsonConfig = null;
+    $configDetected = false;
+    if (file_exists($jsonPath)) {
+        $jsonRaw = file_get_contents($jsonPath);
+        $jsonConfig = json_decode($jsonRaw, true);
+        if (is_array($jsonConfig)) {
+            $configDetected = true;
+            // Parse config
+            // Output name
+            if (!empty($jsonConfig['name'][0])) {
+                $opts['output'] = $jsonConfig['name'][0] . (substr($jsonConfig['name'][0], -5) === '.phar' ? '' : '.phar');
+            }
+            // Overwrite
+            if (isset($jsonConfig['override'])) {
+                $opts['force'] = (bool)$jsonConfig['override'];
+            }
+            // Includes
+            if (!empty($jsonConfig['path']) && is_array($jsonConfig['path'])) {
+                $opts['include'] = $jsonConfig['path'];
+            }
+            // Root files
+            if (!empty($jsonConfig['root']) && is_array($jsonConfig['root'])) {
+                $opts['root-extras'] = $jsonConfig['root'];
+            }
+            // Stub
+            if (!empty($jsonConfig['stub'][0])) {
+                $stubVal = $jsonConfig['stub'][0];
+                if (strpos($stubVal, '<?php') === 0) {
+                    $opts['stub-string'] = $stubVal;
+                } else {
+                    $opts['stub-file'] = $stubVal;
+                }
+            }
+        } else {
+            echo "build-phar.json exists but is not valid JSON.\n";
+        }
+    }
+
+    // parse remaining CLI args (override json if present)
     for ($i = 2; $i < $argc; $i++) {
         $arg = $argv[$i];
         if (strpos($arg, '--') === 0) {
@@ -381,9 +420,6 @@ if ($cmd === 'build') {
                     break;
                 case 'include':
                     $opts['include'] = array_map('trim', explode(',', $val));
-                    break;
-                case 'self':
-                    $opts['self'] = true;
                     break;
                 case 'stub-file':
                     $opts['stub-file'] = $val;
@@ -403,48 +439,22 @@ if ($cmd === 'build') {
         }
     }
 
-    build_phar($opts);
-    // mark TODO step complete
-    // (the manage_todo_list tool has already been used to create the plan)
-    exit(0);
-}
-
-if ($cmd === 'self-build') {
-    $opts = [];
-    // parse remaining args (same options as build, but force self=true)
-    for ($i = 2; $i < $argc; $i++) {
-        $arg = $argv[$i];
-        if (strpos($arg, '--') === 0) {
-            $pair = substr($arg, 2);
-            $parts = explode('=', $pair, 2);
-            $key = $parts[0];
-            $val = $parts[1] ?? '';
-            switch ($key) {
-                case 'output':
-                    $opts['output'] = $val;
-                    break;
-                case 'include':
-                    $opts['include'] = array_map('trim', explode(',', $val));
-                    break;
-                case 'stub-file':
-                    $opts['stub-file'] = $val;
-                    break;
-                case 'stub-string':
-                    $opts['stub-string'] = $val;
-                    break;
-                case 'root-extras':
-                    $opts['root-extras'] = array_filter(array_map('trim', explode(',', $val)));
-                    break;
-                case 'force':
-                    $opts['force'] = true;
-                    break;
-                default:
-                    echo "Unknown option: --{$key}\n";
-            }
+    // Nếu phát hiện config, hỏi người dùng muốn build tự động hay thủ công
+    if ($configDetected) {
+        echo "\nPhát hiện file cấu hình build-phar.json.\n";
+        echo "Bạn muốn build PHAR tự động theo cấu hình này không?\n";
+        echo "Chọn (a) để build tự động, (m) để build thủ công, (q) để thoát: ";
+        $choice = strtolower(trim(fgets(STDIN)));
+        if ($choice === 'q') {
+            echo "Đã hủy.\n";
+            exit(0);
+        } elseif ($choice === 'm') {
+            // Xóa các tùy chọn lấy từ config để buộc build thủ công
+            $opts = [];
         }
+        // Nếu chọn 'a' hoặc bất kỳ phím nào khác thì giữ nguyên opts
     }
-    // Always enable self inclusion for this command
-    $opts['self'] = true;
+
     build_phar($opts);
     exit(0);
 }

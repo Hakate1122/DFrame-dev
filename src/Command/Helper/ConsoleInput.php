@@ -5,6 +5,11 @@ namespace DFrame\Command\Helper;
 /**
  * ConsoleInput provides methods to prompt user input from the console,
  * including validation and special input types.
+ * 
+ * Example usage: 
+ * * ConsoleInput::prompt("Enter your name:");
+ * * ConsoleInput::askYesNo("Continue?", true);
+ * * ConsoleInput::select("Choose option:", ["1" => "One", "2" => "Two"], "1");
  */
 class ConsoleInput
 {
@@ -134,6 +139,8 @@ class ConsoleInput
 
     /**
      * Prompt for secret input (e.g., password) without echoing.
+     * 
+     * **Note:** Not working on Windows consoles.
      *
      * @param string $message The prompt message.
      * @param string|null $default The default value if input is empty.

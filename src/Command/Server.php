@@ -2,6 +2,8 @@
 
 namespace DFrame\Command;
 
+use DFrame\Application\App;
+
 /**
  * A command to start a local development server.
  *
@@ -18,6 +20,10 @@ class Server
     public static function server()
     {
         return function ($argv = []) {
+            if (App::isRunningFromPhar()) {
+                echo cli_red("Can't start the development server when running from a PHAR archive.\n\n");
+                exit(1);
+            }
             $opts = [];
             for ($i = 2; $i < count($argv); $i++) {
                 $arg = $argv[$i];

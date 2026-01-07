@@ -1,0 +1,24 @@
+{
+    "name": [
+        "DFrame"
+    ],
+    "override": true,
+    "path": [
+        "app",
+        "config",
+        "public",
+        "resource",
+        "src",
+        "vendor"
+    ],
+    "root": [
+        ".env",
+        "cacert.pem",
+        "composer.json",
+        "composer.lock",
+        "dli"
+    ],
+    "stub": [
+        "dli"
+    ]
+}
