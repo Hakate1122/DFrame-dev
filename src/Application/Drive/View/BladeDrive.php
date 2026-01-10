@@ -4,6 +4,9 @@ namespace DFrame\Application\Drive\View;
 
 use DFrame\Application\Interfaces\ViewEngine;
 
+/**
+ * BladeDrive View Engine using Blade templating engine.
+ */
 class BladeDrive implements ViewEngine
 {
     protected $viewPath;

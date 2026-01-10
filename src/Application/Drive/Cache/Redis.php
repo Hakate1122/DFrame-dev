@@ -3,8 +3,6 @@
 namespace DFrame\Application\Drive\Cache;
 
 /**
- * #### DFrame Redis Cache Driver
- *
  * A Redis-based cache driver for DFrame Framework.
  */
 class Redis

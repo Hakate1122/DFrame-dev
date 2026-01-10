@@ -4,6 +4,11 @@ namespace DFrame\Application;
 
 use DFrame\Command\Helper\CommandEntry;
 
+/**
+ * **Command Manager**
+ * 
+ * Command class for registering and executing CLI commands.
+ */
 class Command
 {
     public array $commands = [];

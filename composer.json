@@ -8,6 +8,7 @@
         "ext-openssl": "*",
         "ext-pdo": "*",
         "ext-mbstring": "*",
+        "ext-sockets": "*",
         "datahihi1/tiny-env": "^1",
         "datahihi1/tiny-env-encryptor": "^1",
         "psr/log": "^3",
@@ -16,8 +17,7 @@
     "autoload": {
         "psr-4": {
             "App\\": "app/",
-            "DFrame\\": "src/",
-            "DFrame\\Utils\\": "src/Kit/Utils/"
+            "DFrame\\": "src/"
         },
         "files": [
             "src/Application/helper/cli.php",
@@ -31,6 +31,7 @@
     },
     "scripts": {
         "CopyEnv": "@php -r \"if (file_exists('.env.test') && !file_exists('.env')) copy('.env.test', '.env');\"",
+        "TinyEnvEncryptorGenerateKey": "@php \"vendor/bin/tiny-env-encrypt generate\"",
         "post-install-cmd": [
             "@CopyEnv"
         ],

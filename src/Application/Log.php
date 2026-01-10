@@ -8,6 +8,8 @@ use Psr\Log\LogLevel;
 use \DateTime;
 
 /**
+ * **Application Logger**
+ * 
  * A simple logger implementation adhering to PSR-3 standards.
  * 
  * This logger writes log messages to a specified file with different log levels.

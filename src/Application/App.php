@@ -10,7 +10,7 @@ use Datahihi1\TinyEnv\TinyEnv;
 use Exception;
 
 /**
- * #### App Class is the core to boot and run the application.
+ * **Application Core**
  *
  * This class initializes and boot the application environment, sets up error handling,
  * loads environment variables, and configures reporting for errors, exceptions,
@@ -23,7 +23,7 @@ class App
      * Version of DFrame Framework.
      * @var string
      */
-    public const VERSION = '20260106-dev';
+    public const VERSION = '20260110-dev';
     /**
      * Alias for version constant
      */

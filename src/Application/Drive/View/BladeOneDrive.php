@@ -6,7 +6,7 @@ use DFrame\Application\Interfaces\ViewEngine;
 use eftec\bladeone\BladeOne;
 
 /**
- * #### Class BladeOneDrive for BladeOne view engine
+ * BladeOneDrive View Engine using BladeOne templating engine.
  */
 class BladeOneDrive implements ViewEngine
 {

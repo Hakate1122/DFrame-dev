@@ -5,7 +5,7 @@ namespace DFrame\Application;
 use Exception;
 
 /**
- * #### Class View to render views with data
+ * **View Rendering**
  *
  *  View class for rendering views with data and redirecting to a given URL or route name.
  * 

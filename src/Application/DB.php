@@ -9,7 +9,8 @@ use DFrame\Database\Adapter\PdoSqliteAdapter;
 use DFrame\Database\DatabaseManager;
 
 /**
- * #### Database handler
+ * **Database Handler**
+ * 
  * Database proxy to Mapper/Builder.
  *
  * The actual implementation behind this model depends on env('DB_DESIGN'):

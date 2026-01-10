@@ -1,9 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
 namespace DFrame\Application;
 
+/**
+ * **Resource Loader**
+ * 
+ * Resource class for loading static resources like CSS, JS, SCSS, and TS files
+ * from the `resource` directory.
+ */
 class Resource
 {
     private string $basePath;

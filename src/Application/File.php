@@ -4,6 +4,11 @@ namespace DFrame\Application;
 
 use Exception;
 
+/**
+ * **File Storage Handler**
+ * 
+ * File class for handling file storage operations with support for local and FTP drivers.
+ */
 class File
 {
     protected string $driver;        // local | ftp

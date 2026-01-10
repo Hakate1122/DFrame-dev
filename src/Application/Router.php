@@ -12,7 +12,7 @@ use ReflectionNamedType;
 use DFrame\Application\Middleware;
 
 /**
- * Router Attribute and Static Router Class
+ * **HTTP Router**
  * 
  * A simple HTTP router supporting static route registration,
  * attribute-based route definitions, middleware, and dependency injection.

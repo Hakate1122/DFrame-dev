@@ -3,8 +3,6 @@
 namespace DFrame\Application\Drive\Cache;
 
 /**
- * #### DFrame Memcached Cache Driver
- *
  * A Memcached-based cache driver for DFrame Framework.
  */
 class Memcached

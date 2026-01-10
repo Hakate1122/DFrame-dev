@@ -3,7 +3,7 @@
 namespace DFrame\Application;
 
 /**
- * #### Request class for handling HTTP requests.
+ * **HTTP Request Handler**
  *
  * Handles method, URI, GET, POST, JSON, headers, cookies and server info.
  */

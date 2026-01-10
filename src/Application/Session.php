@@ -3,139 +3,123 @@
 namespace DFrame\Application;
 
 /**
- * #### Session management class
- *
- * Handles starting sessions, getting/setting variables, flash messages,
- * error/success messages, and destroying sessions safely.
+ * **Session Management**
+ * 
+ * This class provides methods to manage user sessions, including basic
+ * session data, flash messages, and security features like session
+ * regeneration and destruction.
  */
-class Session
+final class Session
 {
-    /**
-     * Start the session if not already started
-     */
+    private const FLASH_KEY = '_flash';
+
     public static function start(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
+
+        self::ageFlash();
     }
 
-    /**
-     * Get a session variable
-     *
-     * @param string $key
-     * @param mixed $default
-     * @return mixed
-     */
-    public static function get(string $key, $default = null)
+    // ---basic session operations--- //
+
+    public static function get(string $key, mixed $default = null): mixed
     {
         self::start();
         return $_SESSION[$key] ?? $default;
     }
 
-    /**
-     * Set a session variable
-     *
-     * @param string $key
-     * @param mixed $value
-     */
-    public static function set(string $key, $value): void
+    public static function set(string $key, mixed $value): void
     {
         self::start();
         $_SESSION[$key] = $value;
     }
 
-    /**
-     * Flash a session variable (one-time)
-     *
-     * @param string $key
-     * @param mixed $value
-     */
-    public static function flash(string $key, $value): void
+    public static function has(string $key): bool
     {
         self::start();
-        $_SESSION['_flash'][$key] = $value;
+        return array_key_exists($key, $_SESSION);
     }
 
-    /**
-     * Get a flash variable and remove it
-     *
-     * @param string $key
-     * @param mixed $default
-     * @return mixed
-     */
-    public static function getFlash(string $key, $default = null)
+    public static function forget(string $key): void
     {
         self::start();
-        if (isset($_SESSION['_flash'][$key])) {
-            $value = $_SESSION['_flash'][$key];
-            unset($_SESSION['_flash'][$key]);
-            return $value;
+        unset($_SESSION[$key]);
+    }
+
+    // ---flash message operations--- //
+
+    public static function flash(string $key, mixed $value): void
+    {
+        self::start();
+        $_SESSION[self::FLASH_KEY]['new'][$key] = $value;
+    }
+
+    public static function getFlash(string $key, mixed $default = null): mixed
+    {
+        self::start();
+
+        if (isset($_SESSION[self::FLASH_KEY]['old'][$key])) {
+            return $_SESSION[self::FLASH_KEY]['old'][$key];
         }
+
         return $default;
     }
 
-    /**
-     * Set an error message
-     *
-     * @param string $message
-     */
-    public static function withError(string $message): void
+    private static function ageFlash(): void
     {
-        self::start();
-        $_SESSION['_error'] = $message;
+        $_SESSION[self::FLASH_KEY]['old'] =
+            $_SESSION[self::FLASH_KEY]['new'] ?? [];
+
+        $_SESSION[self::FLASH_KEY]['new'] = [];
     }
 
-    /**
-     * Set a success message
-     *
-     * @param string $message
-     */
-    public static function withSuccess(string $message): void
+    // ---convenience methods for common flash types--- //
+
+    public static function error(string $message): void
     {
-        self::start();
-        $_SESSION['_success'] = $message;
+        self::flash('error', $message);
     }
 
-    /**
-     * Get the error message (optional)
-     *
-     * @return string|null
-     */
+    public static function success(string $message): void
+    {
+        self::flash('success', $message);
+    }
+
     public static function getError(): ?string
     {
-        return self::get('_error');
+        return self::getFlash('error');
     }
 
-    /**
-     * Get the success message (optional)
-     *
-     * @return string|null
-     */
     public static function getSuccess(): ?string
     {
-        return self::get('_success');
+        return self::getFlash('success');
     }
 
-    /**
-     * Destroy the session safely
-     */
+    // ---security methods--- //
+
+    public static function regenerate(): void
+    {
+        self::start();
+        session_regenerate_id(true);
+    }
+
     public static function destroy(): void
     {
         self::start();
-
         $_SESSION = [];
 
-        if (ini_get("session.use_cookies")) {
+        if (ini_get('session.use_cookies')) {
             $params = session_get_cookie_params();
             setcookie(
                 session_name(),
                 '',
                 time() - 42000,
-                $params["path"],
-                $params["domain"],
-                $params["secure"],
-                $params["httponly"]
+                $params['path'],
+                $params['domain'],
+                $params['secure'],
+                $params['httponly']
             );
         }
 

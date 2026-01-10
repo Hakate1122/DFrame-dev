@@ -5,7 +5,7 @@ namespace DFrame\Application;
 use RuntimeException;
 
 /**
- * #### Class Hash extends from password PHP functions
+ * **Hashing Utility**
  *
  * A simple utility class for hashing and verifying strings using default, bcrypt.
  */

@@ -2,6 +2,12 @@
 
 namespace DFrame\Application;
 
+/**
+ * **Data Validator**
+ * 
+ * Validator class for validating data against a set of rules.
+ * Supports basic validation rules and file upload validation rules.
+ */
 class Validator
 {
     /**
