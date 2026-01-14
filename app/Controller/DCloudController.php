@@ -6,7 +6,7 @@ class DCloudController extends Controller
 {
     protected function getSourceDir(): string
     {
-        return INDEX_DIR . 'source';
+        return INDEX_DIR . 'cloud';
     }
 
     public function index()

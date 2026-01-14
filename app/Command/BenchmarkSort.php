@@ -14,6 +14,7 @@ use DFrame\Utils\Sorting\QuickSort;
 use DFrame\Utils\Sorting\RadixSort;
 use DFrame\Utils\Sorting\SelectionSort;
 use DFrame\Utils\Sorting\ShellSort;
+use DFrame\Utils\Sorting\BogoSort;
 
 class BenchmarkSort
 {
@@ -32,9 +33,10 @@ class BenchmarkSort
             'CountSort' => CountSort::class,
             'RadixSort' => RadixSort::class,
             'ArrayKeysSort' => ArrayKeysSort::class,
+            // 'BogoSort' => BogoSort::class,
         ];
 
-        $defaultSizes = [100, 1000, 5000];
+        $defaultSizes = [1, 10, 20];
         $sizes = $defaultSizes;
         // Use $_SERVER['argv'] for CLI arguments to avoid undefined $argv
         $cliArgs = isset($_SERVER['argv']) ? $_SERVER['argv'] : [];

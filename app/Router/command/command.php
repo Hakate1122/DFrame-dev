@@ -3,6 +3,8 @@
 use Datahihi1\RakNet\RakNetServer;
 use DFrame\Command\Helper\ConsoleInput as Input;
 use DFrame\Command\Helper\ConsoleOutput as Output;
+use App\Chat\Chat;
+use DFrame\Utils\Math\Pi;
 
 $cli->register('hello', [\App\Command\Hello::class, 'handle']);
 $cli->register('choice', [\App\Command\Hello::class, 'choice']);
@@ -49,3 +51,22 @@ $cli->register('send:mail', function () {
     }
 });
 $cli->register('benchmark:sort', [\App\Command\BenchmarkSort::class, 'handle']);
+
+$cli->register('websocket:server', function () {
+
+    // Parse command line arguments
+    $options = getopt('', ['host:', 'port:']);
+    $host = $options['host'] ?? '0.0.0.0';
+    $port = isset($options['port']) ? (int)$options['port'] : 9501;
+
+    // Create and start the WebSocket server
+    $chat = new Chat($host, $port);
+    $chat->start();
+
+});
+
+$cli->register('math:pi', function () {
+echo "M_PI: " . Pi::default() . PHP_EOL;
+echo "Leibniz (100000 iters): " . Pi::leibniz(100000) . PHP_EOL;
+echo "High precision (1050 digits): " . Pi::highPrecision(1050) . PHP_EOL;
+});
