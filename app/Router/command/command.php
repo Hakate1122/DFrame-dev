@@ -27,7 +27,6 @@ $cli->register('minesv:ping', function () {
     }
     $client->close();
 });
-
 $cli->register('minesv:run', function () {
     $motd = 'MCPE;Demo MOTD;2;0.2.0;0;20;1234567890';
     $port = '19132';
@@ -38,35 +37,46 @@ $cli->register('minesv:run', function () {
 $cli->register('jsondb', [\App\Command\JsonDBCommand::class, 'handle']);
 
 $cli->register('send:mail', function () {
-    try{
-    $mail = new DFrame\Application\Mail();
-    $mail   ->to(email: 'datd5400@gmail.com')
+    try {
+        $mail = new DFrame\Application\Mail();
+        $mail->to(email: 'datd5400@gmail.com')
             ->subject(subject: 'Test Email from DFrame Mailer 2.0')
             ->body('This is a test email sent from DFrame Mailer 2.0.');
-    $mail->send();
-    echo cli_green("Email sent successfully.\n");
-    }
-    catch(Exception $e){
+        $mail->send();
+        echo cli_green("Email sent successfully.\n");
+    } catch (Exception $e) {
         echo cli_red("Failed to send email: " . $e->getMessage() . "\n");
     }
 });
+
 $cli->register('benchmark:sort', [\App\Command\BenchmarkSort::class, 'handle']);
 
 $cli->register('websocket:server', function () {
 
-    // Parse command line arguments
     $options = getopt('', ['host:', 'port:']);
     $host = $options['host'] ?? '0.0.0.0';
     $port = isset($options['port']) ? (int)$options['port'] : 9501;
 
-    // Create and start the WebSocket server
     $chat = new Chat($host, $port);
     $chat->start();
-
 });
 
 $cli->register('math:pi', function () {
-echo "M_PI: " . Pi::default() . PHP_EOL;
-echo "Leibniz (100000 iters): " . Pi::leibniz(100000) . PHP_EOL;
-echo "High precision (1050 digits): " . Pi::highPrecision(1050) . PHP_EOL;
+    echo "M_PI: " . Pi::default() . PHP_EOL;
+    echo "Leibniz (100000 iters): " . Pi::leibniz(100000) . PHP_EOL;
+    echo "High precision (1050 digits): " . Pi::highPrecision(1050) . PHP_EOL;
+});
+$cli->register('math:delta', function () {
+    $a = (float) Input::prompt('Enter first number (a):', '10.5');
+    $b = (float) Input::prompt('Enter second number (b):', '7.3');
+
+    $absoluteDelta = DFrame\Utils\Math\Delta::absolute($a, $b);
+    Output::info("Absolute difference between $a and $b is: $absoluteDelta");
+
+    try {
+        $relativeDelta = DFrame\Utils\Math\Delta::relative($a, $b);
+        Output::info("Relative difference between $a and $b is: $relativeDelta%");
+    } catch (\InvalidArgumentException $e) {
+        Output::error($e->getMessage());
+    }
 });

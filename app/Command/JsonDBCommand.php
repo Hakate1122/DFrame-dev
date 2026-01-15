@@ -38,7 +38,6 @@ class JsonDBCommand
                             foreach ($all as $row) {
                                 Output::info(json_encode($row, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . PHP_EOL);
                             }
-                            // Wait for user to press Enter to continue
                             Input::prompt("Press Enter to continue...", null, function () {
                                 return true;
                             });

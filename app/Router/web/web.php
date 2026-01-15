@@ -30,9 +30,9 @@ $router->group('/demo')::action(function (DFrame\Application\Router $router) {
 });
 
 
-$router->sign('GET /demo/ws', function () {
-    return View::render('demo/ws');
-})->name('demo.ws');
+$router->sign('GET /ws/chat', function () {
+    return View::render('ws/chat');
+})->name('ws.chat');
 
 $router->sign('GET /sitemap.xml', [\App\Controller\SitemapController::class, 'index'])->name('sitemap');
 

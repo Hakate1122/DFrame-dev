@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dino Chrome ES5 Edition</title>
     <style>
-        /* CSS hỗ trợ trình duyệt cũ (Chrome 30+) */
         * { -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box; }
         body { 
             margin: 0; padding: 0; overflow: hidden; 
@@ -14,7 +13,7 @@
             display: flex; justify-content: center; align-items: center; height: 100vh;
         }
         #game-container {
-            width: 100%; max-width: 600px; /* Responsive tối đa 600px */
+            width: 100%; max-width: 600px;
             min-width: 320px; position: relative;
             background: #fff; border: 1px solid #ddd;
         }
@@ -39,10 +38,6 @@
 </div>
 
 <script>
-/**
- * DINO GAME - ES5 VERSION
- * Giải thích: Sử dụng Constructor Function & Prototype cho hiệu năng tốt trên máy cũ.
- */
 (function() {
     var canvas = document.getElementById('dinoCanvas');
     var ctx = canvas.getContext('2d');
@@ -50,7 +45,6 @@
     var highDisplay = document.getElementById('high-score');
     var gameOverScreen = document.getElementById('game-over');
 
-    // Thiết lập kích thước cố định cho logic, CSS sẽ tự scale hiển thị (Responsive)
     var GAME_WIDTH = 600;
     var GAME_HEIGHT = 150;
     canvas.width = GAME_WIDTH;
@@ -63,7 +57,6 @@
     var isPlaying = true;
     var obstacles = [];
 
-    // --- ĐỐI TƯỢNG DINO ---
     function Dino() {
         this.width = 40;
         this.height = 40;
@@ -100,7 +93,6 @@
         }
     };
 
-    // --- ĐỐI TƯỢNG VẬT CẢN (XƯƠNG RỒNG) ---
     function Cactus() {
         this.width = 15 + Math.random() * 20;
         this.height = 20 + Math.random() * 30;
@@ -117,7 +109,6 @@
         this.x -= gameSpeed;
     };
 
-    // --- KHỞI TẠO ---
     var player = new Dino();
 
     function spawnObstacle() {
@@ -141,13 +132,11 @@
         update();
     }
 
-    // --- VÒNG LẶP GAME (GAME LOOP) ---
     function update() {
         if (!isPlaying) return;
 
         ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
 
-        // Vẽ đường đất
         ctx.beginPath();
         ctx.moveTo(0, GAME_HEIGHT - 5);
         ctx.lineTo(GAME_WIDTH, GAME_HEIGHT - 5);
@@ -163,7 +152,6 @@
             obstacles[i].update();
             obstacles[i].draw();
 
-            // Kiểm tra va chạm (AABB Collision)
             if (player.x < obstacles[i].x + obstacles[i].width &&
                 player.x + player.width > obstacles[i].x &&
                 player.y < obstacles[i].y + obstacles[i].height &&
@@ -175,16 +163,14 @@
                 gameOverScreen.style.display = 'block';
             }
 
-            // Xóa vật cản đã trôi qua
             if (obstacles[i].x + obstacles[i].width < 0) {
                 obstacles.splice(i, 1);
                 score++;
                 scoreDisplay.innerHTML = formatScore(score);
-                if (score % 10 === 0) gameSpeed += 0.2; // Tăng độ khó
+                if (score % 10 === 0) gameSpeed += 0.2;
             }
         }
 
-        // Tương thích trình duyệt cũ
         var requestAnimationFrame = window.requestAnimationFrame || 
                                    window.webkitRequestAnimationFrame || 
                                    window.mozRequestAnimationFrame || 
@@ -192,7 +178,6 @@
         requestAnimationFrame(update);
     }
 
-    // --- XỬ LÝ SỰ KIỆN (DESKTOP & MOBILE) ---
     function handleInput(e) {
         if (!isPlaying) {
             resetGame();
@@ -205,8 +190,7 @@
     window.addEventListener('keydown', function(e) {
         if (e.keyCode === 32 || e.keyCode === 38) handleInput();
     });
-    
-    // Hỗ trợ cảm ứng cho Mobile
+
     canvas.addEventListener('touchstart', handleInput);
 
     update();

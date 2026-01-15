@@ -11,8 +11,6 @@ class Chat extends WebSocket{
 
     protected function onClose(\Socket $client): void
     {
-        // Client đã được xóa trong disconnect() của WebSocket
-        // Chỉ cần gửi thông báo
         $this->sendMessageToAll("A user has left the chat.");
     }
 

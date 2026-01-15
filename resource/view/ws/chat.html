@@ -16,7 +16,6 @@
     <button onclick="sendMessage()">Send</button>
 
     <script>
-        // Kết nối WebSocket (thay đổi host và port theo server của bạn)
         const ws = new WebSocket('ws://localhost:9501');
 
         ws.onopen = function() {
@@ -53,7 +52,6 @@
             messages.scrollTop = messages.scrollHeight;
         }
 
-        // Gửi tin nhắn khi nhấn Enter
         document.getElementById('messageInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 sendMessage();
