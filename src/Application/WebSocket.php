@@ -40,7 +40,7 @@ class WebSocket
         socket_bind($this->master, $this->host, $this->port);
         socket_listen($this->master);
 
-        if(PHP_SAPI === 'cli') {
+        if (PHP_SAPI === 'cli') {
             echo "WebSocket server started at ws://{$this->host}:{$this->port}\n";
         }
 
@@ -61,7 +61,6 @@ class WebSocket
                 continue;
             }
 
-            // New connection
             if (in_array($this->master, $read, true)) {
                 $client = socket_accept($this->master);
                 if ($client && $this->handshake($client)) {
@@ -73,17 +72,14 @@ class WebSocket
                 unset($read[array_search($this->master, $read, true)]);
             }
 
-            // Existing clients
             foreach ($read as $client) {
-                // Skip master socket
                 if ($client === $this->master) {
                     continue;
                 }
-                
+
                 $frame = $this->readFrame($client);
 
                 if ($frame === null) {
-                    // Check if client is still connected
                     $socketError = socket_get_option($client, SOL_SOCKET, SO_ERROR);
                     if ($socketError !== 0) {
                         $this->disconnect($client);
@@ -120,7 +116,34 @@ class WebSocket
      */
     private function handshake($client): bool
     {
-        $request = socket_read($client, 2048);
+        $request = '';
+        $maxHeaderSize = 8192;
+        socket_set_nonblock($client);
+        $start = microtime(true);
+        while (strpos($request, "\r\n\r\n") === false && strlen($request) < $maxHeaderSize) {
+            $part = @socket_read($client, 2048);
+            if ($part === false) {
+                $err = socket_last_error($client);
+                if ($err === SOCKET_EWOULDBLOCK || $err === SOCKET_EAGAIN) {
+                    if (microtime(true) - $start > 2.0) break;
+                    usleep(10000);
+                    continue;
+                }
+                $this->logSocketError('handshake read failed', $err);
+                socket_set_block($client);
+                return false;
+            }
+
+            if ($part === '') {
+                socket_set_block($client);
+                return false;
+            }
+
+            $request .= $part;
+            if (microtime(true) - $start > 5.0) break;
+        }
+        socket_set_block($client);
+
         if (!$request) return false;
 
         if (
@@ -142,7 +165,11 @@ class WebSocket
             "Connection: Upgrade\r\n" .
             "Sec-WebSocket-Accept: {$accept}\r\n\r\n";
 
-        socket_write($client, $response);
+        $sent = @socket_write($client, $response);
+        if ($sent === false) {
+            $this->logSocketError('handshake write failed', socket_last_error($client));
+            return false;
+        }
         return true;
     }
 
@@ -162,7 +189,7 @@ class WebSocket
         if ($data === false || $data === '') {
             return null;
         }
-        
+
         if (strlen($data) < 2) {
             return null;
         }
@@ -175,10 +202,9 @@ class WebSocket
         $masked = ($byte2 & 0x80) !== 0;
         $len = $byte2 & 0x7F;
 
-        // Fragmented frame not supported
         if (!$fin) return null;
 
-        if (!$masked) return null; // client must mask
+        if (!$masked) return null;
 
         $offset = 2;
 
@@ -220,7 +246,7 @@ class WebSocket
      */
     protected function send($client, string $message): void
     {
-        $frame = chr(0x81); // FIN + TEXT
+        $frame = chr(0x81);
         $len = strlen($message);
 
         if ($len <= 125) {
@@ -240,7 +266,8 @@ class WebSocket
             $sent = @socket_write($client, $chunk);
 
             if ($sent === false) {
-                // Failed to write: disconnect client and stop sending
+                $err = socket_last_error($client);
+                $this->logSocketError('send failed', $err);
                 $this->disconnect($client);
                 return;
             }
@@ -260,7 +287,23 @@ class WebSocket
         $data = chr(0x8A) . chr(0x00);
         $sent = @socket_write($client, $data);
         if ($sent === false) {
+            $err = socket_last_error($client);
+            $this->logSocketError('sendPong failed', $err);
             $this->disconnect($client);
+        }
+    }
+
+    /**
+     * Log a socket error to stdout with human readable message.
+     */
+    private function logSocketError(string $context, int $errno): void
+    {
+        $msg = socket_strerror($errno);
+        $time = (new \DateTime())->format('H:i:s');
+        if (PHP_SAPI === 'cli') {
+            echo "[{$time}] Socket error ({$context}): ({$errno}) {$msg}\n";
+        } else {
+            error_log("Socket error ({$context}): ({$errno}) {$msg}");
         }
     }
 
@@ -274,7 +317,7 @@ class WebSocket
     protected function broadcast(string $message, $except = null): void
     {
         $exceptId = $except ? spl_object_id($except) : null;
-        
+
         foreach ($this->clients as $client) {
             $clientId = spl_object_id($client);
             if ($clientId !== $exceptId) {
