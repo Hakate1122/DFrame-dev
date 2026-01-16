@@ -16,12 +16,23 @@ class WebSocket
     protected string $host;
     protected int $port;
 
+    /**
+     * Constructor to init new WebSocket server instance.
+     *
+     * @param string $host The host address to bind the server to.
+     * @param int $port The port number to listen on.
+     */
     public function __construct(string $host = '0.0.0.0', int $port = 9501)
     {
         $this->host = $host;
         $this->port = $port;
     }
 
+    /**
+     * Start the WebSocket server.
+     *
+     * @return void
+     */
     public function start(): void
     {
         $this->master = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
@@ -37,6 +48,7 @@ class WebSocket
     }
 
     /**
+     * Main server loop to handle connections and messages.
      * @return never
      */
     private function loop()
@@ -100,6 +112,12 @@ class WebSocket
     // RFC 6455 HANDSHAKE
     // ─────────────────────────────────────────────
 
+    /**
+     * Perform the WebSocket handshake with a client.
+     *
+     * @param \Socket $client The client socket.
+     * @return bool True on successful handshake, false otherwise.
+     */
     private function handshake($client): bool
     {
         $request = socket_read($client, 2048);
@@ -132,6 +150,12 @@ class WebSocket
     // FRAME PARSING (RFC 6455)
     // ─────────────────────────────────────────────
 
+    /**
+     * Read and parse a WebSocket frame from a client.
+     *
+     * @param \Socket $client The client socket.
+     * @return array|null Parsed frame data or null on failure.
+     */
     private function readFrame($client): ?array
     {
         $data = @socket_read($client, 2048, PHP_BINARY_READ);
@@ -187,6 +211,13 @@ class WebSocket
     // SEND FRAME
     // ─────────────────────────────────────────────
 
+    /**
+     * Send a text message to a client.
+     *
+     * @param \Socket $client The client socket.
+     * @param string $message The message to send.
+     * @return void
+     */
     protected function send($client, string $message): void
     {
         $frame = chr(0x81); // FIN + TEXT
@@ -200,14 +231,46 @@ class WebSocket
             $frame .= chr(127) . pack('J', $len);
         }
 
-        socket_write($client, $frame . $message);
+        $data = $frame . $message;
+        $total = strlen($data);
+        $written = 0;
+
+        while ($written < $total) {
+            $chunk = substr($data, $written);
+            $sent = @socket_write($client, $chunk);
+
+            if ($sent === false) {
+                // Failed to write: disconnect client and stop sending
+                $this->disconnect($client);
+                return;
+            }
+
+            $written += $sent;
+        }
     }
 
+    /**
+     * Send a Pong frame to a client in response to a Ping.
+     *
+     * @param \Socket $client The client socket.
+     * @return void
+     */
     private function sendPong($client): void
     {
-        socket_write($client, chr(0x8A) . chr(0x00));
+        $data = chr(0x8A) . chr(0x00);
+        $sent = @socket_write($client, $data);
+        if ($sent === false) {
+            $this->disconnect($client);
+        }
     }
 
+    /**
+     * Broadcast a message to all connected clients except the sender.
+     *
+     * @param string $message The message to broadcast.
+     * @param \Socket|null $except The client socket to exclude from broadcasting.
+     * @return void
+     */
     protected function broadcast(string $message, $except = null): void
     {
         $exceptId = $except ? spl_object_id($except) : null;
@@ -220,6 +283,12 @@ class WebSocket
         }
     }
 
+    /**
+     * Disconnect a client and clean up resources.
+     *
+     * @param \Socket $client The client socket to disconnect.
+     * @return void
+     */
     private function disconnect($client): void
     {
         $this->onClose($client);
@@ -231,16 +300,35 @@ class WebSocket
     // EVENTS
     // ─────────────────────────────────────────────
 
+    /**
+     * Handle new client connection.
+     *
+     * @param \Socket $client The client socket.
+     * @return void
+     */
     protected function onOpen(\Socket $client): void
     {
         echo "Client connected\n";
     }
 
+    /**
+     * Handle incoming message from a client.
+     *
+     * @param \Socket $client The client socket.
+     * @param string $message The received message.
+     * @return void
+     */
     protected function onMessage(\Socket $client, string $message): void
     {
         $this->broadcast("Client says: $message", $client);
     }
 
+    /**
+     * Handle client disconnection.
+     *
+     * @param \Socket $client The client socket.
+     * @return void
+     */
     protected function onClose(\Socket $client): void
     {
         echo "Client disconnected\n";

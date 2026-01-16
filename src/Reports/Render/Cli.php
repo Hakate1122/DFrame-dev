@@ -22,7 +22,7 @@ class Cli implements RenderInterface
     {
         $dfversion = class_exists(\DFrame\Application\App::class)
         ? \DFrame\Application\App::VERSION
-        : 'Non-DFrame Environment';
+        : 'Non-DFrame Env';
         
         $phpversion = PHP_VERSION;
         
@@ -40,7 +40,8 @@ class Cli implements RenderInterface
         echo "$color Message: $reset$message" . PHP_EOL;
         echo "$color File:    $reset$file" . PHP_EOL;
         echo "$color Line:    $reset$line" . PHP_EOL;
-        echo "$color Time:    $reset" . date('Y-m-d H:i:s') . PHP_EOL;
+        $dt = new \DateTime('now', new \DateTimeZone(env('APP_TIMEZONE', 'UTC')));
+        echo "$color Time:    $reset" . $dt->format('Y-m-d H:i:s') . " - " . env('APP_TIMEZONE', 'UTC') . PHP_EOL;
 
         if (!empty($context['code'])) {
             echo "$color Code:    $reset" . $context['code'] . PHP_EOL;
