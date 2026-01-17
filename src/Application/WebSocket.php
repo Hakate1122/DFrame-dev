@@ -338,11 +338,7 @@ class WebSocket
         unset($this->clients[spl_object_id($client)]);
         @socket_close($client);
     }
-
     // ─────────────────────────────────────────────
-    // EVENTS
-    // ─────────────────────────────────────────────
-
     /**
      * Handle new client connection.
      *

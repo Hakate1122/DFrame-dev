@@ -42,9 +42,29 @@ class Server
                 }
             }
 
+
+            $appUrl = null;
+            if (function_exists('env')) {
+                $appUrl = env('APP_URL', null);
+            } elseif (getenv('APP_URL')) {
+                $appUrl = getenv('APP_URL');
+            }
+
             $mode = strtolower($opts['mode'] ?? $opts['m'] ?? 'lan');
             $port = (int)($opts['port'] ?? $opts['p'] ?? 8000);
             $bind = $opts['bind'] ?? null;
+
+            if ($appUrl) {
+                $parsed = parse_url($appUrl);
+                if (isset($parsed['host'])) {
+                    $bind = $bind ?? $parsed['host'];
+                }
+                if (isset($parsed['port'])) {
+                    $port = $port ?: $parsed['port'];
+                } elseif (isset($parsed['scheme']) && $parsed['scheme'] === 'https') {
+                    $port = $port ?: 443;
+                }
+            }
 
             $detectLanIp = function (): string {
                 $ip = gethostbyname(gethostname());
@@ -72,14 +92,18 @@ class Server
             };
 
             $public = defined('INDEX_DIR') ? INDEX_DIR : __DIR__ . '/../../public';
+
             if ($mode === 'local' || $mode === 'localhost') {
                 $bindHost = $bind ?? '127.0.0.1';
                 $displayHost = $bindHost === '0.0.0.0' ? '127.0.0.1' : $bindHost;
             } else {
-
                 $bindHost = $bind ?? '0.0.0.0';
-                $detected = $detectLanIp();
-                $displayHost = ($detected === '0.0.0.0') ? 'localhost' : $detected;
+                if ($appUrl && isset($parsed['host'])) {
+                    $displayHost = $parsed['host'];
+                } else {
+                    $detected = $detectLanIp();
+                    $displayHost = ($detected === '0.0.0.0') ? 'localhost' : $detected;
+                }
             }
 
             echo "Starting development server (mode: $mode)\n";

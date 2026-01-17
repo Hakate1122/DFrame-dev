@@ -5,7 +5,6 @@ namespace DFrame\Application;
 use DFrame\Application\Router;
 use DFrame\Application\Session;
 use DFrame\Command\Register;
-use DFrame\Reports\Report;
 use Datahihi1\TinyEnv\TinyEnv;
 use Exception;
 
@@ -23,7 +22,7 @@ class App
      * Version of DFrame Framework.
      * @var string
      */
-    public const VERSION = '20260116-dev';
+    public const VERSION = '20260117-dev';
     /**
      * Alias for version constant
      */
@@ -373,13 +372,7 @@ class App
                 if (!headers_sent()) {
                     http_response_code(500);
                 }
-                $path = ROOT_DIR . 'src/Kit/helper/default_pages.php';
-                if (file_exists($path)) {
-                    require_once $path;
-                    echo function_exists('get500pages') ? get500pages() : 'Internal Server Error';
-                } else {
-                    echo 'Internal Server Error';
-                }
+                echo function_exists('get500pages') ? get500pages() : 'Internal Server Error';
                 if (is_object($e) || is_string($e)) {
                     error_log((string) $e);
                 }
@@ -390,13 +383,7 @@ class App
                 if (!headers_sent()) {
                     http_response_code(500);
                 }
-                $path = ROOT_DIR . 'src/Kit/helper/default_pages.php';
-                if (file_exists($path)) {
-                    require_once $path;
-                    echo function_exists('get500pages') ? get500pages() : 'Internal Server Error';
-                } else {
-                    echo 'Internal Server Error';
-                }
+                echo function_exists('get500pages') ? get500pages() : 'Internal Server Error';
                 error_log("PHP Error: [{$severity}] {$message} in {$file} on line {$line}");
                 exit(1);
             });
@@ -408,12 +395,7 @@ class App
                         http_response_code(500);
                     }
                     $path = ROOT_DIR . 'src/Kit/helper/default_pages.php';
-                    if (file_exists($path)) {
-                        require_once $path;
-                        echo function_exists('get500pages') ? get500pages() : 'Internal Server Error';
-                    } else {
-                        echo 'Internal Server Error';
-                    }
+                    echo function_exists('get500pages') ? get500pages() : 'Internal Server Error';
                 }
             });
         } else {

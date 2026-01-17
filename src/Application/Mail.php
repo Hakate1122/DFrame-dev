@@ -59,7 +59,7 @@ class Mail
         return str_replace(["\r", "\n"], "", trim($string));
     }
 
-    // --- Networking Helpers ---
+    /* ----- SMTP Communication Helpers ----- */
 
     private function sendLine($fp, string $line): void
     {
@@ -80,7 +80,7 @@ class Mail
         }
     }
 
-    // --- Recipient Methods ---
+    /* ----- Recipient Methods ----- */
 
     /**
      * Add a recipient email address
@@ -109,7 +109,7 @@ class Mail
         return $this;
     }
 
-    // --- Content Methods ---
+    /* ----- Email Content Methods ----- */
 
     /**
      * Set the email subject
@@ -168,7 +168,7 @@ class Mail
         return $this;
     }
 
-    // --- Main Logic ---
+    /* ----- Send Email ----- */
 
     /**
      * Send the email via SMTP

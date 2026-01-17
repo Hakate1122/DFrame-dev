@@ -33,7 +33,7 @@ class Router
     private mixed $request;
     private array $container = [];
 
-    /** ---------- STATIC REGISTRATION ---------- */
+    /** ----- STATIC REGISTRATION ----- */
     private static array $staticRoutes = [
         'GET' => [],
         'POST' => [],
@@ -85,7 +85,7 @@ class Router
         $this->globalApiMiddleware[] = $mw;
     }
 
-    /* -------------------------- STATIC ROUTE REGISTRATION -------------------------- */
+    /* ----- STATIC ROUTE REGISTRATION ----- */
     private static function parseRouteSpec(string $spec): array
     {
         if (!preg_match('#^([A-Z|]+)\s+(.+)$#', trim($spec), $m)) {
@@ -194,7 +194,7 @@ class Router
         return new self();
     }
 
-    /* -------------------------- GROUPING -------------------------- */
+    /* ----- GROUPING ----- */
     /**
      * Start a route group with a common prefix.
      * @param string $prefix The route prefix for the group.
@@ -291,7 +291,7 @@ class Router
         return new self();
     }
 
-    /* -------------------------- ATTRIBUTE SCANNER -------------------------- */
+    /* ----- ATTRIBUTE SCANNER ----- */
     /**
      * Scan controller classes for route attributes and register them.
      * @param array $controllers List of controller class names to scan.
@@ -636,7 +636,7 @@ class Router
         return str_starts_with($p, 'api/') ? '/' . $p : '/api/' . $p;
     }
 
-    /* -------------------------- URL GENERATOR -------------------------- */
+    /* ----- URL GENERATOR ----- */
     public static function route(string $name, array $params = [], ?string $base = null): ?string
     {
         if (!isset(self::$routeNames[$name])) {

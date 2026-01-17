@@ -14,18 +14,15 @@ class BladeOneDrive implements ViewEngine
 
     public function __construct($viewPath, $options = [])
     {
-        // Respect explicit "cache" option; if false => disable cache
         $useCache = $options['cache'] ?? true;
 
         $cachePath = null;
         if ($useCache) {
-            // prefer cache_path, fallback to compiled_path for backward compatibility
             $cachePath = $options['cache_path'] ?? $options['compiled_path'] ?? (defined('INDEX_DIR') ? INDEX_DIR . 'cache/' : null);
         } else {
             $cachePath = null;
         }
 
-        // Ensure cache dir exists and is writable
         if ($cachePath) {
             if (!is_dir($cachePath)) {
                 if (false === @mkdir($cachePath, 0777, true)) {

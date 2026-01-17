@@ -22,7 +22,7 @@ final class Session
         self::ageFlash();
     }
 
-    // ---basic session operations--- //
+    /* ----- Basic Session Methods ----- */
 
     public static function get(string $key, mixed $default = null): mixed
     {
@@ -48,7 +48,7 @@ final class Session
         unset($_SESSION[$key]);
     }
 
-    // ---flash message operations--- //
+    /* ----- Flash Message Methods ----- */
 
     public static function flash(string $key, mixed $value): void
     {
@@ -75,7 +75,7 @@ final class Session
         $_SESSION[self::FLASH_KEY]['new'] = [];
     }
 
-    // ---convenience methods for common flash types--- //
+    /* ----- Convenience Flash Methods ----- */
 
     public static function error(string $message): void
     {
@@ -97,7 +97,7 @@ final class Session
         return self::getFlash('success');
     }
 
-    // ---security methods--- //
+    /* ----- Security Methods ----- */
 
     public static function regenerate(): void
     {

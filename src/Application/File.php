@@ -26,9 +26,7 @@ class File
         }
     }
 
-    /*
-     * ------------- COMMON UTIL -------------
-     */
+    /* ----- COMMON UTIL ----- */
     protected function fullPath(string $path): string
     {
         return $this->root . '/' . ltrim($path, '/');
@@ -57,9 +55,7 @@ class File
         return $this->fullPath($path);
     }
 
-    /*
-     * ------------- READ / WRITE -------------
-     */
+    /* ----- READ / WRITE ----- */
     public function read(string $path): string
     {
         if ($this->driver === 'local') {
@@ -89,9 +85,7 @@ class File
         return $this->write($path, $old . $content);
     }
 
-    /*
-     * ------------- LOCAL HELPER -------------
-     */
+    /* ----- LOCAL HELPER ----- */
     protected function ensureDir(string $dir): void
     {
         if (!is_dir($dir)) {
@@ -99,9 +93,7 @@ class File
         }
     }
 
-    /*
-     * ------------- FTP ZONE -------------
-     */
+    /* ----- FTP ZONE ----- */
     protected function connectFTP(array $config): void
     {
         $this->ftp = ftp_connect(

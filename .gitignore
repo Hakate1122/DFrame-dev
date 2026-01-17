@@ -12,3 +12,4 @@ node_modules/
 public/source/videos/
 *.log
 benchmark_results.json
+*.phar

@@ -1,7 +1,4 @@
 <?php
-// CLI helper functions can be added here
-
-// basic echo on CLI environment
 if (!function_exists('cli_echo')) {
     /**
      * Echo a message to the CLI.
@@ -16,7 +13,6 @@ if (!function_exists('cli_echo')) {
     }
 }
 
-// green text in CLI
 if (!function_exists('cli_green')) {
     /**
      * Return a green colored message (do not echo).
@@ -31,7 +27,6 @@ if (!function_exists('cli_green')) {
     }
 }
 
-// red text in CLI
 if (!function_exists('cli_red')) {
     /**
      * Return a red colored message (do not echo).
@@ -45,7 +40,6 @@ if (!function_exists('cli_red')) {
     }
 }
 
-// yellow text in CLI
 if (!function_exists('cli_yellow')) {
     /**
      * Return a yellow colored message (do not echo).
@@ -59,7 +53,6 @@ if (!function_exists('cli_yellow')) {
     }
 }
 
-// blue text in CLI (already returns a string)
 if (!function_exists('cli_blue')) {
     /**
      * Return a blue colored message.
@@ -73,7 +66,6 @@ if (!function_exists('cli_blue')) {
     }
 }
 
-// cyan text in CLI
 if (!function_exists('cli_cyan')) {
     /**
      * Return a cyan colored message (do not echo).
@@ -87,7 +79,6 @@ if (!function_exists('cli_cyan')) {
     }
 }
 
-//gray text in CLI
 if (!function_exists('cli_gray')) {
     /**
      * Return a gray colored message (do not echo).

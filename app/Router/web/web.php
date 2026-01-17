@@ -19,26 +19,11 @@ $router->sign('GET /game/sudoku', function () {
     return View::render('game/sudoku');
 })->name('game.sudoku');
 
-$router->group('/demo')::action(function (DFrame\Application\Router $router) {
-    $router->sign('GET /chat', function () {
-        return View::render('demo/chat');
-    })->name('demo.chat');
-
-    $router->sign('GET /editor', function () {
-        return View::render('demo/editor');
-    })->name('demo.editor');
-});
-
-
 $router->sign('GET /ws/chat', function () {
     return View::render('ws/chat');
 })->name('ws.chat');
 
 $router->sign('GET /sitemap.xml', [\App\Controller\SitemapController::class, 'index'])->name('sitemap');
-
-$router->default(function () {
-    return get404pages() ?? '404 Not Found';
-});
 
 $router->scanControllerAttributes([
         App\Controller\UserController::class,

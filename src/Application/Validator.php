@@ -22,7 +22,7 @@ class Validator
      */
     private ?string $firstError = null;
 
-    /* --- BASIC RULES --- */
+    /* ----- BASIC RULES ----- */
 
     public static function required($value): bool
     {
@@ -90,7 +90,7 @@ class Validator
         return strtotime($value) !== false;
     }
 
-    /* --- FILE UPLOAD RULES --- */
+    /* ----- FILE UPLOAD RULES ----- */
 
     public static function isFile($value): bool
     {
@@ -152,7 +152,7 @@ class Validator
         return $sizeKB >= $min && $sizeKB <= $max;
     }
 
-    /* --- VALIDATION --- */
+    /* ----- MAIN VALIDATION METHOD ----- */
 
     public function make(array $data, array $rules, array $messages = []): void
     {
@@ -221,7 +221,7 @@ class Validator
         }
     }
 
-    /* --- RESULTS --- */
+    /* ----- RESULTS ----- */
 
     public function fails(): bool
     {

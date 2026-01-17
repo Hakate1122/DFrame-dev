@@ -5,7 +5,6 @@ namespace DFrame\Application;
 use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
-use \DateTime;
 
 /**
  * **Application Logger**
@@ -55,7 +54,7 @@ class Log implements LoggerInterface
         @file_put_contents($this->logFilePath, $logEntry, FILE_APPEND);
     }
 
-    // --- Define PSR-3 methods ---
+    /* ----- Define PSR-3 methods ----- */
 
     public function emergency($message, array $context = []): void
     {
@@ -97,7 +96,8 @@ class Log implements LoggerInterface
         $this->log(LogLevel::DEBUG, $message, $context);
     }
 
-    // ---Fast log methods ---
+    /* ----- Fast Log Method ----- */
+
     /**
      * Fast log method for quick logging without instantiating the class. Not implementing context.
      * 

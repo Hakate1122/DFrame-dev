@@ -1,8 +1,9 @@
 <?php
+
 namespace DFrame\Database\Traits;
 
 /**
- * #### SoftDelete trait
+ * **SoftDelete Trait**
  *
  * This trait provides functionality to mark an object as deleted without actually removing it from the database.
  * 

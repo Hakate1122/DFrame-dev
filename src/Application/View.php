@@ -111,24 +111,11 @@ class View
 
     /**
      * Abort the request with a given status code and optional custom error template.
-     * @param int $statusCode
-     * @param string|null $errorTemplate
-     * @return never
+     * @param int $statusCode The HTTP status code to abort with.
      */
-    public static function abort($statusCode, $errorTemplate = null)
+    public static function abort($statusCode): bool|int
     {
-        http_response_code($statusCode);
-        $instance = new self();
-
-        $errorTemplate ??= "errors/$statusCode";
-        $filePath = $instance->viewPath . '/' . $errorTemplate . '.php';
-
-        if (file_exists($filePath)) {
-            echo $instance->view($errorTemplate, ['statusCode' => $statusCode]);
-        } else {
-            echo "Error $statusCode: " . http_response_code($statusCode);
-        }
-        exit();
+        return http_response_code($statusCode);
     }
 
     /**
