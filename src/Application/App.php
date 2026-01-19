@@ -22,7 +22,7 @@ class App
      * Version of DFrame Framework.
      * @var string
      */
-    public const VERSION = '20260117-dev';
+    public const VERSION = '20260119-dev';
     /**
      * Alias for version constant
      */

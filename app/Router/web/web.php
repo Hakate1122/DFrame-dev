@@ -7,9 +7,7 @@ UserAuthencation::sign();
 
 $router = new DFrame\Application\Router();
 
-$router->sign('GET /', function () {
-    return View::render('home');
-})->name('home');
+$router->sign('GET /', [\App\Controller\HomeController::class, 'home'])->name('home');
 
 $router->sign('GET /game/air-balloon', function () {
     return View::render('game/air-balloon');

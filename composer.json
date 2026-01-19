@@ -31,7 +31,6 @@
     },
     "scripts": {
         "CopyEnv": "@php -r \"if (file_exists('.env.test') && !file_exists('.env')) copy('.env.test', '.env');\"",
-        "TinyEnvEncryptorGenerateKey": "@php \"vendor/bin/tiny-env-encrypt generate\"",
         "post-install-cmd": [
             "@CopyEnv"
         ],
