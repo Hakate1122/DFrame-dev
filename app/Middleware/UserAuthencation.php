@@ -4,7 +4,7 @@ namespace App\Middleware;
 use DFrame\Application\Middleware;
 
 /**
- * #### UserAuthencation Middleware
+ * **User Authentication Middleware**
  * 
  * This middleware handles user authentication for incoming requests.
  */

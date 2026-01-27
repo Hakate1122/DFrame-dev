@@ -76,31 +76,20 @@ if (!function_exists('route')) {
 if (!function_exists('session')) {
     /**
      * Helper function for session get/set.
-     * - session(): get all session variables.
      * - session($key): get session value.
      * - session($key, $value): set session value.
      *
-     * @param string|null $key The session key.
+     * @param string $key The session key.
      * @param mixed|null $value The session value.
-     * @return mixed|null
+     * @return mixed
      */
-    function session(?string $key = null, $value = null)
+    function session(string $key, $value = null)
     {
-
-        if (is_null($key) && is_null($value)) {
-            return $_SESSION;
-        }
-
-        if (!is_null($key) && is_null($value)) {
+        if ($value === null) {
             return Session::get($key);
-        }
-
-        if (!is_null($key) && !is_null($value)) {
+        }else {
             Session::set($key, $value);
-            return null;
         }
-
-        return null;
     }
 }
 

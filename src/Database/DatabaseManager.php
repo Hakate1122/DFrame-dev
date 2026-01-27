@@ -19,7 +19,7 @@ use DFrame\Database\QueryBuilder\SqliteBuilder;
 use function \in_array;
 
 /**
- * #### DatabaseManager class
+ * **Database Manager**
  * 
  * Manages database connections and mappers/builders based on configuration.
  * 

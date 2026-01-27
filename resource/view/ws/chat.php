@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -70,6 +71,20 @@
     </div>
 
     <script>
+        var inputEl = document.getElementById('messageInput');
+        var sendBtn = document.getElementById('sendBtn');
+
+        var logoutBtn = document.createElement('button');
+        logoutBtn.id = 'logoutBtn';
+        logoutBtn.textContent = 'Logout';
+        logoutBtn.style.flex = '0 0 auto';
+        logoutBtn.style.marginLeft = '6px';
+        document.getElementById('inputArea').appendChild(logoutBtn);
+
+        inputEl.disabled = true;
+        sendBtn.disabled = true;
+        logoutBtn.disabled = true;
+
         var host = window.location.hostname;
         var port = 9501;
         var scheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
@@ -85,6 +100,10 @@
 
         ws.onopen = function() {
             addMessage('Connected to chat server (' + wsUrl + ')');
+            inputEl.disabled = false;
+            sendBtn.disabled = false;
+            logoutBtn.disabled = false;
+            inputEl.focus();
         };
 
         ws.onmessage = function(event) {
@@ -95,6 +114,9 @@
             var msg = 'Disconnected from server';
             if (event && event.code) msg += ' (code ' + event.code + ')';
             addMessage(msg);
+            inputEl.disabled = true;
+            sendBtn.disabled = true;
+            logoutBtn.disabled = true;
             try { console.info('WebSocket closed', event); } catch (e) {}
         };
 
@@ -106,10 +128,11 @@
             try { console.error('WebSocket error', evt); } catch (e) {}
         };
 
-        var inputEl = document.getElementById('messageInput');
-        var sendBtn = document.getElementById('sendBtn');
-
         function sendMessage() {
+            if (!ws || ws.readyState !== WebSocket.OPEN) {
+                addMessage('Not connected to server.');
+                return;
+            }
             var message = inputEl.value.replace(/^\s+|\s+$/g, '');
             if (message) {
                 try { ws.send(message); } catch (e) { addMessage('Send error: ' + (e && e.message ? e.message : e)); }
@@ -133,6 +156,32 @@
                 var key = e.which || e.keyCode;
                 if (key === 13) { sendMessage(); }
             });
+        }
+
+        function logout() {
+            if (!ws) {
+                addMessage('WebSocket not initialized.');
+                return;
+            }
+            if (ws.readyState === WebSocket.OPEN) {
+                try {
+                    ws.close(1000, 'Client logout');
+                    addMessage('You have logged out.');
+                } catch (e) {
+                    addMessage('Logout error: ' + (e && e.message ? e.message : e));
+                }
+            } else {
+                addMessage('Already disconnected.');
+            }
+            inputEl.disabled = true;
+            sendBtn.disabled = true;
+            logoutBtn.disabled = true;
+        }
+
+        if (logoutBtn.addEventListener) {
+            logoutBtn.addEventListener('click', logout);
+        } else if (logoutBtn.attachEvent) {
+            logoutBtn.attachEvent('onclick', logout);
         }
 
         function addMessage(message) {

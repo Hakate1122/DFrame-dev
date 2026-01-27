@@ -2,17 +2,18 @@
 
 namespace DFrame\Attribute;
 
-use Attribute;
 use DFrame\Application\Router;
 
 /**
  * Route extends Router to define route attributes for controller methods.
  */
-#[Attribute]
+#[\Attribute]
 class Route extends Router
 {
     /**
      * Constructor to initialize route properties (using for attributes)
+     * 
+     * Example: #[Route(path: '/users', method: 'GET', isApi: true, name: 'user.list', middleware: ['auth'])]
      *
      * @param string $path The URL path for the route (e.g., '/users', '/api/data')
      * @param string $method The HTTP method (GET, POST, etc.)
@@ -26,5 +27,5 @@ class Route extends Router
         public bool $isApi = true,
         public ?string $name = null,
         public ?array $middleware = null,
-    ) {}
+    ){}
 }

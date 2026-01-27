@@ -2,7 +2,7 @@
 namespace DFrame\Database\Traits;
 
 /**
- * #### Freeze trait
+ * **Freeze Trait**
  * 
  * This trait provides functionality to mark an object as frozen,
  * preventing further modifications to its state.

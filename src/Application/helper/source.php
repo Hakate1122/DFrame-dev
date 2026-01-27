@@ -1,7 +1,7 @@
 <?php
 
 /**
- * #### Class Source
+ * **Source File Helper**
  *
  * Utility class for managing source files located in public/source.
  */
@@ -27,7 +27,6 @@ class Source
             $ext = $extension ?? '';
         }
 
-        // Handle dot notation: css.main → css/main.css
         if ($ext && strpos($filename, '.') !== false && strpos($filename, '/') === false) {
             $parts = explode('.', $filename, 2);
             if (count($parts) === 2) {
@@ -35,13 +34,11 @@ class Source
             }
         }
 
-        // Append extension if missing
         $info = pathinfo($filename);
         if ($ext && (!isset($info['extension']) || $info['extension'] !== $ext)) {
             $filename .= '.' . $ext;
         }
 
-        // Sanitize path
         $path = preg_replace('#[^a-zA-Z0-9/_\.-]#', '', $filename);
         $path = ltrim($path, '/');
 

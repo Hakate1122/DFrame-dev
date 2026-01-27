@@ -9,14 +9,6 @@ $router = new DFrame\Application\Router();
 
 $router->sign('GET /', [\App\Controller\HomeController::class, 'home'])->name('home');
 
-$router->sign('GET /game/air-balloon', function () {
-    return View::render('game/air-balloon');
-})->name('game.air-balloon');
-
-$router->sign('GET /game/sudoku', function () {
-    return View::render('game/sudoku');
-})->name('game.sudoku');
-
 $router->sign('GET /ws/chat', function () {
     return View::render('ws/chat');
 })->name('ws.chat');

@@ -36,6 +36,47 @@ $cli->register('minesv:run', function () {
 
 $cli->register('jsondb', [\App\Command\JsonDBCommand::class, 'handle']);
 
+$cli->register('jsondb:server', function () {
+    $options = getopt('', ['host:', 'port:']);
+    $host = $options['host'] ?? '0.0.0.0';
+    $port = isset($options['port']) ? (int)$options['port'] : 9501;
+
+    // Start the JsonDB TCP server (this will block)
+    $server = new \DFrame\JsonDB\Server($host, $port);
+});
+
+$cli->register('jsondb:client', function () {
+    $options = getopt('', ['host:', 'port:']);
+    $host = $options['host'] ?? '127.0.0.1';
+    $port = isset($options['port']) ? (int)$options['port'] : 9501;
+
+    $client = new \DFrame\JsonDB\Client($host, $port);
+
+    echo "-- PING --\n";
+    try {
+        $ping = $client->ping();
+        print_r($ping);
+    } catch (Exception $e) {
+        echo "Ping failed: " . $e->getMessage() . "\n";
+    }
+
+    echo "-- INSERT --\n";
+    try {
+        $inserted = $client->insert('users', ['name' => 'CLI Test', 'email' => 'cli@example.com']);
+        print_r($inserted);
+    } catch (Exception $e) {
+        echo "Insert failed: " . $e->getMessage() . "\n";
+    }
+
+    echo "-- FIND --\n";
+    try {
+        $all = $client->find('users');
+        print_r($all);
+    } catch (Exception $e) {
+        echo "Find failed: " . $e->getMessage() . "\n";
+    }
+});
+
 $cli->register('send:mail', function () {
     try {
         $mail = new DFrame\Application\Mail();

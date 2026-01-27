@@ -2,7 +2,7 @@
 namespace DFrame\Database\Traits;
 
 /**
- * #### Timestamp trait
+ * **Timestamp Trait**
  * 
  * This trait provides functionality to manage created_at and updated_at timestamps for database models.
  */

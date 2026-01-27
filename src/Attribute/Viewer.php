@@ -4,8 +4,6 @@ namespace DFrame\Attribute;
 use DFrame\Application\View;
 
 /**
- * #### Attribute View for method rendering
- *
  * Attribute View class for rendering views with data in methods.
  */
 #[\Attribute(\Attribute::TARGET_METHOD)]

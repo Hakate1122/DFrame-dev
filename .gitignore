@@ -14,3 +14,6 @@ public/source/videos/
 *.log
 benchmark_results.json
 *.phar
+.idea/
+.DS_Store
+.phpdoc/

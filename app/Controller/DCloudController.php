@@ -11,7 +11,6 @@ class DCloudController extends Controller
 
     public function index()
     {
-        jslog('DCloud loaded at directory: ' . $this->getSourceDir() .'');
         $this->render('DCloud.home');
     }
 
@@ -92,7 +91,6 @@ class DCloudController extends Controller
         }
 
         if (is_dir($full)) {
-            // only remove empty directories for safety
             $ok = @rmdir($full);
         } else {
             $ok = @unlink($full);
