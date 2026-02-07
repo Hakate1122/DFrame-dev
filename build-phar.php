@@ -1,4 +1,3 @@
-#!/usr/bin/env php
 <?php
 
 /** Simple PHAR builder CLI */
@@ -364,6 +363,12 @@ if (in_array($cmd, ['-h', '--help', 'help'])) {
 }
 
 if ($cmd === 'build') {
+
+    if (!extension_loaded('phar')) {
+        exit("ERROR: phar extension is not loaded — cannot build PHAR files.\n");
+    } elseif (ini_get('phar.readonly')) {
+        exit("ERROR: phar.readonly is enabled in php.ini — disable it to build PHAR files.\n");
+    }
 
     $opts = [];
     $baseDir = __DIR__;

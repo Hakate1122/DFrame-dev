@@ -27,14 +27,13 @@ $cli->register('minesv:ping', function () {
     }
     $client->close();
 });
+
 $cli->register('minesv:run', function () {
     $motd = 'MCPE;Demo MOTD;2;0.2.0;0;20;1234567890';
     $port = '19132';
     $server = new RakNetServer($motd, $port);
     $server->run();
 });
-
-$cli->register('jsondb', [\App\Command\JsonDBCommand::class, 'handle']);
 
 $cli->register('jsondb:server', function () {
     $options = getopt('', ['host:', 'port:']);
@@ -107,6 +106,7 @@ $cli->register('math:pi', function () {
     echo "Leibniz (100000 iters): " . Pi::leibniz(100000) . PHP_EOL;
     echo "High precision (1050 digits): " . Pi::highPrecision(1050) . PHP_EOL;
 });
+
 $cli->register('math:delta', function () {
     $a = (float) Input::prompt('Enter first number (a):', '10.5');
     $b = (float) Input::prompt('Enter second number (b):', '7.3');
