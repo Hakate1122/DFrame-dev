@@ -2,7 +2,7 @@
 namespace App\Controller;
 
 use DFrame\Application\View;
-use Exception;
+use \Exception;
 
 class Controller
 {

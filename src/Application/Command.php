@@ -13,11 +13,39 @@ class Command
 {
     public array $commands = [];
 
+    /**
+     * Register a new command.
+     *
+     * **Example**: register('greet', [\App\Command\Greet::class, 'handle'])
+     *
+     * @param string $name Command name
+     * @param callable|array|string $handler Function, method array, or class name
+     * @param bool $hiddenOnPhar Whether to hide this command in Phar builds
+     * @return CommandEntry
+     */
     public function register(string $name, callable|array|string $handler, bool $hiddenOnPhar = false): CommandEntry
     {
         $entry = new CommandEntry($this, $name, $handler, $hiddenOnPhar);
         $this->commands[$name] = $entry;
         return $entry;
+    }
+
+    /**
+     * Register an alias for an existing command.
+     *
+     * Example: registerAlias('say:greet', 'greet')
+     *
+     * @param string $alias
+     * @param string $target Name of the existing command to alias
+     * @return CommandEntry
+     */
+    public function registerAlias(string $alias, string $target): CommandEntry
+    {
+        if (!isset($this->commands[$target])) {
+            throw new \InvalidArgumentException("Target command not found: $target");
+        }
+        $this->commands[$alias] = $this->commands[$target];
+        return $this->commands[$target];
     }
 
     public function property(string $name, mixed $default = null){}

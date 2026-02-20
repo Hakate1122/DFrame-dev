@@ -48,6 +48,7 @@ final class Report
     public static function throw(string $type, string $message, string $file = __FILE__, int $line = __LINE__): void
     {
         $renderer = php_sapi_name() === 'cli' ? self::cli() : self::html();
-        $renderer->render($type, $message, $file, $line);
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        $renderer->render($type, $message, $file, $line, ['trace' => $trace]);
     }
 }

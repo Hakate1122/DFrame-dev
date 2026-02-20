@@ -199,8 +199,7 @@ class Mail
 
         if (!$fp) {
             // Log error securely instead of showing to user
-            error_log("SMTP Connect Error: $errstr ($errno)");
-            throw new \RuntimeException("Could not connect to Mail Server.");
+            throw new \RuntimeException("Could not connect to Mail Server: $errstr ($errno).");
         }
 
         // 2. Handshake & Auth

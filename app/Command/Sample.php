@@ -13,7 +13,7 @@ class Sample
         if ($isOk) {
             Output::success("Continuing...");
         } else {
-            Output::error("Cancelled.");
+            Output::info("Cancelled.");
         }
     }
 
@@ -24,9 +24,7 @@ class Sample
         $user = Input::prompt("Enter database user", "root");
         $pass = Input::prompt("Enter database password", "");
 
-        // Simulate connection attempt
         echo "Attempting to connect to database at {$host}:{$port} with user '{$user}'...\n";
-        // Here you would add actual connection logic
 
         try {
             $pdo = new \PDO("mysql:host={$host};port={$port}", $user, $pass);
@@ -76,7 +74,6 @@ class Sample
             echo "Connection failed: " . $e->getMessage() . "\n";
         }
 
-        // Choose database
         $dbName = Input::prompt("Enter database name to use", "testdb");
         echo "Switching to database '{$dbName}'...\n";
         try {

@@ -50,15 +50,26 @@ class Handler implements HandlerInterface
             default => 'error',
         };
 
-        $this->log($type, $errstr, $errfile, $errline, ['code' => $errno]);
-        $this->renderer->render($type, $errstr, $errfile, $errline, ['code' => $errno]);
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        $context = [
+            'code'  => $errno,
+            'trace' => $trace,
+        ];
+
+        $this->log($type, $errstr, $errfile, $errline, $context);
+        $this->renderer->render($type, $errstr, $errfile, $errline, $context);
         return true;
     }
 
     public function handleException(\Throwable $exception): void
     {
-        $this->log('exception', $exception->getMessage(), $exception->getFile(), $exception->getLine());
-        $this->renderer->render('exception', $exception->getMessage(), $exception->getFile(), $exception->getLine());
+        $trace = $exception->getTrace();
+        $context = [
+            'trace' => $trace,
+        ];
+
+        $this->log('exception', $exception->getMessage(), $exception->getFile(), $exception->getLine(), $context);
+        $this->renderer->render('exception', $exception->getMessage(), $exception->getFile(), $exception->getLine(), $context);
     }
 
     /**
@@ -88,8 +99,14 @@ class Handler implements HandlerInterface
 
         if (isset($fatalTypes[$error['type']])) {
             $type = $fatalTypes[$error['type']];
-            $this->log($type, $error['message'], $error['file'], $error['line'], ['code' => $error['type']]);
-            $this->renderer->render($type, $error['message'], $error['file'], $error['line'], ['code' => $error['type']]);
+            $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+            $context = [
+                'code'  => $error['type'],
+                'trace' => $trace,
+            ];
+
+            $this->log($type, $error['message'], $error['file'], $error['line'], $context);
+            $this->renderer->render($type, $error['message'], $error['file'], $error['line'], $context);
         }
     }
 

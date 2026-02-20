@@ -59,6 +59,41 @@ class Cli implements RenderInterface
             }
         }
 
+        if (!empty($context['trace'])) {
+            echo PHP_EOL;
+            echo "$color{$bold}Stack trace (earliest call first):$reset" . PHP_EOL;
+
+            $trace = $context['trace'];
+
+            if (is_string($trace)) {
+                echo $trace . PHP_EOL;
+            } elseif (is_array($trace)) {
+                $frames = array_values(array_reverse($trace));
+                foreach ($frames as $index => $frame) {
+                    $tFile = $frame['file'] ?? '[internal function]';
+                    $tLine = $frame['line'] ?? '-';
+                    $function = $frame['function'] ?? '';
+                    $class = $frame['class'] ?? '';
+                    $typeSep = $frame['type'] ?? '';
+
+                    $call = $function;
+                    if ($class !== '') {
+                        $call = $class . $typeSep . $call;
+                    }
+
+                    echo sprintf(
+                        "  #%d %s(%s): %s%s%s",
+                        $index,
+                        $tFile,
+                        $tLine,
+                        $bold,
+                        $call,
+                        $reset
+                    ) . PHP_EOL;
+                }
+            }
+        }
+
         echo "$color{$bold}==============================$reset" . PHP_EOL . PHP_EOL;
         exit(1);
     }

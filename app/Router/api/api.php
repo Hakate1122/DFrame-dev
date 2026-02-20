@@ -6,11 +6,6 @@ $router->signApi('GET /', function () {
     return "Hello, World!";
 })->name('api.home');
 
-$router->signApi('GET /demo/socket', function () {
-   $time = time();
-   return $time;
-})->name('api.demo.socket');
-
 // Demo Send Mail
 $router->signApi('GET /demo/mail', function () {
     $mail = new DFrame\Application\Mail();

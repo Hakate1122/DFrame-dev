@@ -101,6 +101,8 @@ $cli->register('websocket:server', function () {
     $chat->start();
 });
 
+$cli->registerAlias('ws:server', 'websocket:server');
+
 $cli->register('math:pi', function () {
     echo "M_PI: " . Pi::default() . PHP_EOL;
     echo "Leibniz (100000 iters): " . Pi::leibniz(100000) . PHP_EOL;
@@ -120,4 +122,18 @@ $cli->register('math:delta', function () {
     } catch (\InvalidArgumentException $e) {
         Output::error($e->getMessage());
     }
+});
+
+$cli->register('env:test', function () {
+    $env = new \Datahihi1\TinyEnv\TinyEnv(ROOT_DIR);
+    $env->load();
+    // Get all environment variables
+    $allEnv = $env->env();
+    Output::info("All environment variables:");
+    foreach ($allEnv as $key => $value) {
+        Output::info("$key: $value");
+    }
+    // Get APP_NAME variable
+    $appName = $env->env('APP_NAME', 'DefaultAppName');
+    Output::info("Application name: $appName");
 });

@@ -9,19 +9,16 @@ if(!function_exists('env') || env('MAINTENANCE_MODE') !== 'true'){
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bảo trì hệ thống</title>
+  <title>Maintenance Mode</title>
   <meta name="color-scheme" content="light dark" />
   <style>
-    /* ====== Thiết lập cơ bản, chỉ HTML + CSS, không JS ====== */
     :root{
-      /* Màu sắc cơ bản */
       --bg: #0b0c0f;
       --panel: #111317;
       --text: #e7e9ee;
       --muted: #a8afbd;
       --accent: #7aa2ff;
       --border: color-mix(in oklab, var(--text) 12%, transparent);
-      /* Kích thước co giãn theo viewport, nhưng có giới hạn */
       --radius: 24px;
       --space: clamp(12px, 2vw, 28px);
       --space-lg: clamp(16px, 3.2vw, 40px);
@@ -124,7 +121,6 @@ if(!function_exists('env') || env('MAINTENANCE_MODE') !== 'true'){
 
     .brand{ font-weight: 600; color: var(--text); }
 
-    /* Đảm bảo hiển thị tốt từ cực nhỏ (128px) đến màn hình 4K */
     @media (max-width: 220px){
       .content{ padding: 12px; }
       .footer{ padding: 10px; }
@@ -140,23 +136,22 @@ if(!function_exists('env') || env('MAINTENANCE_MODE') !== 'true'){
   <main class="card" role="main" aria-labelledby="title">
     <div class="content">
       <span class="badge" aria-hidden="true">
-        <!-- Biểu tượng cờ lê dạng SVG tối giản -->
         <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M22 2a7 7 0 0 1-9.9 9.9L7 17l-3 3 3-3 4.1-4.1A7 7 0 0 1 22 2z"/>
           <circle cx="7" cy="17" r="1.6"/>
         </svg>
-        Bảo trì
+        Maintenance
       </span>
 
-      <h1 id="title">Chúng tôi đang bảo trì hệ thống</h1>
-      <p>Một số tính năng sẽ tạm thời không khả dụng. Vui lòng quay lại sau ít phút nữa. Cảm ơn bạn đã thông cảm!</p>
+      <h1 id="title">Sorry, we're down for maintenance</h1>
+      <p>We're currently performing maintenance on our system. Please check back later.</p>
     </div>
 
     
 
     <footer class="footer">
-      <span class="brand" aria-label="Tên hệ thống">DocTruyenHay</span>
-      <span>Liên hệ hỗ trợ: datahihi1100@gmail.com</span>
+      <span class="brand" aria-label="Tên hệ thống">Your App</span>
+      <span>Contact support: admin@example.com</span>
     </footer>
   </main>
 </body>

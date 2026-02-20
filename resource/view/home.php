@@ -149,8 +149,10 @@ function formatBytes($bytes)
             </p>
 
             <p>
-                Controller: <code>src/Controller/HomeController.php</code><br>
-                Route: <code>src/Route/web/web.php</code>
+                Controller: <code>app/Controller/HomeController.php</code><br>
+            </p>
+            <p>
+                Route: <code>app/Route/web/web.php</code>
             </p>
         </div>
 

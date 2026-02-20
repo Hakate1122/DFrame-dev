@@ -9,6 +9,10 @@ $router = new DFrame\Application\Router();
 
 $router->sign('GET /', [\App\Controller\HomeController::class, 'home'])->name('home');
 
+$router->sign('GET /morse', function () {
+    return View::render('morse');
+})->name('morse');
+
 $router->sign('GET /ws/chat', function () {
     return View::render('ws/chat');
 })->name('ws.chat');

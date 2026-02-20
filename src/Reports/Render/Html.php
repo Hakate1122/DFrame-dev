@@ -223,6 +223,26 @@ class Html implements RenderInterface
                 .php-operator {
                     color: #374151
                 }
+
+                .trace-header {
+                    background: #f3f4f6;
+                    padding: 12px 20px;
+                    border-top: 1px solid #e5e7eb;
+                    border-bottom: 1px solid #e5e7eb;
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 12px;
+                    color: #6b7280;
+                }
+
+                .trace-viewer {
+                    font-family: Monaco, Consolas, monospace;
+                    font-size: 12px;
+                    line-height: 1.6;
+                    background: #fcfcfc;
+                    overflow-x: auto;
+                    padding: 12px 16px;
+                }
             </style>
         </head>
 
@@ -245,7 +265,7 @@ class Html implements RenderInterface
                     <?php if ($file && file_exists($file)): ?>
                         <div class="code-container">
                             <div class="code-header">
-                                <span><?= htmlspecialchars(basename($file)) ?></span>
+                                <span><?= htmlspecialchars($file) ?></span>
                                 <span>Line <?= $line ?></span>
                             </div>
                             <div class="code-viewer">
@@ -265,11 +285,37 @@ class Html implements RenderInterface
                             </div>
                         </div>
                     <?php endif; ?>
+
+                    <?php if (!empty($context['trace'])): ?>
+                        <div class="code-container">
+                            <div class="trace-header">
+                                <span>Stack trace</span>
+                                <span><?= count(is_array($context['trace']) ? $context['trace'] : []) ?> frames</span>
+                            </div>
+                            <div class="trace-viewer">
+                                <?php
+                                $frames = $this->normalizeTrace($context['trace']);
+                                foreach ($frames as $index => $frameLine): ?>
+                                    <div class="code-line">
+                                        <span class="line-number">#<?= $index ?></span>
+                                        <span class="line-content"><?= htmlspecialchars($frameLine) ?></span>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
+
+                <?php
+                $raw = "Type: $type\nMessage: $message\nFile: $file\nLine: $line\nTime: " . date('c');
+                if (!empty($context['trace'])) {
+                    $raw .= "\nTrace:\n" . implode("\n", $this->normalizeTrace($context['trace']));
+                }
+                ?>
 
                 <div id="raw" class="content"
                     style="display:none;padding:20px;font-family:monospace;background:#f8f9fa;white-space:pre-wrap;">
-                    <?= htmlspecialchars("Type: $type\nMessage: $message\nFile: $file\nLine: $line\nTime: " . date('c')) ?>
+                    <?= htmlspecialchars($raw) ?>
                 </div>
 
                 <script>
@@ -434,5 +480,42 @@ class Html implements RenderInterface
         }
 
         return $leadingSpace . $code;
+    }
+
+    /**
+     * Normalize a trace (array or string) into an array of readable lines.
+     *
+     * @param mixed $trace
+     * @return array<int,string>
+     */
+    private function normalizeTrace($trace): array
+    {
+        if (is_string($trace)) {
+            return preg_split('/\r\n|\r|\n/', $trace) ?: [];
+        }
+
+        if (!is_array($trace)) {
+            return [];
+        }
+
+        $frames = array_values(array_reverse($trace));
+        $lines = [];
+
+        foreach ($frames as $frame) {
+            $file = $frame['file'] ?? '[internal function]';
+            $line = $frame['line'] ?? '-';
+            $function = $frame['function'] ?? '';
+            $class = $frame['class'] ?? '';
+            $typeSep = $frame['type'] ?? '';
+
+            $call = $function;
+            if ($class !== '') {
+                $call = $class . $typeSep . $call;
+            }
+
+            $lines[] = sprintf('%s(%s): %s', $file, $line, $call);
+        }
+
+        return $lines;
     }
 }

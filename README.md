@@ -18,6 +18,7 @@
 - **Environment Configuration**: Read environment variables from `.env`, supported by [TinyEnv](https://github.com/datahihi1/tiny-env.git).
 - **Security**: Supports secure sessions, maintenance mode, security headers, tokens generation (easily extendable).
 - **Mailing**: Simple SMTP mail sending with configuration options.
+- **WebSocket**: Basic WebSocket server implementation for real-time communication.
 
 ## Basic Usage
 
@@ -31,6 +32,7 @@ $router->group('/api')->action(function($router) { // Grouped routes
 });
 $router->sign('GET|POST /demo', [App\Controller\DemoController::class, 'index']); // Multiple methods
 $router->signApi('GET /data', [App\Controller\Api\DataController::class, 'fetch']); // API route
+$router->all('/contact', [App\Controller\ContactController::class, 'index']); // All methods
 $router->runInstance();
 ```
 
@@ -74,8 +76,11 @@ $isValid = DFrame\Application\Hash::verify('password123', $hashedPassword); // V
 ```php
 $mail = new DFrame\Application\Mail();
 $mail->to('recipient@example.com')
+    ->cc('')
+    ->bcc('')
     ->subject('Test Email')
     ->body('This is a test email.')
+    ->addAttachment('/path/to/file.txt')
     ->send();
 ```
 
@@ -87,8 +92,9 @@ $mail->to('recipient@example.com')
 ## Installation
 
 ```bash
-composer create-project datahihi1/dframe:dev-main my-project
+git clone https://github.com/datahihi1/DFrame.git my-project
 cd my-project
+composer install
 php dli -s
 ```
 
