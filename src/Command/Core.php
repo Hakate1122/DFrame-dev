@@ -57,9 +57,6 @@ class Core
             echo "  server, -s      Start the development server\n";
             echo "  list            List all available commands\n";
             echo "\n";
-            echo "Available tools:\n";
-            echo "  compile:ts      Compile TypeScript files to JavaScript (requires Node.js + tsc)\n";
-            echo "\n";
         };
     }
 

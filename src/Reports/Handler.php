@@ -2,6 +2,7 @@
 
 namespace DFrame\Reports;
 
+use DFrame\Application\App;
 use DFrame\Reports\Interface\HandlerInterface;
 use DFrame\Reports\Interface\RenderInterface;
 
@@ -125,13 +126,15 @@ class Handler implements HandlerInterface
             mkdir($dir, 0755, true);
 
         $log = sprintf(
-            "[%s] %s | %s:%d | %s | %s\n",
+            "[%s] %s | %s:%d | %s | %s | %s | %s\n",
             date('Y-m-d H:i:s'),
             strtoupper($type),
             $file,
             $line,
             $message,
-            json_encode($context)
+            json_encode($context),
+            App::version ?? 'unknown',
+            phpversion()
         );
         $isSupportLockEx = defined('FILE_APPEND') && defined('LOCK_EX');
         if ($isSupportLockEx) {

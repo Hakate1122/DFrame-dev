@@ -8,6 +8,9 @@ UserAuthencation::sign();
 $router = new DFrame\Application\Router();
 
 $router->sign('GET /', [\App\Controller\HomeController::class, 'home'])->name('home');
+$router->sign('GET /h', function () {
+    echo "<img src='" . asset('images/logo.png') . "' alt='Logo'>";
+})->name('home.alias');
 
 $router->sign('GET /morse', function () {
     return View::render('morse');

@@ -50,6 +50,12 @@ class DB extends DatabaseManager
     protected $table;
 
     /**
+     * Optional columns to select (string|array|null)
+     * @var mixed
+     */
+    protected $selectable;
+
+    /**
      * Check if this class uses SoftDelete trait
      * Allows child models extending DB to automatically detect SoftDelete trait
      * @return bool
@@ -78,7 +84,8 @@ class DB extends DatabaseManager
         parent::__construct();
         if ($this->table) {
             // If child class has SoftDelete trait, use soft delete automatically
-            $this->mapper = $this->getMapper($this->table, $this->usesSoftDelete());
+            $selectable = property_exists($this, 'selectable') ? $this->selectable : null;
+            $this->mapper = $this->getMapper($this->table, $this->usesSoftDelete(), $selectable);
         }
     }
 
@@ -93,7 +100,8 @@ class DB extends DatabaseManager
         $instance->table = $table;
         // If called from child class with SoftDelete trait, auto-detect
         // If called directly from DB class, use hard delete (useSoftDelete = false)
-        $instance->mapper = $instance->getMapper($table, $instance->usesSoftDelete());
+        $selectable = property_exists($instance, 'selectable') ? $instance->selectable : null;
+        $instance->mapper = $instance->getMapper($table, $instance->usesSoftDelete(), $selectable);
         return $instance;
     }
 

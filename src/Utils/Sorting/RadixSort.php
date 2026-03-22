@@ -87,4 +87,46 @@ class RadixSort
         
         return $newArray;
     }
+
+    /**
+     * Debug version of Radix Sort that reports the array after each digit pass.
+     *
+     * @param array $nums The array to be sorted.
+     * @param callable|null $onStep Optional callback invoked after each pass: function(array $current, int $pass, string $status = null).
+     *                             If null, the method will echo each step as JSON.
+     * @param int $msDelay Optional delay in milliseconds between steps when using the default echo mode.
+     * @param int|null $memoryLimitBytes Optional memory limit in bytes; stops when exceeded.
+     * @return array The sorted array.
+     */
+    public static function debug(array $nums, ?callable $onStep = null, int $msDelay = 0, ?int $memoryLimitBytes = null): array
+    {
+        $maxDigitsCount = self::maxDigits($nums);
+        for ($k = 0; $k < $maxDigitsCount; $k++) {
+            if ($memoryLimitBytes !== null && memory_get_usage(true) > $memoryLimitBytes) {
+                $status = 'memory_limit_exceeded';
+                if ($onStep) {
+                    $onStep($nums, $k, $status);
+                } else {
+                    echo json_encode(['status' => $status, 'pass' => $k, 'array' => $nums]) . PHP_EOL;
+                }
+                break;
+            }
+
+            $digitBucket = array_fill(0, 10, []);
+
+            for ($i = 0; $i < count($nums); $i++) {
+                $digitBucket[self::getDigit($nums[$i], $k)][] = $nums[$i];
+            }
+
+            $nums = self::concat($digitBucket);
+            if ($onStep) {
+                $onStep($nums, $k);
+            } else {
+                echo json_encode(['pass' => $k, 'current' => $nums]) . PHP_EOL;
+                if ($msDelay > 0) usleep($msDelay * 1000);
+            }
+        }
+
+        return $nums;
+    }
 }

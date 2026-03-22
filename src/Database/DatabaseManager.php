@@ -29,16 +29,37 @@ use function \in_array;
  */
 class DatabaseManager
 {
+    // constants for supported drivers and designs.
     /** Supported database drivers */
     protected const SUPPORTED_DRIVERS = ['mysqli', 'pdo_mysql', 'sqlite3', 'pdo_sqlite'];
     /** Supported database designs */
     protected const SUPPORTED_DESIGNS = ['mapper', 'builder'];
+
+    // properties for adapter, mapper/builder class.
     /** Adapter instance */
     protected $adapter;
+    /** Mapper or Builder instance */
     protected $mapper;
-    protected $builder;
     /** Mapper or Builder class name based on design */
     protected $mapperClass;
+
+    // properties for database (optional).
+    /**
+     * Table name for the mapper/builder instance
+     * @var string
+     */
+    protected $table;
+
+    /**
+     * Selectable columns for table queries (string|array|null)
+     * @var string|array|null
+     */
+    protected $selectable;
+    /**
+     * Fillable fields for mass assignment
+     * @var string|array|null
+     */
+    protected $fillable;
 
     public function __construct()
     {
@@ -123,17 +144,21 @@ class DatabaseManager
     }
 
     /**
-     * Get a mapper instance for a specific table
-     * 
-     *  **Note:**
-     * - For 'mapper': the Mapper class receives ($adapter, $table, $useSoftDelete)
-     * - For 'builder': the Builder also receives ($adapter, $table, $useSoftDelete) and executes through the adapter
-     * @param mixed $table
+     * Get a mapper/builder instance for a specific table
+     *
+     * @param mixed $table The table name for the mapper/builder
      * @param bool $useSoftDelete Whether to use soft delete (default: false)
+     * @param mixed $selectable Optional columns to select (string|array|null)
      * @return object
      */
-    public function getMapper($table, $useSoftDelete = false)
+    public function getMapper($table, $useSoftDelete = false, $selectable = null)
     {
-        return new $this->mapperClass($this->adapter, $table, $useSoftDelete);
+        $mapper = new $this->mapperClass($this->adapter, $table, $useSoftDelete);
+
+        if ($selectable !== null && is_object($mapper) && method_exists($mapper, 'select')) {
+            $mapper->select($selectable);
+        }
+
+        return $mapper;
     }
 }

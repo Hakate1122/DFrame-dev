@@ -9,7 +9,7 @@
         "ext-pdo": "*",
         "ext-mbstring": "*",
         "ext-sockets": "*",
-        "datahihi1/tiny-env": "dev-test",
+        "datahihi1/tiny-env": "^1.0",
         "psr/log": "^3",
         "datahihi1/raknet": "dev-main"
     },

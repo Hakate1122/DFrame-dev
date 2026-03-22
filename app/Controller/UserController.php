@@ -17,8 +17,8 @@ class UserController extends Controller
     }
     public function listUsers()
     {
-        $allUsers = $this->users
-                         ->fetchAll();
+        $allUsers = Users::all();
+                         dd($allUsers);
         return $this->render('user1/list', ['users' => $allUsers]);
     }
 
@@ -61,8 +61,7 @@ class UserController extends Controller
              'email' => $email
              ])
              ->execute();
-        header('Location: ' . route('user.list'));
-        exit;
+        return redirect()->route('user.list');
     }
 
     public function editUser($id)
@@ -107,17 +106,14 @@ class UserController extends Controller
                 'email' => $email
             ])
             ->execute();
-        header('Location: ' . route('user.list'));
-        exit;
+        return redirect()->route('user.list');
     }
     public function deleteUser($id)
     {
-        DB::table('users')
-            ->where('id', $id)
-            ->softDelete()
-            ->execute();
-        Log::fast(INDEX_DIR . 'logs/user_deletions.log', "User with ID {$id} has been deleted.");
-        header('Location: ' . route('user.list'));
-        exit;
+        $this->users
+             ->where('id', $id)
+             ->delete()
+             ->execute();
+        return redirect()->route('user.list');
     }
 }

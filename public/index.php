@@ -79,10 +79,10 @@ require_once $autoloadFile;
 \DFrame\Reports\Report::setup(true, INDEX_DIR . 'logs/app.log', \DFrame\Reports\Report::html());
 
 \DFrame\Application\App::initialize()
-    ->setUpWebRoutes(ROOT_DIR . 'app/Router/web/web.php') // Load web routes
-    ->setUpWebRoutes(ROOT_DIR . 'app/Router/web/dcloud.php') // Load DCloud routes
-    ->setUpWebRoutes(ROOT_DIR . 'app/Router/web/user_basic_crud.php') // Load User CRUD routes
+    ->setUpWebRoutes(ROOT_DIR . 'app/Router/web/web.php')
+    ->setUpWebRoutes(ROOT_DIR . 'app/Router/web/dcloud.php')
+    ->setUpWebRoutes(ROOT_DIR . 'app/Router/web/user_basic_crud.php')
 
-    ->setUpApiRoutes(ROOT_DIR . 'app/Router/api/api.php') // Load API routes
-    ->setUpApiRoutes(ROOT_DIR . 'app/Router/api/api_product_basic.php') // Load Product API routes
+    ->setUpApiRoutes(ROOT_DIR . 'app/Router/api/api.php')
+    ->setUpApiRoutes(ROOT_DIR . 'app/Router/api/api_product_basic.php')
     ->bootWeb();

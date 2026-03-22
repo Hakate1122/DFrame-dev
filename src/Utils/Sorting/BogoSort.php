@@ -50,4 +50,41 @@ class BogoSort
         }
         return $array;
     }
+
+    /**
+     * Debug version of Bogo Sort that reports each shuffle step.
+     *
+     * @param array $array The array to sort.
+     * @param callable|null $onStep Optional callback invoked after each shuffle: function(array $current, int $step, string $status = null).
+     *                             If null, the method will echo each step as JSON.
+     * @param int|null $memoryLimitBytes Optional memory limit in bytes. If provided and current memory usage
+     *                                   exceeds this limit the debug run will stop and report the condition.
+     * @return array The sorted array.
+     */
+    public static function debug(array $array, ?callable $onStep = null, ?int $memoryLimitBytes = null)
+    {
+        $step = 0;
+        while (!self::isSorted($array)) {
+            // Check memory limit if provided
+            if ($memoryLimitBytes !== null && memory_get_usage(true) > $memoryLimitBytes) {
+                $msg = 'Memory limit exceeded';
+                if ($onStep) {
+                    $onStep($array, $step, $msg);
+                } else {
+                    $usage = memory_get_usage(true);
+                    echo "{$msg} at step {$step} (usage={$usage} bytes, limit={$memoryLimitBytes} bytes)" . PHP_EOL;
+                }
+                break;
+            }
+
+            $array = self::shuffle($array);
+            $step++;
+            if ($onStep) {
+                $onStep($array, $step);
+            } else {
+                echo "Step $step: " . json_encode($array) . PHP_EOL;
+            }
+        }
+        return $array;
+    }
 }

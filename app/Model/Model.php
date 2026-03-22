@@ -40,11 +40,17 @@ use DFrame\Database\DatabaseManager;
  */
 class Model extends DatabaseManager
 {
-    /**
-     * Summary of table
-     * @var string
-     */
-    protected $table;
+    // /**
+    //  * Summary of table
+    //  * @var string
+    //  */
+    // protected $table;
+
+    // /**
+    //  * Optional columns to select (string|array|null)
+    //  * @var mixed
+    //  */
+    // protected $selectable;
 
     /**
      * Check if this model uses SoftDelete trait
@@ -73,7 +79,8 @@ class Model extends DatabaseManager
     {
         parent::__construct();
         if ($this->table) {
-            $this->mapper = $this->getMapper($this->table, $this->usesSoftDelete());
+            $selectable = property_exists($this, 'selectable') ? $this->selectable : null;
+            $this->mapper = $this->getMapper($this->table, $this->usesSoftDelete(), $selectable);
         }
     }
 
@@ -86,7 +93,8 @@ class Model extends DatabaseManager
     {
         $instance = new static();
         $instance->table = $table;
-        $instance->mapper = $instance->getMapper($table, $instance->usesSoftDelete());
+        $selectable = property_exists($instance, 'selectable') ? $instance->selectable : null;
+        $instance->mapper = $instance->getMapper($table, $instance->usesSoftDelete(), $selectable);
         return $instance;
     }
 

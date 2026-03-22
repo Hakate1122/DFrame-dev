@@ -231,4 +231,16 @@ if (!function_exists('df_config')) {
             exit;
         }
     }
+
+    if (!function_exists('asset')) {
+        /**
+         * Generate a URL for an asset.
+         * @param string $path The asset path relative to the public directory.
+         * @return string The full URL to the asset.
+         */
+        function asset(string $path = ''): string
+        {
+            return getBaseUrl() . ltrim($path, '/');
+        }
+    }
 }

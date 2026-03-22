@@ -22,7 +22,7 @@ class App
      * Version of DFrame Framework.
      * @var string
      */
-    public const VERSION = '20260220-dev';
+    public const VERSION = '20260322-dev';
     /**
      * Alias for version constant
      */
@@ -524,8 +524,6 @@ class App
 
     /**
      * Boots the web application.
-     *
-     * @param array|null $argv Optional argv (kept for compatibility)
      * @return void
      */
     public function bootWeb()
@@ -552,7 +550,7 @@ class App
     /**
      * Starts DLI application.
      *
-     * @param array $argv
+     * @param array $argv Command line arguments passed to the script.
      * @return void
      */
     public function bootDli($argv)

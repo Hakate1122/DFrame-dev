@@ -8,14 +8,34 @@ abstract class BaseMapper implements MapperInterface {
     protected $table;
 
     protected ?bool $hasDeletedAt = null;
-    
-    // Whether to use soft delete automatically
+
     protected bool $useSoftDelete = false;
+
+    /** Columns to select for queries (default: ['*']) */
+    protected $columns = ['*'];
 
     public function __construct($adapter, $table, bool $useSoftDelete = false) {
         $this->adapter = $adapter;
         $this->table = $table;
         $this->useSoftDelete = $useSoftDelete;
+    }
+
+    /**
+     * Set selectable columns for mapper queries.
+     * Accepts a string (single column or '*') or multiple string args or an array.
+     */
+    public function select($columns = ['*']) {
+        if (is_array($columns)) {
+            $this->columns = $columns;
+        } else {
+            $args = func_get_args();
+            if (count($args) > 1) {
+                $this->columns = $args;
+            } else {
+                $this->columns = [$columns];
+            }
+        }
+        return $this;
     }
 
     /**
@@ -30,7 +50,6 @@ abstract class BaseMapper implements MapperInterface {
         try {
             $adapterClass = get_class($this->adapter);
             if (stripos($adapterClass, 'sqlite') !== false) {
-                // SQLite
                 $sql = "PRAGMA table_info(\"{$this->table}\")";
                 $res = $this->adapter->query($sql);
                 $rows = $this->adapter->fetchAll($res);
@@ -42,7 +61,6 @@ abstract class BaseMapper implements MapperInterface {
                     }
                 }
             } else {
-                // MySQL
                 $sql = "SHOW COLUMNS FROM `{$this->table}` LIKE 'deleted_at'";
                 $res = $this->adapter->query($sql);
                 $rows = $this->adapter->fetchAll($res);

@@ -3,7 +3,9 @@ namespace DFrame\Database\Mapper;
 
 class SqliteMapper extends BaseMapper {
     public function find($id) {
-        $sql = "SELECT * FROM \"{$this->table}\" WHERE id = ?";
+        $cols = $this->columns;
+        $colSql = (count($cols) === 1 && $cols[0] === '*') ? '*' : '"' . implode('","', $cols) . '"';
+        $sql = "SELECT {$colSql} FROM \"{$this->table}\" WHERE id = ?";
         $result = $this->adapter->query($sql, [$id]);
         return $this->adapter->fetch($result);
     }
@@ -17,13 +19,17 @@ class SqliteMapper extends BaseMapper {
     }
 
     public function all() {
-        $sql = "SELECT * FROM \"{$this->table}\"";
+        $cols = $this->columns;
+        $colSql = (count($cols) === 1 && $cols[0] === '*') ? '*' : '"' . implode('","', $cols) . '"';
+        $sql = "SELECT {$colSql} FROM \"{$this->table}\"";
         $result = $this->adapter->query($sql);
         return $this->adapter->fetchAll($result);
     }
 
     public function where($column, $value, $operator = "=") {
-        $sql = "SELECT * FROM \"{$this->table}\" WHERE \"{$column}\" {$operator} ?";
+        $cols = $this->columns;
+        $colSql = (count($cols) === 1 && $cols[0] === '*') ? '*' : '"' . implode('","', $cols) . '"';
+        $sql = "SELECT {$colSql} FROM \"{$this->table}\" WHERE \"{$column}\" {$operator} ?";
         $result = $this->adapter->query($sql, [$value]);
         return $this->adapter->fetchAll($result);
     }
@@ -46,13 +52,12 @@ class SqliteMapper extends BaseMapper {
     }
 
     public function delete($id) {
-        // Only auto soft delete if useSoftDelete is true AND table has deleted_at column
         if ($this->useSoftDelete && $this->hasDeletedAt()) {
             $sql = "UPDATE \"{$this->table}\" SET \"deleted_at\" = ? WHERE id = ?";
             $now = date('Y-m-d H:i:s');
             return $this->adapter->query($sql, [$now, $id]);
         }
-        // Hard delete (even if deleted_at column exists)
+
         $sql = "DELETE FROM \"{$this->table}\" WHERE id = ?";
         return $this->adapter->query($sql, [$id]);
     }

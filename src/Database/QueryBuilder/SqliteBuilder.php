@@ -23,7 +23,6 @@ class SqliteBuilder extends BaseBuilder implements BuilderInterface {
             return $sql;
         }
         if ($op === 'softDelete') {
-            // This is handled in execute(), but we can return a placeholder
             return "UPDATE \"{$this->table}\" SET \"deleted_at\" = ?";
         }
         if ($op === 'insert') {
@@ -94,7 +93,6 @@ class SqliteBuilder extends BaseBuilder implements BuilderInterface {
             return 0;
         }
         if ($op === 'delete') {
-            // Only auto soft delete if useSoftDelete is true AND table has deleted_at column
             if ($this->useSoftDelete && $this->tableHasDeletedAt()) {
                 $sql = $this->toSql();
                 $sql = preg_replace('/^\s*DELETE\s+FROM\s+[`"]?[^`"]+[`"]?/', "UPDATE \"{$this->table}\" SET \"deleted_at\" = ?", $sql);
@@ -106,7 +104,6 @@ class SqliteBuilder extends BaseBuilder implements BuilderInterface {
                 return 0;
             }
 
-            // Hard delete (even if deleted_at column exists)
             $sql = $this->toSql();
             $bindings = $this->getBindings();
             $result = $this->adapter->query($sql, $bindings);
@@ -116,7 +113,6 @@ class SqliteBuilder extends BaseBuilder implements BuilderInterface {
             return 0;
         }
         if ($op === 'softDelete') {
-            // Soft delete with where conditions
             if (!$this->tableHasDeletedAt()) {
                 throw new \RuntimeException("Table '{$this->table}' does not have 'deleted_at' column for soft delete.");
             }

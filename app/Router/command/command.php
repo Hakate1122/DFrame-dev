@@ -4,7 +4,6 @@ use Datahihi1\RakNet\RakNetServer;
 use DFrame\Command\Helper\ConsoleInput as Input;
 use DFrame\Command\Helper\ConsoleOutput as Output;
 use App\Chat\Chat;
-use DFrame\Utils\Math\Pi;
 
 $cli->register('hello', [\App\Command\Hello::class, 'handle']);
 $cli->register('choice', [\App\Command\Hello::class, 'choice']);
@@ -35,47 +34,6 @@ $cli->register('minesv:run', function () {
     $server->run();
 });
 
-$cli->register('jsondb:server', function () {
-    $options = getopt('', ['host:', 'port:']);
-    $host = $options['host'] ?? '0.0.0.0';
-    $port = isset($options['port']) ? (int)$options['port'] : 9501;
-
-    // Start the JsonDB TCP server (this will block)
-    $server = new \DFrame\JsonDB\Server($host, $port);
-});
-
-$cli->register('jsondb:client', function () {
-    $options = getopt('', ['host:', 'port:']);
-    $host = $options['host'] ?? '127.0.0.1';
-    $port = isset($options['port']) ? (int)$options['port'] : 9501;
-
-    $client = new \DFrame\JsonDB\Client($host, $port);
-
-    echo "-- PING --\n";
-    try {
-        $ping = $client->ping();
-        print_r($ping);
-    } catch (Exception $e) {
-        echo "Ping failed: " . $e->getMessage() . "\n";
-    }
-
-    echo "-- INSERT --\n";
-    try {
-        $inserted = $client->insert('users', ['name' => 'CLI Test', 'email' => 'cli@example.com']);
-        print_r($inserted);
-    } catch (Exception $e) {
-        echo "Insert failed: " . $e->getMessage() . "\n";
-    }
-
-    echo "-- FIND --\n";
-    try {
-        $all = $client->find('users');
-        print_r($all);
-    } catch (Exception $e) {
-        echo "Find failed: " . $e->getMessage() . "\n";
-    }
-});
-
 $cli->register('send:mail', function () {
     try {
         $mail = new DFrame\Application\Mail();
@@ -102,38 +60,3 @@ $cli->register('websocket:server', function () {
 });
 
 $cli->registerAlias('ws:server', 'websocket:server');
-
-$cli->register('math:pi', function () {
-    echo "M_PI: " . Pi::default() . PHP_EOL;
-    echo "Leibniz (100000 iters): " . Pi::leibniz(100000) . PHP_EOL;
-    echo "High precision (1050 digits): " . Pi::highPrecision(1050) . PHP_EOL;
-});
-
-$cli->register('math:delta', function () {
-    $a = (float) Input::prompt('Enter first number (a):', '10.5');
-    $b = (float) Input::prompt('Enter second number (b):', '7.3');
-
-    $absoluteDelta = DFrame\Utils\Math\Delta::absolute($a, $b);
-    Output::info("Absolute difference between $a and $b is: $absoluteDelta");
-
-    try {
-        $relativeDelta = DFrame\Utils\Math\Delta::relative($a, $b);
-        Output::info("Relative difference between $a and $b is: $relativeDelta%");
-    } catch (\InvalidArgumentException $e) {
-        Output::error($e->getMessage());
-    }
-});
-
-$cli->register('env:test', function () {
-    $env = new \Datahihi1\TinyEnv\TinyEnv(ROOT_DIR);
-    $env->load();
-    // Get all environment variables
-    $allEnv = $env->env();
-    Output::info("All environment variables:");
-    foreach ($allEnv as $key => $value) {
-        Output::info("$key: $value");
-    }
-    // Get APP_NAME variable
-    $appName = $env->env('APP_NAME', 'DefaultAppName');
-    Output::info("Application name: $appName");
-});

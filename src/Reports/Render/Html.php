@@ -29,9 +29,9 @@ class Html implements RenderInterface
             ob_end_clean();
 
         // set HTTP 500 when rendering an error/exception report
-        // if(!headers_sent()){
-        //     http_response_code(500);
-        // }
+        if(!headers_sent()){
+            http_response_code(500);
+        }
 
         // build a small SVG favicon whose fill color is the same as the error color
         $favColor = $config['color'] ?? '#7c3aed';
@@ -58,19 +58,43 @@ class Html implements RenderInterface
                     box-sizing: border-box
                 }
 
+                :root {
+                    --bg: #f8f9fa;
+                    --text: #333;
+                    --container-bg: #ffffff;
+                    --code-bg: #ffffff;
+                    --line-number-bg: #f8f9fa;
+                    --muted: #6b7280;
+                    --subtle-bg: #f3f4f6;
+                    --border: #e5e7eb;
+                    --shadow: 0 2px 10px rgba(0, 0, 0, .1);
+                }
+
+                .dark {
+                    --bg: #1e1e1e;
+                    --text: #d4d4d4;
+                    --container-bg: #252526;
+                    --code-bg: #1e1e1e;
+                    --line-number-bg: #2d2d2d;
+                    --muted: #9a9a9a;
+                    --subtle-bg: #2a2a2a;
+                    --border: #2f2f2f;
+                    --shadow: none;
+                }
+
                 body {
                     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                    background: #f8f9fa;
-                    color: #333;
+                    background: var(--bg);
+                    color: var(--text);
                     line-height: 1.5;
                     min-width: 320px
                 }
 
                 .container {
                     margin: 20px;
-                    background: white;
+                    background: var(--container-bg);
                     border-radius: 8px;
-                    box-shadow: 0 2px 10px rgba(0, 0, 0, .1);
+                    box-shadow: var(--shadow);
                     overflow: hidden
                 }
 
@@ -112,9 +136,20 @@ class Html implements RenderInterface
                     background: rgba(255, 255, 255, .3)
                 }
 
+                .theme-toggle {
+                    background: rgba(255,255,255,0.12);
+                    padding: 4px 10px;
+                    border-radius: 4px;
+                    font-size: 12px;
+                    cursor: pointer;
+                    margin-left: 8px;
+                    border: none;
+                    color: inherit;
+                }
+
                 .title {
                     padding: 20px;
-                    border-bottom: 1px solid #e5e7eb
+                    border-bottom: 1px solid var(--border)
                 }
 
                 .title h2 {
@@ -129,30 +164,30 @@ class Html implements RenderInterface
                 }
 
                 .message {
-                    color: #6b7280;
+                    color: var(--muted);
                     font-size: 14px
                 }
 
                 .code-container {
-                    background: #fafafa;
-                    border-top: 1px solid #e5e7eb
+                    background: var(--container-bg);
+                    border-top: 1px solid var(--border)
                 }
 
                 .code-header {
-                    background: #f3f4f6;
+                    background: var(--subtle-bg);
                     padding: 12px 20px;
-                    border-bottom: 1px solid #e5e7eb;
+                    border-bottom: 1px solid var(--border);
                     display: flex;
                     justify-content: space-between;
                     font-size: 12px;
-                    color: #6b7280
+                    color: var(--muted)
                 }
 
                 .code-viewer {
                     font-family: Monaco, Consolas, monospace;
                     font-size: 13px;
                     line-height: 1.6;
-                    background: white;
+                    background: var(--code-bg);
                     overflow-x: auto;
                     padding: 16px
                 }
@@ -162,12 +197,12 @@ class Html implements RenderInterface
                 }
 
                 .line-number {
-                    background: #f8f9fa;
+                    background: var(--line-number-bg);
                     color: #9ca3af;
                     padding: 0 12px;
                     text-align: right;
                     min-width: 60px;
-                    border-right: 1px solid #e5e7eb;
+                    border-right: 1px solid var(--border);
                     font-size: 12px
                 }
 
@@ -200,7 +235,7 @@ class Html implements RenderInterface
                 }
 
                 .php-comment {
-                    color: #6b7280;
+                    color: var(--muted);
                     font-style: italic
                 }
 
@@ -225,21 +260,21 @@ class Html implements RenderInterface
                 }
 
                 .trace-header {
-                    background: #f3f4f6;
+                    background: var(--subtle-bg);
                     padding: 12px 20px;
-                    border-top: 1px solid #e5e7eb;
-                    border-bottom: 1px solid #e5e7eb;
+                    border-top: 1px solid var(--border);
+                    border-bottom: 1px solid var(--border);
                     display: flex;
                     justify-content: space-between;
                     font-size: 12px;
-                    color: #6b7280;
+                    color: var(--muted);
                 }
 
                 .trace-viewer {
                     font-family: Monaco, Consolas, monospace;
                     font-size: 12px;
                     line-height: 1.6;
-                    background: #fcfcfc;
+                    background: var(--code-bg);
                     overflow-x: auto;
                     padding: 12px 16px;
                 }
@@ -251,8 +286,9 @@ class Html implements RenderInterface
                 <div class="header">
                     <span><?= $config['icon'] ?></span>
                     <div class="tabs">
-                        <span class="tab active" onclick="show('full')">Full</span>
-                        <span class="tab" onclick="show('raw')">Raw</span>
+                        <span class="tab active" onclick="show('full', event)">Full</span>
+                        <span class="tab" onclick="show('raw', event)">Raw</span>
+                        <button id="themeToggle" class="theme-toggle" onclick="toggleTheme(event)">Theme</button>
                     </div>
                 </div>
 
@@ -314,17 +350,47 @@ class Html implements RenderInterface
                 ?>
 
                 <div id="raw" class="content"
-                    style="display:none;padding:20px;font-family:monospace;background:#f8f9fa;white-space:pre-wrap;">
+                    style="display:none;padding:20px;font-family:monospace;background:var(--bg);white-space:pre-wrap;">
                     <?= htmlspecialchars($raw) ?>
                 </div>
 
                 <script>
-                    function show(id) {
-                        document.querySelectorAll('.content').forEach(el => el.style.display = 'none');
-                        document.getElementById(id).style.display = 'block';
-                        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                        event.target.classList.add('active');
-                    }
+                    (function(){
+                        var favColor = '<?= $favColor ?>';
+
+                        function show(id, evt) {
+                            document.querySelectorAll('.content').forEach(el => el.style.display = 'none');
+                            document.getElementById(id).style.display = 'block';
+                            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                            if (evt && evt.target) evt.target.classList.add('active');
+                        }
+
+                        window.show = show;
+
+                        function applyTheme(isDark){
+                            if(isDark) document.documentElement.classList.add('dark');
+                            else document.documentElement.classList.remove('dark');
+                            var meta = document.querySelector('meta[name="theme-color"]');
+                            if(meta) meta.setAttribute('content', favColor);
+                            var btn = document.getElementById('themeToggle');
+                            if(btn) btn.textContent = isDark ? 'Light' : 'Dark';
+                        }
+
+                        function toggleTheme(evt){
+                            var isDark = document.documentElement.classList.toggle('dark');
+                            localStorage.setItem('dframe-theme', isDark ? 'dark' : 'light');
+                            applyTheme(isDark);
+                            if(evt && evt.stopPropagation) evt.stopPropagation();
+                        }
+
+                        window.toggleTheme = toggleTheme;
+
+                        // initialize from localStorage or system preference
+                        var stored = localStorage.getItem('dframe-theme');
+                        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                        var useDark = stored ? (stored === 'dark') : prefersDark;
+                        applyTheme(useDark);
+                    })();
                 </script>
             </div>
         </body>

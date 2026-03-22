@@ -15,10 +15,8 @@ abstract class BaseBuilder implements BuilderInterface {
     protected $operation = null; // select|insert|update|delete|softDelete
     protected $pendingData = [];
 
-    // cache for has deleted_at
     protected ?bool $tableHasDeletedAtCache = null;
-    
-    // Whether to use soft delete automatically
+
     protected bool $useSoftDelete = false;
 
     public function __construct($adapter, string $table, bool $useSoftDelete = false)
@@ -40,10 +38,7 @@ abstract class BaseBuilder implements BuilderInterface {
     }
 
     public function where($column, $value = null, $operator = "="): BuilderInterface {
-        // Allow passing an associative array: where(['email' => $email, 'role' => 'admin'])
-        // Also allow parallel arrays: where(['email','role'], [$email, 'admin'])
         if (is_array($column)) {
-            // If second param is provided and is array, treat $column as list of cols
             if (is_array($value)) {
                 $cols = array_values($column);
                 $vals = array_values($value);
@@ -55,7 +50,6 @@ abstract class BaseBuilder implements BuilderInterface {
                 return $this;
             }
 
-            // associative array: key => value
             foreach ($column as $col => $val) {
                 $this->wheres[] = [$col, '=', $val, 'AND'];
                 $this->bindings[] = $val;
@@ -63,7 +57,6 @@ abstract class BaseBuilder implements BuilderInterface {
             return $this;
         }
 
-        // Support shorthand: where('id', $id) => where('id', '=', $id)
         if ($value === null && $operator !== null) {
             $value = $operator;
             $operator = '=';
@@ -77,9 +70,7 @@ abstract class BaseBuilder implements BuilderInterface {
         return $this;
     }
 
-    // New orWhere implementation
     public function orWhere($column, $value = null): BuilderInterface {
-        // Reuse where logic but mark boolean as OR
         if (is_array($column)) {
             if (is_array($value)) {
                 $cols = array_values($column);
@@ -99,7 +90,6 @@ abstract class BaseBuilder implements BuilderInterface {
             return $this;
         }
 
-        // shorthand orWhere('col', $val)
         $this->wheres[] = [$column, '=', $value, 'OR'];
         $this->bindings[] = $value;
         return $this;
@@ -221,10 +211,9 @@ abstract class BaseBuilder implements BuilderInterface {
     public function softDelete($id = null)
     {
         if ($id !== null) {
-            // Direct soft delete by ID
             return $this->softDeleteById($id);
         }
-        // Chainable soft delete
+
         $this->operation = 'softDelete';
         return $this;
     }
