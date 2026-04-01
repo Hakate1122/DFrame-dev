@@ -28,12 +28,10 @@ class Html implements RenderInterface
         while (ob_get_level())
             ob_end_clean();
 
-        // set HTTP 500 when rendering an error/exception report
         if(!headers_sent()){
             http_response_code(500);
         }
 
-        // build a small SVG favicon whose fill color is the same as the error color
         $favColor = $config['color'] ?? '#7c3aed';
         $svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="' . $favColor . '"/><text x="50%" y="55%" font-size="36" text-anchor="middle" fill="#ffffff" font-family="Arial,Helvetica,sans-serif" font-weight="700">!</text></svg>';
         $favicon = 'data:image/svg+xml;utf8,' . rawurlencode($svg);
@@ -46,12 +44,10 @@ class Html implements RenderInterface
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title><?= $config['title'] ?>: <?= htmlspecialchars($message) ?></title>
 
-            <!-- colored favicon to visually distinguish error type -->
             <link rel="icon" href="<?= $favicon ?>" type="image/svg+xml">
             <meta name="theme-color" content="<?= $favColor ?>">
 
             <style>
-                /* [CSS ĐÃ ĐƯỢC TỐI ƯU – XEM FILE RIÊNG] */
                 * {
                     margin: 0;
                     padding: 0;
@@ -147,6 +143,21 @@ class Html implements RenderInterface
                     color: inherit;
                 }
 
+                .theme-transition .container,
+                .theme-transition .header,
+                .theme-transition .title,
+                .theme-transition .code-viewer,
+                .theme-transition .trace-viewer,
+                .theme-transition .line-number,
+                .theme-transition .line-content,
+                .theme-transition body,
+                .theme-transition html {
+                    transition: background-color 300ms ease, color 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
+                }
+
+                .theme-toggle { transition: transform 180ms ease, background-color 200ms ease; }
+                .theme-toggle:active { transform: scale(0.98); }
+
                 .title {
                     padding: 20px;
                     border-bottom: 1px solid var(--border)
@@ -220,7 +231,6 @@ class Html implements RenderInterface
                     padding-left: 12px;
                 }
 
-                /* dim non-highlighted lines slightly to make the highlighted line stand out */
                 .code-viewer .code-line:not(.highlight-line) .line-content,
                 .code-viewer .code-line:not(.highlight-line) .line-number {
                     opacity: 0.6;
@@ -377,15 +387,21 @@ class Html implements RenderInterface
                         }
 
                         function toggleTheme(evt){
+                            document.documentElement.classList.add('theme-transition');
+
                             var isDark = document.documentElement.classList.toggle('dark');
                             localStorage.setItem('dframe-theme', isDark ? 'dark' : 'light');
                             applyTheme(isDark);
+
+                            setTimeout(function(){
+                                document.documentElement.classList.remove('theme-transition');
+                            }, 400);
+
                             if(evt && evt.stopPropagation) evt.stopPropagation();
                         }
 
                         window.toggleTheme = toggleTheme;
 
-                        // initialize from localStorage or system preference
                         var stored = localStorage.getItem('dframe-theme');
                         var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
                         var useDark = stored ? (stored === 'dark') : prefersDark;
@@ -402,7 +418,6 @@ class Html implements RenderInterface
 
     private function highlight(string $code): string
     {
-        // Remove trailing whitespace but preserve leading whitespace
         $leadingSpace = '';
         if (preg_match('/^(\s+)/', $code, $matches)) {
             $leadingSpace = $matches[1];
@@ -501,23 +516,23 @@ class Html implements RenderInterface
             $code = preg_replace('/\b(' . preg_quote($keyword) . ')\b(?![^<]*>)/', '<span class="php-keyword">$1</span>', $code);
         }
 
-        // Variables (but not inside already highlighted content)
+        # Variables (but not inside already highlighted content)
         $code = preg_replace('/(\$[a-zA-Z_][a-zA-Z0-9_]*)(?![^<]*>)/', '<span class="php-variable">$1</span>', $code);
 
-        // Object operators and array access
+        # Object operators and array access
         $code = preg_replace('/(-&gt;)/', '<span class="php-operator">-></span>', $code);
         $code = preg_replace('/(::)/', '<span class="php-operator">::</span>', $code);
 
-        // Numbers
+        # Numbers
         $code = preg_replace('/\b(\d+\.?\d*)\b(?![^<]*>)/', '<span class="php-number">$1</span>', $code);
 
-        // Function calls (word followed by opening parenthesis, but not keywords)
+        # Function calls (word followed by opening parenthesis, but not keywords)
         $code = preg_replace('/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()(?![^<]*>)(?!.*<span class="php-keyword">)/', '<span class="php-function">$1</span>', $code);
 
-        // Constants (all caps words)
+        # Constants (all caps words)
         $code = preg_replace('/\b([A-Z_][A-Z0-9_]{2,})\b(?![^<]*>)/', '<span class="php-constant">$1</span>', $code);
 
-        // Operators
+        # Operators
         $operators = [
             '=',
             '+',

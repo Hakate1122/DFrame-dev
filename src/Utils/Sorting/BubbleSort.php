@@ -2,10 +2,15 @@
 
 namespace DFrame\Utils\Sorting;
 
+use function count;
+
 /**
  * **Utility: Sorting - BubbleSort**
  * 
  * Implements the Bubble Sort algorithm to sort an array.
+ * **Principle**: Repeatedly step through the list, compare adjacent elements and swap them if they are in the wrong order. The process is repeated until the list is sorted.
+ * 
+ * **Complexity**: O(n^2) time complexity in the worst and average cases, O(n) in the best case (when the array is already sorted), and O(1) space complexity.
  */
 class BubbleSort
 {
@@ -27,53 +32,6 @@ class BubbleSort
                     $array[$j] = $array[$j + 1];
                     $array[$j + 1] = $temp;
                     $swapped = false;
-                }
-            }
-
-            if ($swapped) {
-                break;
-            }
-        }
-
-        return $array;
-    }
-
-    /**
-     * Debug version of bubble sort that reports each swap step.
-     *
-     * @param array $array The array to sort.
-     * @param callable|null $onStep Optional callback invoked after each swap: function(array $current, int $index, int $step).
-     *                             If null, the method will echo each step as JSON.
-     * @param int $msDelay Optional delay in milliseconds between steps when using the default echo mode.
-     * @return array The sorted array.
-     */
-    public static function debug(array $array, ?callable $onStep = null, int $msDelay = 0)
-    {
-        $length = count($array);
-        $step = 0;
-
-        for ($i = $length; $i > 0; $i--) {
-            $swapped = true;
-
-            for ($j = 0; $j < $i - 1; $j++) {
-                if ($array[$j] > $array[$j + 1]) {
-                    $temp = $array[$j];
-                    $array[$j] = $array[$j + 1];
-                    $array[$j + 1] = $temp;
-                    $swapped = false;
-
-                    if ($onStep) {
-                        $onStep($array, $j, ++$step);
-                    } else {
-                        echo json_encode([
-                            'step' => $step,
-                            'index' => $j,
-                            'current' => $array
-                        ]) . "\n";
-                        if ($msDelay > 0) {
-                            usleep($msDelay * 1000);
-                        }
-                    }
                 }
             }
 

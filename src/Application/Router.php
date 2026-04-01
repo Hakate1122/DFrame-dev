@@ -155,7 +155,9 @@ class Router
 
     /**
      * Sign a route specification to a handler with optional middleware.
-     * @param string $spec (`GET`, `POST`, etc.) Route specification in the format 'METHOD /path' or 'METHOD1|METHOD2 /path'.
+     * 
+     * **Accept methods**: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS
+     * @param string $spec Route specification in the format 'METHOD /path' or 'METHOD1|METHOD2 /path'.
      * @param mixed $handler The handler for the route (callable, or 'Class@method' string).
      * @param array $middleware Optional middleware for the route.
      * @return static
@@ -168,7 +170,9 @@ class Router
 
     /**
      * Sign an API route specification to a handler with optional middleware.
-     * @param string $spec (`GET`, `POST`, etc.) Route specification in the format 'METHOD /path' or 'METHOD1|METHOD2 /path'.
+     * 
+     * **Accept methods**: GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS
+     * @param string $spec Route specification in the format 'METHOD /path' or 'METHOD1|METHOD2 /path'.
      * @param mixed $handler The handler for the route (callable, or 'Class@method' string).
      * @param array $middleware Optional middleware for the route.
      * @return static
@@ -637,6 +641,13 @@ class Router
     }
 
     /* ----- URL GENERATOR ----- */
+    /**
+     * Generate a URL for a named route with optional parameters and base URL.
+     * @param string $name The name of the route to generate.
+     * @param array $params Optional parameters to fill in the route pattern.
+     * @param string|null $base Optional base URL (scheme + host + script path). If null, it will be auto-detected.
+     * @return string|null The generated URL, or null if the route name is not found.
+     */
     public static function route(string $name, array $params = [], ?string $base = null): ?string
     {
         if (!isset(self::$routeNames[$name])) {
@@ -671,7 +682,7 @@ class Router
     /**
      * Return registered routes for debugging or sitemap generation.
      *
-     * NOTE: Read-only, does not change Router state.
+     * **Note**: Read-only, does not change Router state.
      *
      * @return array{static:array, api:array, names:array}
      */

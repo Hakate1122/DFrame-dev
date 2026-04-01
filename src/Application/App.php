@@ -22,7 +22,7 @@ class App
      * Version of DFrame Framework.
      * @var string
      */
-    public const VERSION = '20260322-dev';
+    public const VERSION = '20260401-dev';
     /**
      * Alias for version constant
      */
@@ -139,9 +139,9 @@ class App
     }
 
     /**
-     * Set security headers for web requests
+     * Internal: apply security headers for web requests
      */
-    private static function setSecurityHeaders(): void
+    private static function applySecurityHeaders(): void
     {
         if (headers_sent()) {
             return;
@@ -149,13 +149,14 @@ class App
 
         header('X-Content-Type-Options: nosniff');
         header('X-Frame-Options: DENY');
-        header('X-XSS-Protection: 1; mode=block');
         header('Referrer-Policy: strict-origin-when-cross-origin');
 
+        header('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+
+        header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
+
         if (self::isProduction()) {
-            header(
-                "Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
-            );
+            header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none';");
         }
 
         header_remove('X-Powered-By');
@@ -167,7 +168,8 @@ class App
      */
     public static function setMaintenanceMode($noEnv = false): void
     {
-        date_default_timezone_set(env('APP_TIMEZONE', 'UTC'));
+        $utc_env = $_SERVER['APP_TIMEZONE'] ?? (function_exists('env') ? env('APP_TIMEZONE', 'UTC') : 'UTC');
+        date_default_timezone_set($utc_env);
         if (headers_sent()) {
             return;
         }
@@ -276,12 +278,9 @@ class App
     private static function checkRunningFromPhar()
     {
         $pharRunning = false;
-        try {
-            if (class_exists('Phar') && \Phar::running(false) !== '') {
-                $pharRunning = true;
-            }
-        } catch (\Throwable $t) {
-            // ignore
+
+        if (class_exists('Phar') && \Phar::running(false) !== '') {
+            $pharRunning = true;
         }
 
         if (!$pharRunning) {
@@ -349,6 +348,7 @@ class App
         if (!class_exists(TinyEnv::class)) {
             throw new Exception('TinyEnv is not installed. Please run "composer require datahihi1/tiny-env"');
         }
+
         $env = new TinyEnv(ROOT_DIR);
         $env->envfiles(['.env', '.env.encrypted']);
         $env->load();
@@ -427,7 +427,9 @@ class App
      */
     private function initializeRoute()
     {
+        /** The route configuration path */
         $routeConfigPath = ROOT_DIR . 'app/Router/web.php';
+        /** The API route configuration path */
         $apiRouteConfigPath = ROOT_DIR . 'app/Router/api.php';
 
         if (!$this->webRoutesLoaded && file_exists($routeConfigPath)) {
@@ -451,7 +453,7 @@ class App
     public function setUpWebRoutes(string $path): self
     {
         if (file_exists($path)) {
-            require $path;
+            require_once $path;
             $this->webRoutesLoaded = true;
         }
         return $this;
@@ -463,9 +465,27 @@ class App
     public function setUpApiRoutes(string $path): self
     {
         if (file_exists($path)) {
-            require $path;
+            require_once $path;
             $this->apiRoutesLoaded = true;
         }
+        return $this;
+    }
+
+    /**
+     * Apply security headers and return self for fluent chaining.
+     * 
+     * Includes:
+     * - X-Content-Type-Options: nosniff (prevents MIME type sniffing)
+     * - X-Frame-Options: DENY (prevents clickjacking)
+     * - Referrer-Policy: strict-origin-when-cross-origin (limits referrer information sent to other origins)
+     * - Strict-Transport-Security: max-age=31536000; includeSubDomains; preload (enforces HTTPS for 1 year and includes subdomains)
+     * - Permissions-Policy: geolocation=(), microphone=(), camera=() (denies access to sensitive APIs)
+     * - Content-Security-Policy (only in production): default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; (prevents loading of resources from untrusted sources and disallows framing)
+     * - Removes X-Powered-By header (hides PHP version information)
+     */
+    public function setSecurityHeaders(): self
+    {
+        self::applySecurityHeaders();
         return $this;
     }
 
@@ -478,56 +498,37 @@ class App
         $this->dliRoutesLoaded = false;
         return $this;
     }
-    /**
-     * Initializes the environment.
-     *
-     * @return self
-     */
-    public static function initialize()
-    {
-        try {
-
-            self::$runningFromPhar = self::checkRunningFromPhar();
-
-            // Load environment files (.env, encrypted .env if present)
-            self::loadEnvironmentVariables();
-
-            // Initialize configuration
-            self::initializeConfig();
-
-            // Configure error reporting
-            self::configureErrorReporting();
-
-            // Configure timezone
-            self::configureTimezone();
-
-            // Validate session configuration
-            self::validateSessionConfig();
-
-            // Validate required environment variables for services
-            self::validateServiceConfig();
-
-            // Perform health check (optional, can log or act on results)
-            $healthStatus = self::healthCheck();
-            if ($healthStatus['status'] === 'unhealthy') {
-                dump($healthStatus);
-                throw new Exception('Application health check failed.');
-            }
-        } catch (Exception $e) {
-            if (self::isDebug()) {
-                throw $e;
-            }
-        }
-
-        return new self();
-    }
 
     /**
-     * Boots the web application.
+     * Starts the DFrame web application.
      * @return void
      */
     public function bootWeb()
     {
+
+        self::$runningFromPhar = self::checkRunningFromPhar();
+
+        // Load environment files (.env, encrypted .env if present)
+        self::loadEnvironmentVariables();
+
+        // Initialize configuration
+        self::initializeConfig();
+
+        // Configure error reporting
+        self::configureErrorReporting();
+
+        // Configure timezone
+        self::configureTimezone();
+
+        // Validate session configuration
+        self::validateSessionConfig();
+
+        // Validate required environment variables for services
+        self::validateServiceConfig();
+        $healthStatus = self::healthCheck();
+        if ($healthStatus['status'] === 'unhealthy') {
+            throw new Exception('Application health check failed.');
+        }
 
         // Set maintenance mode if enabled
         self::setMaintenanceMode();
@@ -553,8 +554,32 @@ class App
      * @param array $argv Command line arguments passed to the script.
      * @return void
      */
-    public function bootDli($argv)
+    public function bootDli(array $argv)
     {
+        self::$runningFromPhar = self::checkRunningFromPhar();
+
+        // Load environment files (.env, encrypted .env if present)
+        self::loadEnvironmentVariables();
+
+        // Initialize configuration
+        self::initializeConfig();
+
+        // Configure error reporting
+        self::configureErrorReporting();
+
+        // Configure timezone
+        self::configureTimezone();
+
+        // Validate session configuration
+        self::validateSessionConfig();
+
+        // Validate required environment variables for services
+        self::validateServiceConfig();
+
+        $healthStatus = self::healthCheck();
+        if ($healthStatus['status'] === 'unhealthy') {
+            throw new Exception('Application health check failed.');
+        }
 
         // Kernel
         $cli = new Command();

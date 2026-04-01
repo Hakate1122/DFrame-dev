@@ -6,6 +6,9 @@ namespace DFrame\Utils\Sorting;
  * **Utility: Sorting - CountSort**
  * 
  * Implements the Counting Sort algorithm to sort an array.
+ * **Principle**: Count the occurrences of each unique element in the input array, then reconstruct the sorted array based on these counts.
+ * 
+ * **Complexity**: O(n + k) time complexity, where n is the number of elements in the input array and k is the range of the input values. O(k) space complexity for the count array, and O(n) for the output array.
  */
 class CountSort
 {
@@ -39,40 +42,4 @@ class CountSort
         return $array;
     }
 
-    /**
-     * Debug version of counting sort that reports the count array after counting occurrences.
-     *
-     * @param array $array The array to sort.
-     * @param callable|null $onCount Optional callback invoked after counting occurrences: function(array $count, int $step).
-     *                             If null, the method will echo the count array as JSON.
-     * @return array The sorted array.
-     */
-    public static function debug(array $array, ?callable $onCount = null)
-    {
-        $count = array();
-        $min = min($array);
-        $max = max($array);
-
-        for ($i = $min; $i <= $max; $i++) {
-            $count[$i] = 0;
-        }
-
-        foreach ($array as $number) {
-            $count[$number]++;
-        }
-
-        if ($onCount !== null) {
-            $onCount($count, 1);
-        }
-
-        $z = 0;
-
-        for ($i = $min; $i <= $max; $i++) {
-            while ($count[$i]-- > 0) {
-                $array[$z++] = $i;
-            }
-        }
-
-        return $array;
-    }
 }

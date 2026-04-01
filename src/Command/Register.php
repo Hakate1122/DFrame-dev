@@ -18,5 +18,6 @@ class Register
         $cli->register('server', Server::server())->info('Start the development server');
         $cli->register('-s', Server::server())->infoAlias('server');
         $cli->register('list', Core::list($cli->list()))->info('List all available commands');
+        $cli->register('setting', Setting::handle())->info('Show or set application settings');
     }
 }

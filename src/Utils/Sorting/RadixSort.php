@@ -2,10 +2,15 @@
 
 namespace DFrame\Utils\Sorting;
 
+use function count;
+
 /**
  * **Utility: Sorting - RadixSort**
  * 
  * Implements the Radix Sort algorithm to sort an array.
+ * **Principle**: Radix Sort sorts numbers by processing individual digits. It uses a stable sorting algorithm (like Counting Sort) as a subroutine to sort the digits, starting from the least significant digit to the most significant.
+ * 
+ * **Complexity**: O(n * k) time complexity, where n is the number of elements in the input array and k is the number of digits in the largest number. O(n + k) space complexity due to the temporary arrays used for sorting each digit.
  */
 class RadixSort
 {
@@ -88,45 +93,4 @@ class RadixSort
         return $newArray;
     }
 
-    /**
-     * Debug version of Radix Sort that reports the array after each digit pass.
-     *
-     * @param array $nums The array to be sorted.
-     * @param callable|null $onStep Optional callback invoked after each pass: function(array $current, int $pass, string $status = null).
-     *                             If null, the method will echo each step as JSON.
-     * @param int $msDelay Optional delay in milliseconds between steps when using the default echo mode.
-     * @param int|null $memoryLimitBytes Optional memory limit in bytes; stops when exceeded.
-     * @return array The sorted array.
-     */
-    public static function debug(array $nums, ?callable $onStep = null, int $msDelay = 0, ?int $memoryLimitBytes = null): array
-    {
-        $maxDigitsCount = self::maxDigits($nums);
-        for ($k = 0; $k < $maxDigitsCount; $k++) {
-            if ($memoryLimitBytes !== null && memory_get_usage(true) > $memoryLimitBytes) {
-                $status = 'memory_limit_exceeded';
-                if ($onStep) {
-                    $onStep($nums, $k, $status);
-                } else {
-                    echo json_encode(['status' => $status, 'pass' => $k, 'array' => $nums]) . PHP_EOL;
-                }
-                break;
-            }
-
-            $digitBucket = array_fill(0, 10, []);
-
-            for ($i = 0; $i < count($nums); $i++) {
-                $digitBucket[self::getDigit($nums[$i], $k)][] = $nums[$i];
-            }
-
-            $nums = self::concat($digitBucket);
-            if ($onStep) {
-                $onStep($nums, $k);
-            } else {
-                echo json_encode(['pass' => $k, 'current' => $nums]) . PHP_EOL;
-                if ($msDelay > 0) usleep($msDelay * 1000);
-            }
-        }
-
-        return $nums;
-    }
 }

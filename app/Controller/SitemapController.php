@@ -21,12 +21,6 @@ class SitemapController
 
     protected function buildSitemapXml(): string
     {
-        $base = rtrim(getenv('APP_URL') ?: ($_SERVER['APP_URL'] ?? ''), "/");
-        if (empty($base)) {
-            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-            $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-            $base = $scheme . '://' . $host;
-        }
 
         $routesInfo = \DFrame\Application\Router::getRegisteredRoutes();
         $paths = [];
@@ -36,7 +30,7 @@ class SitemapController
             foreach ($map as $path => $meta) {
                 if (strpos($path, '{') !== false) continue;
                 $paths[$path] = [
-                    'loc' => rtrim($base, '/') . $path,
+                    'loc' => rtrim(getBaseUrl(), '/') . $path,
                     'lastmod' => date('c'),
                     'changefreq' => 'weekly',
                     'priority' => '0.5'
@@ -48,7 +42,7 @@ class SitemapController
             if (!empty($info['api'])) continue;
             $p = $info['path'];
             if (strpos($p, '{') !== false) continue;
-            $loc = rtrim($base, '/') . $p;
+            $loc = rtrim(getBaseUrl(), '/') . $p;
             $paths[$p] = [
                 'loc' => $loc,
                 'lastmod' => date('c'),

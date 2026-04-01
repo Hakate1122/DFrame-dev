@@ -38,7 +38,7 @@ class View
         $this->engine = $config['engine'] ?? 'php';
 
         if (
-            env('SUPPORT_VIEW_ENGINE') === 'enable'
+            function_exists('env') && env('SUPPORT_VIEW_ENGINE', 'disable') === 'enable'
             && $this->engine !== 'php'
             && isset($config['drives'][$this->engine]['class'])
         ) {

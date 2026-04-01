@@ -120,7 +120,7 @@ if (!function_exists('getFlash')) {
 
 if (!function_exists('getBaseUrl')) {
     /**
-     * Get the base URL of the application.
+     * Get the dynamic base URL of the application.
      *
      * @return string
      */

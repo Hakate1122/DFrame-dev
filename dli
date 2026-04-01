@@ -11,13 +11,17 @@
 define('ROOT_DIR', __DIR__ . '/');
 define('INDEX_DIR', __DIR__ . '/public/');
 
-require_once __DIR__ . '/vendor/autoload.php';
+if (!file_exists(ROOT_DIR . 'vendor/autoload.php')) {
+	die("Autoloader not found. Please run 'composer install' in the root directory.");
+}
+
+require_once ROOT_DIR . 'vendor/autoload.php';
 
 use DFrame\Application\App;
 use DFrame\Reports\Report;
 
 Report::setup(true, INDEX_DIR . 'logs/cli.log', Report::cli());
 
-App::initialize()
-	->setUpDliRoutes(ROOT_DIR . "app/Router/command/command.php")
+$app = new App();
+$app->setUpDliRoutes(ROOT_DIR . "app/Router/command/command.php")
 	->bootDli($argv);

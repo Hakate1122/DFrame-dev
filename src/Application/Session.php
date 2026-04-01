@@ -69,6 +69,12 @@ final class Session
 
     private static function ageFlash(): void
     {
+        
+        if (!isset($_SESSION[self::FLASH_KEY])) {
+            $_SESSION[self::FLASH_KEY] = ['old' => [], 'new' => []];
+            return;
+        }
+
         $_SESSION[self::FLASH_KEY]['old'] =
             $_SESSION[self::FLASH_KEY]['new'] ?? [];
 

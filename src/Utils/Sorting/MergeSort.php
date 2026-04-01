@@ -2,10 +2,15 @@
 
 namespace DFrame\Utils\Sorting;
 
+use function count;
+
 /**
  * **Utility: Sorting - MergeSort**
  * 
  * Implements the Merge Sort algorithm to sort an array.
+ * **Principle**: Merge Sort is a divide-and-conquer algorithm that divides the input array into two halves, recursively sorts each half, and then merges the sorted halves back together.
+ * 
+ * **Complexity**: O(n log n) time complexity in the worst and average cases, O(n) in the best case (when the array is already sorted), and O(n) space complexity due to the temporary arrays used for merging.
  */
 class MergeSort
 {
@@ -62,59 +67,4 @@ class MergeSort
         return $result;
     }
 
-    /**
-     * Debug version of Merge Sort that reports merging steps.
-     *
-     * @param array $arr The array to sort.
-     * @param callable|null $onStep Optional callback invoked during merges: function(array $current, int $step, string $status = null).
-     *                             If null, the method will echo each step as JSON.
-     * @param int $msDelay Optional delay in milliseconds between steps when using the default echo mode.
-     * @param int|null $memoryLimitBytes Optional memory limit in bytes; stops when exceeded.
-     * @return array The sorted array.
-     */
-    public static function debug(array $arr, ?callable $onStep = null, int $msDelay = 0, ?int $memoryLimitBytes = null): array
-    {
-        $step = 0;
-
-        $recur = function(array $a) use (&$recur, &$step, $onStep, $msDelay, $memoryLimitBytes) : array {
-            if ($memoryLimitBytes !== null && memory_get_usage(true) > $memoryLimitBytes) {
-                $status = 'memory_limit_exceeded';
-                if ($onStep) {
-                    $onStep($a, $step, $status);
-                } else {
-                    echo json_encode(['status' => $status, 'step' => $step, 'array' => $a]) . PHP_EOL;
-                }
-                return $a;
-            }
-
-            if (count($a) <= 1) return $a;
-            $mid = floor(count($a) / 2);
-            $left = $recur(array_slice($a, 0, $mid));
-            $right = $recur(array_slice($a, $mid));
-
-            $merged = [];
-            $i = 0; $j = 0;
-            while ($i < count($left) && $j < count($right)) {
-                if ($right[$j] > $left[$i]) {
-                    $merged[] = $left[$i++];
-                } else {
-                    $merged[] = $right[$j++];
-                }
-                $step++;
-                if ($onStep) {
-                    $onStep(array_merge($merged, array_slice($left, $i), array_slice($right, $j)), $step);
-                } else {
-                    echo json_encode(['step' => $step, 'current' => array_merge($merged, array_slice($left, $i), array_slice($right, $j))]) . PHP_EOL;
-                    if ($msDelay > 0) usleep($msDelay * 1000);
-                }
-            }
-
-            while ($i < count($left)) { $merged[] = $left[$i++]; }
-            while ($j < count($right)) { $merged[] = $right[$j++]; }
-
-            return $merged;
-        };
-
-        return $recur($arr);
-    }
 }
