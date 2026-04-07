@@ -52,10 +52,19 @@ class Core
             }
             
             echo "Available commands:\n";
-            echo "  help, -h        Show this help message\n";
-            echo "  version, -v     Show application version\n";
-            echo "  server, -s      Start the development server\n";
-            echo "  list            List all available commands\n";
+            echo "  help, -h                Show this help message\n";
+            echo "  version, -v             Show application version\n";
+            echo "  server, -s              Start the development server\n";
+            echo "  list                    List all available commands\n";
+            echo "Add commands - create a new components:\n";
+            echo "  add [type]              Create a new component[controller, model, view, middleware, command, mail]\n";
+            echo "  add:controller/ctrl     Create a new controller\n";
+            echo "  add:model/mdl           Create a new model\n";
+            echo "  add:view/vw             Create a new view\n";
+            echo "  add:middleware/mdw      Create a new middleware\n";
+            echo "  add:command/cmd         Create a new command\n";
+            echo "  add:mail                Create a new mail class\n";
+            echo "  For add commands, use --name=Name to specify the name of the component\n";
             echo "\n";
         };
     }

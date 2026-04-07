@@ -4,6 +4,16 @@ namespace DFrame\Command\Helper;
 
 use DFrame\Application\Command;
 
+/**
+ * **CommandEntry**
+ * 
+ * CommandEntry represents a single command registered in the Command system.
+ * It holds the command's name, handler, description, and other metadata.
+ * 
+ * Example usage:
+ *   $entry = new CommandEntry($commandSystem, 'hello', $handler);
+ *   $entry->info('This command says hello');
+ */
 class CommandEntry
 {
     public Command $parent;

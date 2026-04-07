@@ -14,7 +14,6 @@ use DFrame\Utils\Sorting\RadixSort;
 use DFrame\Utils\Sorting\SelectionSort;
 use DFrame\Utils\Sorting\ShellSort;
 use DFrame\Utils\Sorting\TimSort;
-use DFrame\Utils\Sorting\BogoSort;
 
 class BenchmarkSort
 {

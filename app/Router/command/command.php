@@ -1,6 +1,5 @@
 <?php
 
-use Datahihi1\RakNet\RakNetServer;
 use DFrame\Command\Helper\ConsoleInput as Input;
 use DFrame\Command\Helper\ConsoleOutput as Output;
 use App\Chat\Chat;
@@ -10,29 +9,9 @@ $cli->register('choice', [\App\Command\Hello::class, 'choice']);
 $cli->register('hi', [\App\Command\Hello::class, 'num']);
 
 $cli->register('sample', [\App\Command\Sample::class, 'handle']);
+$cli->register('quiz', [\App\Command\Sample::class, 'quiz']);
 $cli->register('try-connect-sql', [\App\Command\Sample::class, 'tryConnectSQL']);
 $cli->register('try-connect-db', [\App\Command\Sample::class, 'tryConnectDB']);
-
-$cli->register('minesv:ping', function () {
-    $host = Input::prompt('Enter host:', '127.0.0.1');
-    $port = Input::prompt('Enter port:', '19132');
-    $client = new \Datahihi1\RakNet\RakNetClient($host, $port);
-    $response = $client->ping();
-    if ($response !== null) {
-        Output::success("Server is online!");
-        Output::info(print_r($response, true));
-    } else {
-        Output::error("Server is offline or did not respond.");
-    }
-    $client->close();
-});
-
-$cli->register('minesv:run', function () {
-    $motd = 'MCPE;Demo MOTD;2;0.2.0;0;20;1234567890';
-    $port = '19132';
-    $server = new RakNetServer($motd, $port);
-    $server->run();
-});
 
 $cli->register('send:mail', function () {
     try {

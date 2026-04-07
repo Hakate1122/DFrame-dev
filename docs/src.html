@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DFrame Docs — src/ (Core framework)</title>
+  <link rel="stylesheet" href="./assets/style.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span>DFrame Docs</span>
+        <span class="badge">src/</span>
+      </div>
+      <div class="badge"><a href="./index.html">Giới thiệu</a></div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="nav">
+        <div class="section-title">Bắt đầu</div>
+        <a href="./index.html">Giới thiệu <small>overview</small></a>
+        <a href="./install.html">Yêu cầu & cài đặt <small>setup</small></a>
+        <div class="section-title">Kiến trúc</div>
+        <a href="./structure.html">Cấu trúc dự án <small>folders</small></a>
+        <a href="./components.html">Thành phần & cách dùng <small>how-to</small></a>
+        <a href="./mvc.html">MVC trong DFrame <small>patterns</small></a>
+        <div class="section-title">Core</div>
+        <a class="active" href="./src.html">src/ theo chức năng <small>modules</small></a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <h1>`src/` theo chức năng</h1>
+      <p>
+        Thư mục <code>src/</code> là “core framework”, được autoload theo namespace <code>DFrame\</code> (xem <code>composer.json</code>).
+        Dưới đây là các thành phần hiện có trong repo, gom theo nhóm chức năng.
+      </p>
+
+      <h2>1) Application (HTTP + tiện ích ứng dụng)</h2>
+      <ul>
+        <li><b>App core</b>: <code>src/Application/App.php</code> (boot web/cli, env, session, route run)</li>
+        <li><b>Router</b>: <code>src/Application/Router.php</code> (routing, group, middleware, named routes, API normalize)</li>
+        <li><b>Request</b>: <code>src/Application/Request.php</code></li>
+        <li><b>Middleware runner</b>: <code>src/Application/Middleware.php</code></li>
+        <li><b>Session</b>: <code>src/Application/Session.php</code></li>
+        <li><b>View</b>: <code>src/Application/View.php</code> + <code>src/Application/Interfaces/ViewEngine.php</code></li>
+        <li><b>View drives</b>:
+          <ul>
+            <li><code>src/Application/Drive/View/BladeOneDrive.php</code></li>
+            <li><code>src/Application/Drive/View/BladeDrive.php</code></li>
+            <li><code>src/Application/Drive/View/TwigDrive.php</code></li>
+          </ul>
+        </li>
+        <li><b>Cache drives</b>:
+          <ul>
+            <li><code>src/Application/Drive/Cache/Redis.php</code></li>
+            <li><code>src/Application/Drive/Cache/Memcached.php</code></li>
+          </ul>
+        </li>
+        <li><b>DB facade</b>: <code>src/Application/DB.php</code></li>
+        <li><b>Mail</b>: <code>src/Application/Mail.php</code></li>
+        <li><b>Log</b>: <code>src/Application/Log.php</code></li>
+        <li><b>Validator</b>: <code>src/Application/Validator.php</code></li>
+        <li><b>Hash</b>: <code>src/Application/Hash.php</code></li>
+        <li><b>File/Resource</b>: <code>src/Application/File.php</code>, <code>src/Application/Resource.php</code></li>
+        <li><b>WebSocket</b>: <code>src/Application/WebSocket.php</code></li>
+        <li><b>Helpers</b>:
+          <ul>
+            <li><code>src/Application/helper/helper.php</code></li>
+            <li><code>src/Application/helper/cli.php</code></li>
+            <li><code>src/Application/helper/source.php</code></li>
+            <li><code>src/Application/helper/TokenGenerator.php</code></li>
+            <li><code>src/Application/helper/default_pages.php</code></li>
+          </ul>
+        </li>
+      </ul>
+
+      <h2>2) Database (adapter + builder + mapper)</h2>
+      <ul>
+        <li><b>Database manager</b>: <code>src/Database/DatabaseManager.php</code></li>
+        <li><b>Adapters</b>:
+          <ul>
+            <li><code>src/Database/Adapter/MysqliAdapter.php</code></li>
+            <li><code>src/Database/Adapter/PdoMysqlAdapter.php</code></li>
+            <li><code>src/Database/Adapter/Sqlite3Adapter.php</code></li>
+            <li><code>src/Database/Adapter/PdoSqliteAdapter.php</code></li>
+          </ul>
+        </li>
+        <li><b>Query builders</b>:
+          <ul>
+            <li><code>src/Database/QueryBuilder/BaseBuilder.php</code></li>
+            <li><code>src/Database/QueryBuilder/MysqlBuilder.php</code></li>
+            <li><code>src/Database/QueryBuilder/SqliteBuilder.php</code></li>
+          </ul>
+        </li>
+        <li><b>Mappers</b>:
+          <ul>
+            <li><code>src/Database/Mapper/BaseMapper.php</code></li>
+            <li><code>src/Database/Mapper/MysqlMapper.php</code></li>
+            <li><code>src/Database/Mapper/SqliteMapper.php</code></li>
+          </ul>
+        </li>
+        <li><b>Interfaces</b>:
+          <ul>
+            <li><code>src/Database/Interfaces/AdapterInterface.php</code></li>
+            <li><code>src/Database/Interfaces/BuilderInterface.php</code></li>
+            <li><code>src/Database/Interfaces/MapperInterface.php</code></li>
+          </ul>
+        </li>
+        <li><b>Traits</b>:
+          <ul>
+            <li><code>src/Database/Traits/SoftDelete.php</code></li>
+            <li><code>src/Database/Traits/Timestamp.php</code></li>
+            <li><code>src/Database/Traits/Authenticatable.php</code></li>
+            <li><code>src/Database/Traits/Freeze.php</code></li>
+          </ul>
+        </li>
+        <li><b>Exceptions</b>:
+          <ul>
+            <li><code>src/Database/Exception/UnsupportedDriverException.php</code></li>
+            <li><code>src/Database/Exception/UnsupportedDesignException.php</code></li>
+          </ul>
+        </li>
+      </ul>
+
+      <h2>3) Command (CLI framework)</h2>
+      <ul>
+        <li><b>Command core</b>: <code>src/Application/Command.php</code></li>
+        <li><b>Command kernel</b>: <code>src/Command/Core.php</code></li>
+        <li><b>Register commands</b>: <code>src/Command/Register.php</code></li>
+        <li><b>Built-in commands</b>: <code>src/Command/Server.php</code>, <code>src/Command/Setting.php</code>, <code>src/Command/Hint.php</code></li>
+        <li><b>Helper (I/O)</b>:
+          <ul>
+            <li><code>src/Command/Helper/ConsoleInput.php</code></li>
+            <li><code>src/Command/Helper/ConsoleOutput.php</code></li>
+            <li><code>src/Command/Helper/CommandEntry.php</code></li>
+          </ul>
+        </li>
+      </ul>
+
+      <h2>4) Reports (error/exception handler + renderer)</h2>
+      <ul>
+        <li><b>Report facade</b>: <code>src/Reports/Report.php</code></li>
+        <li><b>Handler</b>: <code>src/Reports/Handler.php</code></li>
+        <li><b>Renderers</b>: <code>src/Reports/Render/Html.php</code>, <code>src/Reports/Render/Cli.php</code></li>
+        <li><b>Interfaces</b>: <code>src/Reports/Interface/HandlerInterface.php</code>, <code>src/Reports/Interface/RenderInterface.php</code></li>
+      </ul>
+
+      <h2>5) Attribute (PHP 8 attributes)</h2>
+      <ul>
+        <li><b>Route attribute</b>: <code>src/Attribute/Route.php</code> (dùng với Router scan attributes)</li>
+        <li><b>Viewer attribute</b>: <code>src/Attribute/Viewer.php</code> (post-process output của controller method)</li>
+      </ul>
+
+      <h2>6) Utils</h2>
+      <ul>
+        <li><b>Sorting algorithms (demo)</b>: <code>src/Utils/Sorting/*.php</code></li>
+        <li>Gồm: Bubble, Quick, Merge, Heap, Insertion, Selection, Count, Radix, Tim, Shell, Bucket, ...</li>
+      </ul>
+
+      <h2>7) Kit</h2>
+      <ul>
+        <li><b>Dump</b>: <code>src/Kit/dump/var_dump.php</code></li>
+        <li><b>HTML helper</b>: <code>src/Kit/helper/html_helper.php</code></li>
+      </ul>
+
+      <div class="footer">
+        Nếu bạn muốn, mình có thể bổ sung mô tả “dùng để làm gì + ví dụ code” cho từng nhóm (Router/View/DB/Reports/CLI).
+      </div>
+    </main>
+  </div>
+</body>
+</html>

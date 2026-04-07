@@ -2,11 +2,13 @@
 
 namespace App\Controller;
 
+use DFrame\Application\View;
+
 class HomeController
 {
     public function home()
     {
-        return view('home', [
+        return View::render('home', [
             'phpVersion' => phpversion(),
             'dframeVersion' => \DFrame\Application\App::version,
             'os' => PHP_OS,

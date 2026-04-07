@@ -10,6 +10,7 @@ use ReflectionMethod;
 use ReflectionFunction;
 use ReflectionNamedType;
 use DFrame\Application\Middleware;
+use DFrame\Attribute\Deprecated;
 
 /**
  * **HTTP Router**
@@ -527,6 +528,7 @@ class Router
             [$class, $method] = $handler;
             $instance = $this->resolveClass($class);
             $ref = new ReflectionMethod($instance, $method);
+            $this->emitDeprecationIfNeeded($ref);
         } else {
             $ref = new ReflectionFunction(Closure::fromCallable($handler));
         }
@@ -564,17 +566,29 @@ class Router
             ? $ref->invokeArgs($instance, $args)
             : $ref->invokeArgs($args);
 
-        if ($ref instanceof ReflectionMethod) {
-            $attrs = $ref->getAttributes(\DFrame\Attribute\Viewer::class);
-            if (!empty($attrs)) {
-                $viewer = $attrs[0]->newInstance();
-                if (method_exists($viewer, 'handle')) {
-                    $result = $viewer->handle($result);
-                }
+        return $result;
+    }
+
+    private function emitDeprecationIfNeeded(ReflectionMethod $method): void
+    {
+        $attrs = $method->getAttributes(Deprecated::class);
+        if (!$attrs) {
+            $classAttrs = $method->getDeclaringClass()->getAttributes(Deprecated::class);
+            if (!$classAttrs) {
+                return;
             }
+            $attrs = $classAttrs;
         }
 
-        return $result;
+        $args = $attrs[0]->getArguments();
+        $message = $args['message'] ?? $args[0] ?? 'This method is deprecated and will be removed in future versions.';
+        $since = $args['since'] ?? $args[1] ?? null;
+
+        $full = $since
+            ? "[DEPRECATED since {$since}] {$message}"
+            : "[DEPRECATED] {$message}";
+
+        trigger_error($full, E_USER_DEPRECATED);
     }
 
     private function runDefaultHandler(): void

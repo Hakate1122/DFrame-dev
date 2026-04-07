@@ -3,6 +3,8 @@
 namespace DFrame\Command\Helper;
 
 /**
+ * **ConsoleInput Helper**
+ * 
  * ConsoleInput provides methods to prompt user input from the console,
  * including validation and special input types.
  * 
@@ -10,6 +12,8 @@ namespace DFrame\Command\Helper;
  * * ConsoleInput::prompt("Enter your name:");
  * * ConsoleInput::askYesNo("Continue?", true);
  * * ConsoleInput::select("Choose option:", ["1" => "One", "2" => "Two"], "1");
+ * * ConsoleInput::askChoice("What is 2+2?", ["3", "4", "5"], 1);
+ * * ConsoleInput::promptSecret("Enter password:");
  */
 class ConsoleInput
 {
@@ -138,6 +142,45 @@ class ConsoleInput
     }
 
     /**
+     * Ask a multiple-choice question and return if the selected answer is correct.
+     *
+     * @param string $question The question to ask.
+     * @param array $choices List of answer choices (index => label).
+     * @param int $correctIndex The index of the correct answer in the choices array.
+     * @return bool True if the user's choice is correct, false otherwise.
+     */
+    public static function askChoice(
+        string $question,
+        array $choices,
+        int $correctIndex
+    ): bool {
+        echo "Question: {$question}\n";
+
+        foreach ($choices as $index => $label) {
+            $displayIndex = $index + 1;
+            echo "  [$displayIndex] $label\n";
+        }
+
+        while (true) {
+            echo "Your answer (1-" . count($choices) . "): ";
+            $input = trim(fgets(STDIN));
+
+            if (!is_numeric($input)) {
+                echo "Please enter a number.\n";
+                continue;
+            }
+
+            $selectedIdx = (int)$input - 1;
+
+            if (isset($choices[$selectedIdx])) {
+                return $selectedIdx === $correctIndex;
+            }
+
+            echo "Invalid choice. Please choose between 1 and " . count($choices) . ".\n";
+        }
+    }
+
+    /**
      * Prompt for secret input (e.g., password) without echoing.
      * 
      * **Note:** Not working on Windows consoles.
@@ -151,7 +194,6 @@ class ConsoleInput
         ?string $default = null
     ): string {
         if (strncasecmp(PHP_OS, 'WIN', 3) == 0) {
-            // Windows does not support hiding input in console easily.
             echo "Warning: Secret input may be visible on Windows consoles.\n";
             return self::prompt($message, $default);
         } else {
@@ -169,6 +211,36 @@ class ConsoleInput
 
 
     // --- Validators ---
+
+    /* Validate that input is not empty. */
+    public static function validateNotEmpty(): callable
+    {
+        return function ($value) {
+            return $value !== ''
+                ? true
+                : "Value cannot be empty.";
+        };
+    }
+
+    /* Validate that input is a string. */
+    public static function validateString(): callable
+    {
+        return function ($value) {
+            return is_string($value)
+                ? true
+                : "Value must be a string.";
+        };
+    }
+
+    /* Validate that input is a valid URL. */
+    public static function validateUrl(): callable
+    {
+        return function ($value) {
+            return filter_var($value, FILTER_VALIDATE_URL)
+                ? true
+                : "Invalid URL format.";
+        };
+    }
 
     /** Validate that input is a number. */
     public static function validateNumber(): callable

@@ -28,4 +28,10 @@ class Route extends Router
         public ?string $name = null,
         public ?array $middleware = null,
     ){}
+
+    public function signScanUseAttribute()
+    {
+        // This method can be used to perform any additional processing after scanning the route attributes
+        // For example, you could register the route with the router here if needed
+    }
 }

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DFrame Docs — MVC</title>
+  <link rel="stylesheet" href="./assets/style.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span>DFrame Docs</span>
+        <span class="badge">MVC</span>
+      </div>
+      <div class="badge"><a href="./index.html">Giới thiệu</a></div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="nav">
+        <div class="section-title">Bắt đầu</div>
+        <a href="./index.html">Giới thiệu <small>overview</small></a>
+        <a href="./install.html">Yêu cầu & cài đặt <small>setup</small></a>
+        <div class="section-title">Kiến trúc</div>
+        <a href="./structure.html">Cấu trúc dự án <small>folders</small></a>
+        <a href="./components.html">Thành phần & cách dùng <small>how-to</small></a>
+        <a class="active" href="./mvc.html">MVC trong DFrame <small>patterns</small></a>
+        <div class="section-title">Core</div>
+        <a href="./src.html">src/ theo chức năng <small>modules</small></a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <h1>MVC trong DFrame</h1>
+      <p>
+        DFrame không “ép” bạn theo một cấu trúc MVC cứng nhắc, nhưng repo mẫu đã tổ chức sẵn theo MVC:
+        <code>app/Controller</code> (C), <code>app/Model</code> (M), <code>resource/view</code> (V).
+      </p>
+
+      <h2>Luồng request (tổng quan)</h2>
+      <ol>
+        <li>Web server trỏ về <code>public/index.php</code></li>
+        <li>DFrame load env, session, routes; sau đó <code>DFrame\Application\Router::run()</code></li>
+        <li>Router match route → chạy middleware → invoke handler (closure hoặc controller method)</li>
+        <li>Handler trả về HTML/string hoặc trả về view</li>
+      </ol>
+
+      <h2>Ví dụ MVC tối giản</h2>
+      <h3>1) Route</h3>
+      <pre><code>// app/Router/web/web.php
+$router = new DFrame\Application\Router();
+$router-&gt;sign('GET /users', [\App\Controller\UserController::class, 'index'])
+  -&gt;name('users.index');</code></pre>
+
+      <h3>2) Controller</h3>
+      <pre><code>// app/Controller/UserController.php (minh hoạ)
+namespace App\Controller;
+
+use App\Model\Users;
+
+class UserController
+{
+  public function index()
+  {
+    $users = (new Users())-&gt;all();
+    return view('user1/list', ['users' =&gt; $users]);
+  }
+}</code></pre>
+
+      <h3>3) Model</h3>
+      <p>Model thường extends <code>app/Model/Model.php</code> để nhận DB proxy (mapper/builder tuỳ config).</p>
+      <pre><code>// app/Model/Users.php (đang có trong repo)
+namespace App\Model;
+use DFrame\Database\Traits\SoftDelete;
+
+class Users extends Model
+{
+  use SoftDelete;
+  protected $table = 'users';
+  protected $selectable = ['id','name','email','created_at','updated_at'];
+}</code></pre>
+
+      <h3>4) View</h3>
+      <pre><code>&lt;!-- resource/view/user1/list.php (minh hoạ) --&gt;
+&lt;h1&gt;Users&lt;/h1&gt;
+&lt;ul&gt;
+  &lt;?php foreach (($users ?? []) as $u): ?&gt;
+    &lt;li&gt;&lt;?= htmlspecialchars($u['name'] ?? '', ENT_QUOTES) ?&gt;&lt;/li&gt;
+  &lt;?php endforeach; ?&gt;
+&lt;/ul&gt;</code></pre>
+
+      <h2>Nguyên tắc khuyến nghị</h2>
+      <ul>
+        <li><b>Controller mỏng</b>: lấy input, gọi model/service, trả response/view.</li>
+        <li><b>Model tập trung data</b>: logic query/CRUD, mapping bảng/field (fillable/hidden nếu dùng).</li>
+        <li><b>View không query DB</b>: chỉ hiển thị dữ liệu được controller truyền vào.</li>
+        <li><b>Route rõ ràng</b>: nhóm routes theo domain (web/api), đặt <code>name()</code> để generate URL.</li>
+      </ul>
+
+      <div class="footer">
+        Quay lại: <a href="./components.html">Thành phần & cách dùng</a>.
+      </div>
+    </main>
+  </div>
+</body>
+</html>

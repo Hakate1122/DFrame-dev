@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DFrame Docs — Giới thiệu</title>
+  <link rel="stylesheet" href="./assets/style.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span>DFrame Docs</span>
+        <span class="badge">PHP 8+</span>
+      </div>
+      <div class="badge">Version: 20260401-dev</div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="nav">
+        <div class="section-title">Bắt đầu</div>
+        <a class="active" href="./index.html">Giới thiệu <small>overview</small></a>
+        <a href="./install.html">Yêu cầu & cài đặt <small>setup</small></a>
+        <div class="section-title">Kiến trúc</div>
+        <a href="./structure.html">Cấu trúc dự án <small>folders</small></a>
+        <a href="./components.html">Thành phần & cách dùng <small>how-to</small></a>
+        <a href="./mvc.html">MVC trong DFrame <small>patterns</small></a>
+        <div class="section-title">Core</div>
+        <a href="./src.html">src/ theo chức năng <small>modules</small></a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <h1>Giới thiệu DFrame</h1>
+      <p>
+        <b>DFrame</b> là framework PHP tối giản, phù hợp dự án nhỏ, học tập, hoặc làm nền tảng phát triển framework cá nhân.
+        DFrame cung cấp routing, view engine (PHP/Twig/BladeOne), session & flash, database layer (builder/mapper), CLI (dli),
+        báo lỗi/report, helper tiện ích, và một số tính năng như mail, websocket.
+      </p>
+
+      <div class="grid2">
+        <div class="callout">
+          <h2>Mục tiêu của docs</h2>
+          <ul>
+            <li>Nắm luồng chạy web từ <code>public/index.php</code></li>
+            <li>Biết nơi khai báo routes và cách map vào controller</li>
+            <li>Biết cách render view và tổ chức MVC</li>
+            <li>Biết cách dùng database theo <code>builder</code> hoặc <code>mapper</code></li>
+          </ul>
+        </div>
+        <div class="callout">
+          <h2>Điểm nhanh</h2>
+          <ul>
+            <li><b>Web entry</b>: <code>public/index.php</code></li>
+            <li><b>Routes</b>: <code>app/Router/web/*.php</code>, <code>app/Router/api/*.php</code></li>
+            <li><b>Controllers</b>: <code>app/Controller</code></li>
+            <li><b>Views</b>: <code>resource/view</code></li>
+            <li><b>Core</b>: <code>src/</code> (namespace <code>DFrame\</code>)</li>
+          </ul>
+        </div>
+      </div>
+
+      <h2>Hello world (route + controller + view)</h2>
+      <p>Ví dụ theo đúng code mẫu sẵn có trong repo:</p>
+      <pre><code>// app/Router/web/web.php
+$router = new DFrame\Application\Router();
+$router-&gt;sign('GET /', [\App\Controller\HomeController::class, 'home']);</code></pre>
+      <pre><code>// app/Controller/HomeController.php
+namespace App\Controller;
+class HomeController {
+  public function home() {
+    return view('home', ['dframeVersion' =&gt; \DFrame\Application\App::version]);
+  }
+}</code></pre>
+      <pre><code>// resource/view/home.php (file view PHP)
+&lt;h1&gt;DFrame is running&lt;/h1&gt;</code></pre>
+
+      <div class="footer">
+        Gợi ý đọc tiếp: <a href="./install.html">Yêu cầu & cài đặt</a> → <a href="./structure.html">Cấu trúc dự án</a>.
+      </div>
+    </main>
+  </div>
+</body>
+</html>

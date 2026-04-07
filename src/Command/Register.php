@@ -19,5 +19,12 @@ class Register
         $cli->register('-s', Server::server())->infoAlias('server');
         $cli->register('list', Core::list($cli->list()))->info('List all available commands');
         $cli->register('setting', Setting::handle())->info('Show or set application settings');
+        $cli->register('add', Add::handle())->info('Add a new component');
+        $cli->register('add:controller', Add::controller())->info('Create a new controller');
+        $cli->register('add:model', Add::model())->info('Create a new model');
+        $cli->register('add:view', Add::view())->info('Create a new view');
+        $cli->register('add:command', Add::command())->info('Create a new command');
+        $cli->register('add:middleware', Add::middleware())->info('Create a new middleware');
+        $cli->register('add:mail', Add::mail())->info('Create a new mail class');
     }
 }
