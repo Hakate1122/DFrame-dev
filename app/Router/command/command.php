@@ -1,7 +1,5 @@
 <?php
 
-use DFrame\Command\Helper\ConsoleInput as Input;
-use DFrame\Command\Helper\ConsoleOutput as Output;
 use App\Chat\Chat;
 
 $cli->register('hello', [\App\Command\Hello::class, 'handle']);

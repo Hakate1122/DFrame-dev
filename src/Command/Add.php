@@ -61,7 +61,6 @@ class Add
 				return;
 			}
 
-			// sanitize and normalize name
 			$name = preg_replace('/[^A-Za-z0-9_]/', '', $name);
 			if (!str_ends_with($name, 'Controller')) {
 				$name .= 'Controller';
