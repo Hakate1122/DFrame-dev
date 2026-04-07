@@ -4,6 +4,18 @@ namespace DFrame\Command;
 
 class Add
 {
+	private static function studly(string $value): string
+	{
+		$value = trim($value);
+		if ($value === '') {
+			return '';
+		}
+		$value = str_replace(['-', '_'], ' ', $value);
+		$value = preg_replace('/\s+/', ' ', (string) $value);
+		$value = ucwords(strtolower((string) $value));
+		return str_replace(' ', '', (string) $value);
+	}
+
 	/**
 	 * Generic add handler for `php dli add <type> --name=Name`
 	 */
@@ -24,9 +36,11 @@ class Add
 						(self::controller())($argv);
 						break;
 					case 'model':
+					case 'mdl':
 						(self::model())($argv);
 						break;
 					case 'view':
+					case 'vw':
 						(self::view())($argv);
 						break;
 					case 'command':
@@ -61,12 +75,36 @@ class Add
 				return;
 			}
 
-			$name = preg_replace('/[^A-Za-z0-9_]/', '', $name);
+			$raw = trim((string) $name);
+			$raw = str_replace('\\', '/', $raw);
+			$raw = trim($raw, '/');
+			$raw = preg_replace('/\.php$/i', '', $raw);
+
+			$pathParts = array_values(array_filter(explode('/', (string) $raw), static fn ($p) => $p !== ''));
+			if (count($pathParts) === 0) {
+				echo "Invalid controller name: --name=MyController\n";
+				return;
+			}
+
+			$classPart = (string) array_pop($pathParts);
+			$dirParts = $pathParts;
+
+			$dirParts = array_values(array_filter(array_map(
+				static fn ($p) => preg_replace('/[^A-Za-z0-9_]/', '', (string) $p),
+				$dirParts
+			), static fn ($p) => $p !== ''));
+
+			$name = preg_replace('/[^A-Za-z0-9_]/', '', $classPart);
+			$name = self::studly($name);
+			if ($name === '') {
+				echo "Invalid controller class name: --name=MyController\n";
+				return;
+			}
 			if (!str_ends_with($name, 'Controller')) {
 				$name .= 'Controller';
 			}
 
-			$dir = __DIR__ . '/../../app/Controller';
+			$dir = __DIR__ . '/../../app/Controller' . (!empty($dirParts) ? ('/' . implode('/', $dirParts)) : '');
 			if (!is_dir($dir)) {
 				if (!@mkdir($dir, 0755, true)) {
 					echo "Failed to create directory: $dir\n";
@@ -76,14 +114,23 @@ class Add
 
 			$file = $dir . '/' . $name . '.php';
 			if (file_exists($file)) {
-				echo "Controller already exists: app/Controller/$name.php\n";
+				$rel = 'app/Controller' . (!empty($dirParts) ? ('/' . implode('/', $dirParts)) : '') . "/$name.php";
+				echo "Controller already exists: $rel\n";
 				return;
 			}
 
-			$template = "<?php\n\nnamespace App\\Controller;\n\nclass $name\n{\n    public function index()\n    {\n        echo \"This is $name\";\n    }\n}\n";
+			$namespace = 'App\\Controller' . (!empty($dirParts) ? ('\\' . implode('\\', $dirParts)) : '');
+			$crud = (bool)($opts['crud'] ?? false);
+
+			if ($crud) {
+				$template = "<?php\n\nnamespace $namespace;\n\nclass $name\n{\n    public function index()\n    {\n        // list\n        return null;\n    }\n\n    public function create()\n    {\n        // show create form\n        return null;\n    }\n\n    public function store()\n    {\n        // handle create\n        return null;\n    }\n\n    public function show(\$id)\n    {\n        // show one\n        return null;\n    }\n\n    public function edit(\$id)\n    {\n        // show edit form\n        return null;\n    }\n\n    public function update(\$id)\n    {\n        // handle update\n        return null;\n    }\n\n    public function destroy(\$id)\n    {\n        // handle delete\n        return null;\n    }\n}\n";
+			} else {
+				$template = "<?php\n\nnamespace $namespace;\n\nclass $name\n{\n    public function index()\n    {\n        echo \"This is $name\";\n    }\n}\n";
+			}
 
 			if (file_put_contents($file, $template) !== false) {
-				echo "Created controller: app/Controller/$name.php\n";
+				$rel = 'app/Controller' . (!empty($dirParts) ? ('/' . implode('/', $dirParts)) : '') . "/$name.php";
+				echo "Created controller: $rel\n";
 			} else {
 				echo "Failed to create controller: $file\n";
 			}

@@ -82,7 +82,7 @@ class Core
             if ($line === '' || stripos($line, $valueName) === false) {
                 continue;
             }
-            // Example: ProductName    REG_SZ    Windows 11 Pro
+            
             $parts = preg_split('/\s{2,}/', $line);
             if (is_array($parts) && count($parts) >= 3) {
                 $value = trim((string) end($parts));
@@ -124,7 +124,6 @@ class Core
         }
 
         if (PHP_OS_FAMILY === 'Darwin') {
-            // macOS
             $productName = self::shellReadFirstLine('sw_vers -productName 2>/dev/null');
             $productVersion = self::shellReadFirstLine('sw_vers -productVersion 2>/dev/null');
             $buildVersion = self::shellReadFirstLine('sw_vers -buildVersion 2>/dev/null');
@@ -136,17 +135,15 @@ class Core
         }
 
         if (PHP_OS_FAMILY === 'Linux') {
-            // Linux / Android (Termux) friendly
             $pretty = self::parseOsReleasePrettyName('/etc/os-release');
             if ($pretty === null && is_file('/system/build.prop')) {
                 $pretty = 'Android';
             }
 
             $details['name'] = $pretty ?: 'Linux';
-            $details['version'] = php_uname('r'); // kernel release
-            $details['build'] = php_uname('v');   // kernel version string
+            $details['version'] = php_uname('r');
+            $details['build'] = php_uname('v');
 
-            // Try to enrich Android info (best-effort; safe to fail)
             if (is_file('/system/build.prop')) {
                 $androidRelease = self::shellReadFirstLine('getprop ro.build.version.release 2>/dev/null');
                 $androidSdk = self::shellReadFirstLine('getprop ro.build.version.sdk 2>/dev/null');
@@ -159,7 +156,6 @@ class Core
             return $details;
         }
 
-        // Generic fallback for other OSes (BSD, Solaris, etc.)
         $details['name'] = php_uname('s');
         $details['version'] = php_uname('r');
         $details['build'] = php_uname('v');
@@ -189,7 +185,7 @@ class Core
             $scriptName = isset($argv[0]) ? basename($argv[0]) : '';
             $os = self::getOsDetails();
             echo "DLI - DFrame CLI Core Helper\n";
-            echo "Version: " . cli_green($dfver) . " | PHP: " . cli_blue(phpversion()) . " on " . cli_yellow($detectDeviceRuntime()) . "\n";
+            echo "Version: " . cli_cyan($dfver) . " | PHP: " . cli_blue(phpversion()) . " on " . cli_yellow($detectDeviceRuntime()) . "\n";
             if (!empty($os['name']) || !empty($os['version']) || !empty($os['build'])) {
                 $osName = (string) ($os['name'] ?? $os['family'] ?? 'unknown');
                 $osVersion = (string) ($os['version'] ?? '');
@@ -211,18 +207,18 @@ class Core
             }
             
             echo "Available commands:\n";
-            echo "  help, -h                Show this help message\n";
-            echo "  version, -v             Show application version\n";
-            echo "  server, -s              Start the development server\n";
-            echo "  list                    List all available commands\n";
+            echo "  help, -h             Show this help message\n";
+            echo "  version, -v          Show application version\n";
+            echo "  server, -s           Start the development server\n";
+            echo "  list                 List all available commands\n";
             echo "Add commands - create a new components:\n";
-            echo "  add [type]              Create a new component[controller, model, view, middleware, command, mail]\n";
-            echo "  add:controller/ctrl     Create a new controller\n";
-            echo "  add:model/mdl           Create a new model\n";
-            echo "  add:view/vw             Create a new view\n";
-            echo "  add:middleware/mdw      Create a new middleware\n";
-            echo "  add:command/cmd         Create a new command\n";
-            echo "  add:mail                Create a new mail class\n";
+            echo "  add <type>           Create a new component[controller, model, view, middleware, command, mail]\n";
+            echo "  add:controller       Create a new controller\n";
+            echo "  add:model            Create a new model\n";
+            echo "  add:view             Create a new view\n";
+            echo "  add:middleware       Create a new middleware\n";
+            echo "  add:command          Create a new command\n";
+            echo "  add:mail             Create a new mail class\n";
             echo "  For add commands, use --name=Name to specify the name of the component\n";
             echo "\n";
         };
