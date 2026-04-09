@@ -3,6 +3,7 @@
 namespace DFrame\Command;
 
 use DFrame\Application\App;
+use DFrame\Command\Helper\ConsoleInput;
 
 /**
  * Core command implementations for the CLI application.
@@ -33,6 +34,54 @@ class Core
         }
         $line = trim((string) $lines[0]);
         return $line !== '' ? $line : null;
+    }
+
+    private static function isGitWorkTree(string $dir): bool
+    {
+        $gitDir = rtrim($dir, "/\\") . DIRECTORY_SEPARATOR . '.git';
+        return is_dir($gitDir);
+    }
+
+    private static function normalizeGitRemote(?string $remote): ?string
+    {
+        if (!is_string($remote)) {
+            return null;
+        }
+        $remote = trim($remote);
+        if ($remote === '') {
+            return null;
+        }
+
+        if (preg_match('/^git@github\.com:([^\\s]+)$/i', $remote, $m)) {
+            $path = $m[1];
+            $path = preg_replace('/\\.git$/i', '', $path);
+            return 'https://github.com/' . $path;
+        }
+
+        if (preg_match('/^https?:\\/\\/(.+)$/i', $remote)) {
+            $remote = preg_replace('/\\.git$/i', '', $remote);
+            return $remote;
+        }
+
+        return preg_replace('/\\.git$/i', '', $remote);
+    }
+
+    private static function readGitOriginUrl(string $cwd): ?string
+    {
+        $cmd = 'git -C ' . escapeshellarg($cwd) . ' config --get remote.origin.url 2>NUL';
+        return self::normalizeGitRemote(self::shellReadFirstLine($cmd));
+    }
+
+    private static function readGitBranch(string $cwd): ?string
+    {
+        $cmd = 'git -C ' . escapeshellarg($cwd) . ' rev-parse --abbrev-ref HEAD 2>NUL';
+        return self::shellReadFirstLine($cmd);
+    }
+
+    private static function readGitCommitShort(string $cwd): ?string
+    {
+        $cmd = 'git -C ' . escapeshellarg($cwd) . ' rev-parse --short HEAD 2>NUL';
+        return self::shellReadFirstLine($cmd);
     }
 
     private static function parseOsReleasePrettyName(string $path = '/etc/os-release'): ?string
@@ -203,7 +252,7 @@ class Core
             }
 
             if (App::isRunningFromPhar()) {
-                echo cli_yellow("Note: DLI is running from a PHAR archive. Some features may not work (e.g., starting the server, npm, or file writing)\n\n");
+                echo cli_yellow("Detected: dli is running from a PHAR archive. Some features may not work (e.g., starting the server, or file writing)\n\n");
             }
             
             echo "Available commands:\n";
@@ -227,7 +276,36 @@ class Core
     public static function version()
     {
         return function () {
-            echo "Version: " . cli_green(App::VERSION ?? "unknown") . "\n";
+            $version = App::VERSION ?? "unknown";
+            echo "Version: " . cli_green($version) . "\n";
+
+            $cwd = getcwd();
+            if (!is_string($cwd) || $cwd === '') {
+                return;
+            }
+
+            if (!self::isGitWorkTree($cwd)) {
+                return;
+            }
+
+            if (!ConsoleInput::askYesNo("Git repository detected. Do you want to show Git information?", false)) {
+                return;
+            }
+
+            $origin = self::readGitOriginUrl($cwd);
+            $branch = self::readGitBranch($cwd);
+            $commit = self::readGitCommitShort($cwd);
+
+            if ($origin) {
+                $label = (stripos($origin, 'github.com/') !== false) ? 'GitHub' : 'Git remote';
+                echo $label . ": " . cli_cyan($origin) . "\n";
+            }
+            if ($branch || $commit) {
+                $ref = trim(($branch ? $branch : '') . ($commit ? (' @ ' . $commit) : ''));
+                if ($ref !== '') {
+                    echo "Git: " . cli_yellow($ref) . "\n";
+                }
+            }
         };
     }
 

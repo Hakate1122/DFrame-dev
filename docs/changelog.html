@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DFrame Docs — Changelog</title>
+  <link rel="stylesheet" href="./assets/style.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <span>DFrame Docs</span>
+        <span class="badge">PHP 8+</span>
+      </div>
+      <div class="badge">Version: 20260401-dev</div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <nav class="nav">
+        <div class="section-title">Bắt đầu</div>
+        <a href="./index.html">Giới thiệu <small>overview</small></a>
+        <a href="./install.html">Yêu cầu & cài đặt <small>setup</small></a>
+        <div class="section-title">Kiến trúc</div>
+        <a href="./structure.html">Cấu trúc dự án <small>folders</small></a>
+        <a href="./components.html">Thành phần & cách dùng <small>how-to</small></a>
+        <a href="./mvc.html">MVC trong DFrame <small>patterns</small></a>
+        <div class="section-title">Core</div>
+        <a href="./src.html">src/ theo chức năng <small>modules</small></a>
+        <a class="active" href="./changelog.html">Changelog <small>changes</small></a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <h1>Changelog</h1>
+      <p>Mọi thay đổi đáng chú ý của DFrame sẽ được ghi lại ở đây.</p>
+
+      <h2><code>2026.4.8-dev</code> <span class="badge">2026-04-08</span></h2>
+
+      <h3>Added</h3>
+      <ul>
+        <li>
+          <code>dli version</code> có thể (tùy chọn) hiển thị <b>GitHub/Git source info</b>
+          (origin remote URL, current branch, short commit hash) khi chạy trong thư mục có <code>.git/</code>.
+          Lệnh sẽ hỏi người dùng trước khi in để tránh làm ồn output mặc định.
+        </li>
+        <li>
+          <code>dli tikitiki</code>: bot/wizard hỗ trợ khởi tạo project DFrame mới
+          (copy starter template, tạo <code>.env</code>, tùy chọn copy <code>vendor/</code>).
+        </li>
+      </ul>
+
+      <h3>Changed</h3>
+      <ul>
+        <li>
+          Chạy DFrame từ <b>PHAR</b> không còn bắt buộc phải có file <code>.env</code> cạnh/ở trong PHAR.
+          Khi chạy từ PHAR, cơ chế load env sẽ kiểm tra thêm <b>current working directory</b> (thư mục bạn chạy lệnh),
+          và tiếp tục chạy kể cả khi không tìm thấy <code>.env</code> (để CLI/report/help vẫn hoạt động).
+        </li>
+      </ul>
+
+      <div class="footer">
+        Gợi ý: Nếu bạn muốn xem nội dung dạng Markdown, file nguồn là <code>docs/CHANGELOG.md</code>.
+      </div>
+    </main>
+  </div>
+</body>
+</html>
+

@@ -22,7 +22,7 @@ class App
      * Version of DFrame Framework.
      * @var string
      */
-    public const VERSION = '20260407-dev';
+    public const VERSION = '2026.4.8-dev';
     /**
      * Alias for version constant
      */
@@ -44,6 +44,12 @@ class App
      * @var bool
      */
     private static $runningFromPhar = false;
+
+    /**
+     * Whether a .env file was successfully loaded
+     * @var bool
+     */
+    private static bool $envLoaded = false;
 
     /**
      * Flags to track if web routes have been loaded
@@ -262,6 +268,9 @@ class App
      */
     private static function validateServiceConfig()
     {
+        if (self::isRunningFromPhar() && self::$envLoaded === false) {
+            return;
+        }
         $requiredVars = ['APP_NAME', 'APP_TIMEZONE'];
         foreach ($requiredVars as $var) {
             if (!env($var)) {
@@ -349,9 +358,36 @@ class App
             throw new Exception('TinyEnv is not installed. Please run "composer require datahihi1/tiny-env"');
         }
 
-        $env = new TinyEnv(ROOT_DIR);
+        $rootDirs = [ROOT_DIR];
+        $cwd = getcwd();
+        if (is_string($cwd) && $cwd !== '') {
+            $rootDirs[] = $cwd;
+        }
+        $argv0 = $_SERVER['argv'][0] ?? null;
+        if (is_string($argv0) && $argv0 !== '') {
+            $argvDir = dirname($argv0);
+            if (is_string($argvDir) && $argvDir !== '' && $argvDir !== '.' && $argvDir !== DIRECTORY_SEPARATOR) {
+                $rootDirs[] = $argvDir;
+            }
+        }
+        $rootDirs = array_values(array_unique(array_filter($rootDirs, fn($d) => is_string($d) && $d !== '')));
+
+        $env = new TinyEnv($rootDirs);
+        if(self::isRunningFromPhar()) {
+            $env->allowWrapperSchemes(['phar']);
+        }
         $env->envfiles(['.env', '.env.encrypted']);
-        $env->load();
+        try {
+            $env->load();
+            self::$envLoaded = true;
+        } catch (\RuntimeException $e) {
+            if (!self::isRunningFromPhar()) {
+                throw $e;
+            }
+            // PHAR should be runnable without a project .env (e.g. for `report`).
+            $env->load([], false, true);
+            self::$envLoaded = false;
+        }
     }
 
     /**
@@ -446,7 +482,7 @@ class App
     /**
      * Include a web routes file and mark web routes as loaded.
      *
-     * @param string|null $logDir The directory where log files will be stored.
+     * @param string|null $path Optional path to the web routes file. If not provided, defaults to ROOT_DIR . 'app/Router/web.php'.
      *
      * @return self
      */

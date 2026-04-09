@@ -102,6 +102,16 @@ class ConsoleInput
         }
     }
 
+    /**
+     * Shortcut for askYesNo with default = false.
+     *
+     * @param string $message The question message.
+     * @return bool
+     */
+    public static function confirm(string $message): bool
+    {
+        return self::askYesNo($message, false);
+    }
 
     /**
      * Let user select an option from a list.
