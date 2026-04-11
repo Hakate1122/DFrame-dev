@@ -37,58 +37,30 @@
       <h1>Changelog</h1>
       <p>Mọi thay đổi đáng chú ý của DFrame sẽ được ghi lại ở đây.</p>
 
-      <h2><code>2026.4.11-dev</code> <span class="badge">2026-04-11</span></h2>
-
-      <h3>Added</h3>
-      <ul>
-        <li>
-          <code>php dli help:add</code> in hướng dẫn chi tiết cho <code>add</code>, <code>add:&lt;type&gt;</code>,
-          alias từng loại, tùy chọn (<code>--name</code>, <code>-n</code>), và đường dẫn file mặc định từng generator
-          (controller có <code>--crud</code> và tên dạng thư mục lồng nhau, model/view/command/middleware/mail).
-        </li>
-        <li>
-          <code>php dli add:model</code> hỗ trợ <code>--table=</code> và <code>--selectable=</code> (danh sách cách nhau bởi dấu phẩy hoặc dạng <code>[c1,c2]</code>).
-          Nếu không truyền <code>--table</code>, tên bảng mặc định suy ra snake_case từ tên class (ví dụ <code>Posts</code> → <code>posts</code>).
-        </li>
-      </ul>
-
-      <h3>Changed</h3>
-      <ul>
-        <li>
-          <code>add:model</code> không còn ép hậu tố class <code>Model</code> hay tên file <code>*Model.php</code>; file sinh ra là <code>app/Model/{Class}.php</code> theo kiểu <code>Users</code> / <code>Products</code>.
-          Thông báo thành công chỉ còn một đường dẫn rõ ràng.
-        </li>
-      </ul>
-
-      <h2><code>2026.4.8-dev</code> <span class="badge">2026-04-08</span></h2>
-
-      <h3>Added</h3>
-      <ul>
-        <li>
-          <code>dli version</code> có thể (tùy chọn) hiển thị <b>GitHub/Git source info</b>
-          (origin remote URL, current branch, short commit hash) khi chạy trong thư mục có <code>.git/</code>.
-          Lệnh sẽ hỏi người dùng trước khi in để tránh làm ồn output mặc định.
-        </li>
-        <li>
-          <code>dli tikitiki</code>: bot/wizard hỗ trợ khởi tạo project DFrame mới
-          (copy starter template, tạo <code>.env</code>, tùy chọn copy <code>vendor/</code>).
-        </li>
-      </ul>
-
-      <h3>Changed</h3>
-      <ul>
-        <li>
-          Chạy DFrame từ <b>PHAR</b> không còn bắt buộc phải có file <code>.env</code> cạnh/ở trong PHAR.
-          Khi chạy từ PHAR, cơ chế load env sẽ kiểm tra thêm <b>current working directory</b> (thư mục bạn chạy lệnh),
-          và tiếp tục chạy kể cả khi không tìm thấy <code>.env</code> (để CLI/report/help vẫn hoạt động).
-        </li>
-      </ul>
+      <div id="changelog-container">Đang tải changelog...</div>
 
       <div class="footer">
         Gợi ý: Nếu bạn muốn xem nội dung dạng Markdown, file nguồn là <code>docs/CHANGELOG.md</code>.
       </div>
     </main>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    (async function(){
+      try {
+        const res = await fetch('./CHANGELOG.md');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const md = await res.text();
+        const container = document.getElementById('changelog-container');
+        container.innerHTML = marked.parse(md);
+        document.querySelectorAll('#changelog-container a').forEach(a => a.target = '_blank');
+      } catch (err) {
+        console.error(err);
+        const container = document.getElementById('changelog-container');
+        if (container) container.innerText = 'Không thể tải CHANGELOG.md: ' + err.message;
+      }
+    })();
+  </script>
 </body>
 </html>
 
