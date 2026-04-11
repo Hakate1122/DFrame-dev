@@ -257,9 +257,11 @@ class Core
             
             echo "Available commands:\n";
             echo "  help, -h             Show this help message\n";
+            echo "  help:add             Detailed help for add / add:<type>\n";
             echo "  version, -v          Show application version\n";
             echo "  server, -s           Start the development server\n";
             echo "  list                 List all available commands\n";
+            echo "\n";
             echo "Add commands - create a new components:\n";
             echo "  add <type>           Create a new component[controller, model, view, middleware, command, mail]\n";
             echo "  add:controller       Create a new controller\n";
@@ -268,8 +270,64 @@ class Core
             echo "  add:middleware       Create a new middleware\n";
             echo "  add:command          Create a new command\n";
             echo "  add:mail             Create a new mail class\n";
-            echo "  For add commands, use --name=Name to specify the name of the component\n";
+            echo "  For details on each command, use ". cli_yellow("php dli help:add") . "\n";
             echo "\n";
+        };
+    }
+
+    /**
+     * Detailed help for `add` and `add:<type>` scaffolds.
+     */
+    public static function helpAdd()
+    {
+        return function () {
+            echo cli_cyan("DLI — add commands\n\n");
+
+            echo "You can scaffold components in two equivalent ways:\n\n";
+            echo "  " . cli_yellow("php dli add <type> [options]") . "\n";
+            echo "  " . cli_yellow("php dli add:<type> [options]") . "\n\n";
+
+            echo "Replace <type> with one of:\n";
+            echo "  " . cli_green("controller") . " (aliases: ctrl)\n";
+            echo "  " . cli_green("model") . "       (aliases: mdl)\n";
+            echo "  " . cli_green("view") . "        (aliases: vw)\n";
+            echo "  " . cli_green("command") . "     (aliases: cmd)\n";
+            echo "  " . cli_green("middleware") . "  (aliases: mdw)\n";
+            echo "  " . cli_green("mail") . "\n\n";
+
+            echo "Options (all generators):\n";
+            echo "  " . cli_yellow("--name=Name") . "   Class / file base name (required)\n";
+            echo "  " . cli_yellow("-n Name") . "       Short form for name\n\n";
+
+            echo cli_cyan("add:controller") . " / " . cli_cyan("add controller") . "\n";
+            echo "  Output: app/Controller/…/{Name}Controller.php\n";
+            echo "  Suffix " . cli_gray("Controller") . " is added if missing.\n";
+            echo "  Use a path in the name for subfolders, e.g. " . cli_yellow("--name=Admin/Dashboard") . "\n";
+            echo "  " . cli_yellow("--crud") . " — scaffold index/create/store/show/edit/update/destroy stubs.\n\n";
+
+            echo cli_cyan("add:model") . " / " . cli_cyan("add model") . "\n";
+            echo "  Output: app/Model/{Name}.php — class name is StudlyCase from " . cli_yellow("--name") . " (no forced Model suffix).\n";
+            echo "  " . cli_yellow("--table=posts") . " — DB table; if omitted, derived as snake_case from the class (Posts → posts).\n";
+            echo "  " . cli_yellow("--selectable=[id,title]") . " or " . cli_yellow("--selectable=id,title") . " — default columns for the mapper.\n\n";
+
+            echo cli_cyan("add:view") . " / " . cli_cyan("add view") . "\n";
+            echo "  Output: resource/view/{name}.php (PHP template stub)\n\n";
+
+            echo cli_cyan("add:command") . " / " . cli_cyan("add command") . "\n";
+            echo "  Output: src/Command/{Name}Command.php (namespace DFrame\\Command)\n";
+            echo "  Suffix " . cli_gray("Command") . " is added if missing.\n\n";
+
+            echo cli_cyan("add:middleware") . " / " . cli_cyan("add middleware") . "\n";
+            echo "  Output: app/Middleware/{Name}Middleware.php\n";
+            echo "  Suffix " . cli_gray("Middleware") . " is added if missing.\n\n";
+
+            echo cli_cyan("add:mail") . " / " . cli_cyan("add mail") . "\n";
+            echo "  Output: app/Mail/{Name}.php — suffix " . cli_gray("Mail") . " if name does not end with Mail/Mailer.\n\n";
+
+            echo "Examples:\n";
+            echo "  " . cli_gray("php dli add controller --name=Posts") . "\n";
+            echo "  " . cli_gray('php dli add:model --name=Posts --table=posts --selectable=[id,title,content,created_at]') . "\n";
+            echo "  " . cli_gray("php dli add view -n home") . "\n";
         };
     }
 

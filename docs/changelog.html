@@ -37,6 +37,29 @@
       <h1>Changelog</h1>
       <p>Mọi thay đổi đáng chú ý của DFrame sẽ được ghi lại ở đây.</p>
 
+      <h2><code>2026.4.11-dev</code> <span class="badge">2026-04-11</span></h2>
+
+      <h3>Added</h3>
+      <ul>
+        <li>
+          <code>php dli help:add</code> in hướng dẫn chi tiết cho <code>add</code>, <code>add:&lt;type&gt;</code>,
+          alias từng loại, tùy chọn (<code>--name</code>, <code>-n</code>), và đường dẫn file mặc định từng generator
+          (controller có <code>--crud</code> và tên dạng thư mục lồng nhau, model/view/command/middleware/mail).
+        </li>
+        <li>
+          <code>php dli add:model</code> hỗ trợ <code>--table=</code> và <code>--selectable=</code> (danh sách cách nhau bởi dấu phẩy hoặc dạng <code>[c1,c2]</code>).
+          Nếu không truyền <code>--table</code>, tên bảng mặc định suy ra snake_case từ tên class (ví dụ <code>Posts</code> → <code>posts</code>).
+        </li>
+      </ul>
+
+      <h3>Changed</h3>
+      <ul>
+        <li>
+          <code>add:model</code> không còn ép hậu tố class <code>Model</code> hay tên file <code>*Model.php</code>; file sinh ra là <code>app/Model/{Class}.php</code> theo kiểu <code>Users</code> / <code>Products</code>.
+          Thông báo thành công chỉ còn một đường dẫn rõ ràng.
+        </li>
+      </ul>
+
       <h2><code>2026.4.8-dev</code> <span class="badge">2026-04-08</span></h2>
 
       <h3>Added</h3>

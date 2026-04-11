@@ -12,6 +12,7 @@ class Register
     public function core(Command $cli): void
     {
         $cli->register('help', function($argv = null) { return Core::help()($argv); })->info('Show help information');
+        $cli->register('help:add', Core::helpAdd())->info('Show detailed help for add / add:<type>');
         $cli->register('-h', function($argv = null) { return Core::help()($argv); })->infoAlias('help');
         $cli->register('version', Core::version())->info('Show application version');
         $cli->register('-v', Core::version())->infoAlias('version');

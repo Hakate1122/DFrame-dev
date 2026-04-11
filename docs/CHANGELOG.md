@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## `2026.4.11-dev` (2026-04-11)
+
+### Added
+
+- `php dli help:add` prints detailed usage for `add`, `add:<type>`, supported type aliases, options (`--name`, `-n`), and per-generator output paths (controller CRUD and nested paths, model/view/command/middleware/mail behavior).
+- `php dli add:model` accepts **`--table=`** and **`--selectable=`** (comma list or `[col1,col2]`). If `--table` is omitted, the table name defaults to snake_case derived from the class name (e.g. `Posts` → `posts`).
+
+### Changed
+
+- `add:model` no longer forces a **`Model` class-name suffix** or `SomethingModel.php` naming; the generated file is `app/Model/{Class}.php` matching `Users` / `Products` style. Success output is a single path (no misleading `->` style message).
+
 ## `2026.4.8-dev` (2026-04-08)
 
 ### Added

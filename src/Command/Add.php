@@ -17,6 +17,25 @@ class Add
 	}
 
 	/**
+	 * PHP class name from --name: snake/kebab → Studly; already PascalCase/camelCase tokens stay readable.
+	 */
+	private static function modelClassNameFromArg(string $raw): string
+	{
+		$raw = preg_replace('/[^A-Za-z0-9_]/', '', $raw);
+		if ($raw === '') {
+			return '';
+		}
+		if (str_contains($raw, '_') || str_contains($raw, '-')) {
+			return self::studly(str_replace('-', '_', $raw));
+		}
+		if (preg_match('/^[A-Z0-9_]+$/', $raw) && preg_match('/[A-Z]/', $raw) && !preg_match('/[a-z]/', $raw)) {
+			return ucfirst(strtolower($raw));
+		}
+
+		return ucfirst($raw);
+	}
+
+	/**
 	 * Generic add handler for `php dli add <type> --name=Name`
 	 */
 	public static function handle()
@@ -145,14 +164,18 @@ class Add
 
 			$name = $opts['name'] ?? $opts['n'] ?? null;
 			if (!$name) {
-				echo "Please provide a name: --name=MyModel\n";
+				echo "Please provide a name: --name=Posts [--table=posts] [--selectable=id,title]\n";
 				return;
 			}
 
-			$name = preg_replace('/[^A-Za-z0-9_]/', '', $name);
-			if (!str_ends_with($name, 'Model')) {
-				$name .= 'Model';
+			$className = self::modelClassNameFromArg((string) $name);
+			if ($className === '') {
+				echo "Invalid model class name: --name=Posts\n";
+				return;
 			}
+
+			$table = self::resolveModelTable($opts, $className);
+			$selectable = self::parseModelSelectable($opts);
 
 			$dir = __DIR__ . '/../../app/Model';
 			if (!is_dir($dir)) {
@@ -162,16 +185,22 @@ class Add
 				}
 			}
 
-			$file = $dir . '/' . $name . '.php';
+			$file = $dir . '/' . $className . '.php';
 			if (file_exists($file)) {
-				echo "Model already exists: app/Model/$name.php\n";
+				echo "Model already exists: app/Model/$className.php\n";
 				return;
 			}
 
-			$template = "<?php\n\nnamespace App\\Model;\n\nuse App\\Model\\Model;\n\nclass $name extends Model\n{\n    protected \$table = '';\n}\n";
+			$tableExport = var_export($table, true);
+			$body = "    protected \$table = {$tableExport};\n";
+			if ($selectable !== null) {
+				$body .= '    protected $selectable = ' . self::phpQuotedArray($selectable) . ";\n";
+			}
+
+			$template = "<?php\n\nnamespace App\\Model;\n\nuse App\\Model\\Model;\n\nclass {$className} extends Model\n{\n{$body}}\n";
 
 			if (file_put_contents($file, $template) !== false) {
-				echo "Created model: app/Model/$name.php\n";
+				echo "Created model: app/Model/{$className}.php\n";
 			} else {
 				echo "Failed to create model: $file\n";
 			}
@@ -336,6 +365,89 @@ class Add
 				echo "Failed to create mail class: $file\n";
 			}
 		};
+	}
+
+	/**
+	 * Table name: --table=… or snake_case guess from class name (e.g. Posts → posts).
+	 */
+	private static function resolveModelTable(array $opts, string $className): string
+	{
+		if (array_key_exists('table', $opts)) {
+			$t = $opts['table'];
+			if (!is_string($t)) {
+				return self::guessTableNameFromClass($className);
+			}
+			$t = trim($t);
+			if ($t === '') {
+				return '';
+			}
+			$t = preg_replace('/[^a-zA-Z0-9_]/', '', $t);
+			return is_string($t) ? $t : '';
+		}
+
+		return self::guessTableNameFromClass($className);
+	}
+
+	private static function guessTableNameFromClass(string $className): string
+	{
+		$s = preg_replace('/(?<!^)[A-Z]/', '_$0', $className);
+		return strtolower((string) $s);
+	}
+
+	/**
+	 * Parse --selectable=[id,title] or --selectable=id,title into a list of column names.
+	 */
+	private static function parseModelSelectable(array $opts): ?array
+	{
+		if (!array_key_exists('selectable', $opts)) {
+			return null;
+		}
+
+		$v = $opts['selectable'];
+		if ($v === true || $v === false || $v === null) {
+			return null;
+		}
+		if (!is_string($v)) {
+			return null;
+		}
+
+		$v = trim($v);
+		if ($v === '' || $v === '*') {
+			return null;
+		}
+
+		if (str_starts_with($v, '[') && str_ends_with($v, ']')) {
+			$v = trim(substr($v, 1, -1));
+		}
+
+		$parts = preg_split('/\s*,\s*/', $v);
+		if (!is_array($parts)) {
+			return null;
+		}
+
+		$cols = [];
+		foreach ($parts as $p) {
+			$p = trim((string) $p);
+			if ($p === '') {
+				continue;
+			}
+			if (!preg_match('/^[a-zA-Z0-9_]+$/', $p)) {
+				continue;
+			}
+			$cols[] = $p;
+		}
+
+		return count($cols) > 0 ? $cols : null;
+	}
+
+	/** @param list<string> $columns */
+	private static function phpQuotedArray(array $columns): string
+	{
+		$parts = [];
+		foreach ($columns as $c) {
+			$parts[] = "'" . addcslashes($c, "'\\") . "'";
+		}
+		return '[' . implode(', ', $parts) . ']';
 	}
 
 	private static function parseOptions(array $argv, int $start = 2): array
