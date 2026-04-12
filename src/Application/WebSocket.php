@@ -5,9 +5,8 @@ namespace DFrame\Application;
 /**
  * **WebSocket Server**
  * 
- * A simple WebSocket server implementation in PHP using sockets.
- * This class handles WebSocket handshakes, frame parsing, and basic
- * message broadcasting to connected clients.
+ * A robust WebSocket server implementation in PHP using low-level sockets.
+ * Handles handshake, frame parsing (RFC 6455), and event-based messaging.
  */
 class WebSocket
 {
@@ -16,28 +15,45 @@ class WebSocket
     protected string $host;
     protected int $port;
 
+    /** @var callable|null */
+    public $onOpen = null;
+    /** @var callable|null */
+    public $onMessage = null;
+    /** @var callable|null */
+    public $onClose = null;
+
     /**
-     * Constructor to init new WebSocket server instance.
+     * Constructor to initialize the WebSocket server.
      *
-     * @param string $host The host address to bind the server to.
-     * @param int $port The port number to listen on.
+     * @param string $host The host to bind the server to (default: '0.0.0.0')
+     * @param int $port The port to bind the server to (default: 9501)
      */
     public function __construct(string $host = '0.0.0.0', int $port = 9501)
     {
+        if (php_sapi_name() !== 'cli') {
+            die(cli_red("WebSocket server can only be run from the command line."));
+        }
+        if(!extension_loaded('sockets')) {
+            die(cli_red("The sockets extension is required to run the WebSocket server."));
+        }
         $this->host = $host;
         $this->port = $port;
     }
 
     /**
      * Start the WebSocket server.
-     *
-     * @return void
      */
     public function start(): void
     {
         $this->master = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         socket_set_option($this->master, SOL_SOCKET, SO_REUSEADDR, 1);
-        socket_bind($this->master, $this->host, $this->port);
+        
+        if (!@socket_bind($this->master, $this->host, $this->port)) {
+            $err = socket_last_error($this->master);
+            $this->logSocketError('Bind failed', $err);
+            exit;
+        }
+
         socket_listen($this->master);
 
         if (PHP_SAPI === 'cli') {
@@ -48,7 +64,7 @@ class WebSocket
     }
 
     /**
-     * Main server loop to handle connections and messages.
+     * Main server loop using socket_select for efficient I/O.
      * @return never
      */
     private function loop()
@@ -57,48 +73,44 @@ class WebSocket
             $read = array_merge([$this->master], $this->clients);
             $write = $except = [];
 
+            // Wait for activity on any socket
             if (@socket_select($read, $write, $except, null) < 1) {
                 continue;
             }
 
+            // New connection request
             if (in_array($this->master, $read, true)) {
                 $client = socket_accept($this->master);
-                if ($client && $this->handshake($client)) {
-                    $this->clients[spl_object_id($client)] = $client;
-                    $this->onOpen($client);
-                } else {
-                    socket_close($client);
+                if ($client) {
+                    if ($this->handshake($client)) {
+                        $this->clients[spl_object_id($client)] = $client;
+                        $this->triggerEvent('onOpen', [$client]);
+                    } else {
+                        @socket_close($client);
+                    }
                 }
                 unset($read[array_search($this->master, $read, true)]);
             }
 
+            // Handle client messages
             foreach ($read as $client) {
-                if ($client === $this->master) {
-                    continue;
-                }
-
                 $frame = $this->readFrame($client);
 
                 if ($frame === null) {
-                    $socketError = socket_get_option($client, SOL_SOCKET, SO_ERROR);
-                    if ($socketError !== 0) {
-                        $this->disconnect($client);
-                    }
-                    continue;
-                }
-
-                if ($frame['type'] === 'ping') {
-                    $this->sendPong($client);
-                    continue;
-                }
-
-                if ($frame['type'] === 'close') {
                     $this->disconnect($client);
                     continue;
                 }
 
-                if ($frame['type'] === 'text') {
-                    $this->onMessage($client, $frame['payload']);
+                switch ($frame['type']) {
+                    case 'text':
+                        $this->triggerEvent('onMessage', [$client, $frame['payload']]);
+                        break;
+                    case 'ping':
+                        $this->sendPong($client);
+                        break;
+                    case 'close':
+                        $this->disconnect($client);
+                        break;
                 }
             }
         }
@@ -109,116 +121,109 @@ class WebSocket
     // ─────────────────────────────────────────────
 
     /**
-     * Perform the WebSocket handshake with a client.
+     * Perform the WebSocket handshake with a new client.
      *
-     * @param \Socket $client The client socket.
-     * @return bool True on successful handshake, false otherwise.
+     * @param \Socket $client The client socket to perform the handshake with.
+     * @return bool True if the handshake was successful, false otherwise.
      */
     private function handshake($client): bool
     {
-        $request = '';
-        $maxHeaderSize = 8192;
-        socket_set_nonblock($client);
-        $start = microtime(true);
-        while (strpos($request, "\r\n\r\n") === false && strlen($request) < $maxHeaderSize) {
-            $part = @socket_read($client, 2048);
-            if ($part === false) {
-                $err = socket_last_error($client);
-                if ($err === SOCKET_EWOULDBLOCK || $err === SOCKET_EAGAIN) {
-                    if (microtime(true) - $start > 2.0) break;
-                    usleep(10000);
-                    continue;
-                }
-                $this->logSocketError('handshake read failed', $err);
-                socket_set_block($client);
-                return false;
-            }
-
-            if ($part === '') {
-                socket_set_block($client);
-                return false;
-            }
-
-            $request .= $part;
-            if (microtime(true) - $start > 5.0) break;
-        }
-        socket_set_block($client);
-
+        $request = socket_read($client, 8192);
         if (!$request) return false;
 
-        if (
-            !preg_match("/Upgrade:\s*websocket/i", $request) ||
-            !preg_match("/Connection:\s*Upgrade/i", $request) ||
-            !preg_match("/Sec-WebSocket-Key:\s*(.+)\r\n/i", $request, $match)
-        ) {
+        if (!preg_match("/Sec-WebSocket-Key:\s*(.+)\r\n/i", $request, $match)) {
             return false;
         }
 
         $key = trim($match[1]);
-        $accept = base64_encode(
-            sha1($key . '258EAFA5-E914-47DA-95CA-C5AB0DC85B11', true)
-        );
+        $accept = base64_encode(sha1($key . '258EAFA5-E914-47DA-95CA-C5AB0DC85B11', true));
 
-        $response =
-            "HTTP/1.1 101 Switching Protocols\r\n" .
-            "Upgrade: websocket\r\n" .
-            "Connection: Upgrade\r\n" .
-            "Sec-WebSocket-Accept: {$accept}\r\n\r\n";
+        $header = "HTTP/1.1 101 Switching Protocols\r\n" .
+                  "Upgrade: websocket\r\n" .
+                  "Connection: Upgrade\r\n" .
+                  "Sec-WebSocket-Accept: $accept\r\n\r\n";
 
-        $sent = @socket_write($client, $response);
-        if ($sent === false) {
-            $this->logSocketError('handshake write failed', socket_last_error($client));
-            return false;
-        }
-        return true;
+        return @socket_write($client, $header) !== false;
     }
 
     // ─────────────────────────────────────────────
-    // FRAME PARSING (RFC 6455)
+    // FRAME PARSING
     // ─────────────────────────────────────────────
+
+    /**
+     * Read exactly $length bytes from a socket (TCP may deliver partial reads).
+     *
+     * @param \Socket $client
+     * @return string|null Full buffer or null on EOF/error.
+     */
+    private function readBytes($client, int $length): ?string
+    {
+        if ($length < 0) {
+            return null;
+        }
+        if ($length === 0) {
+            return '';
+        }
+        $buffer = '';
+        while (strlen($buffer) < $length) {
+            $chunk = @socket_read($client, $length - strlen($buffer), PHP_BINARY_READ);
+            if ($chunk === false || $chunk === '') {
+                return null;
+            }
+            $buffer .= $chunk;
+        }
+        return $buffer;
+    }
 
     /**
      * Read and parse a WebSocket frame from a client.
      *
-     * @param \Socket $client The client socket.
-     * @return array|null Parsed frame data or null on failure.
+     * @param \Socket $client The client socket to read from.
+     * @return array|null An associative array with 'type' and 'payload' keys, or null on failure.
      */
     private function readFrame($client): ?array
     {
-        $data = @socket_read($client, 2048, PHP_BINARY_READ);
-        if ($data === false || $data === '') {
+        $header = $this->readBytes($client, 2);
+        if ($header === null) {
             return null;
         }
 
-        if (strlen($data) < 2) {
-            return null;
-        }
+        $byte1 = ord($header[0]);
+        $byte2 = ord($header[1]);
 
-        $byte1 = ord($data[0]);
-        $byte2 = ord($data[1]);
-
-        $fin = ($byte1 & 0x80) !== 0;
         $opcode = $byte1 & 0x0F;
         $masked = ($byte2 & 0x80) !== 0;
         $len = $byte2 & 0x7F;
 
-        if (!$fin) return null;
+        if (!$masked) return null; // Specification requires client frames to be masked
 
-        if (!$masked) return null;
-
-        $offset = 2;
-
+        // Handle extended payload length
         if ($len === 126) {
-            $len = unpack('n', substr($data, 2, 2))[1];
-            $offset = 4;
+            $ext = $this->readBytes($client, 2);
+            if ($ext === null) {
+                return null;
+            }
+            $len = unpack('n', $ext)[1];
         } elseif ($len === 127) {
-            $len = unpack('J', substr($data, 2, 8))[1];
-            $offset = 10;
+            $ext = $this->readBytes($client, 8);
+            if ($ext === null) {
+                return null;
+            }
+            $len = unpack('J', $ext)[1];
         }
 
-        $mask = substr($data, $offset, 4);
-        $payload = substr($data, $offset + 4, $len);
+        // Read masking key (4 bytes)
+        $mask = $this->readBytes($client, 4);
+        if ($mask === null) {
+            return null;
+        }
 
+        $payload = $this->readBytes($client, $len);
+        if ($payload === null) {
+            return null;
+        }
+
+        // Unmask payload
         $decoded = '';
         for ($i = 0; $i < $len; $i++) {
             $decoded .= $payload[$i] ^ $mask[$i % 4];
@@ -234,19 +239,19 @@ class WebSocket
     }
 
     // ─────────────────────────────────────────────
-    // SEND FRAME
+    // COMMUNICATION METHODS
     // ─────────────────────────────────────────────
 
     /**
      * Send a text message to a client.
      *
-     * @param \Socket $client The client socket.
+     * @param \Socket $client The client socket to send the message to.
      * @param string $message The message to send.
-     * @return void
+     * @return bool True on success, false on failure.
      */
-    protected function send($client, string $message): void
+    public function send($client, string $message): bool
     {
-        $frame = chr(0x81);
+        $frame = chr(0x81); // Final fragment, text frame
         $len = strlen($message);
 
         if ($len <= 125) {
@@ -258,53 +263,75 @@ class WebSocket
         }
 
         $data = $frame . $message;
-        $total = strlen($data);
-        $written = 0;
-
-        while ($written < $total) {
-            $chunk = substr($data, $written);
-            $sent = @socket_write($client, $chunk);
-
-            if ($sent === false) {
-                $err = socket_last_error($client);
-                $this->logSocketError('send failed', $err);
-                $this->disconnect($client);
-                return;
-            }
-
-            $written += $sent;
-        }
+        return @socket_write($client, $data, strlen($data)) !== false;
     }
 
     /**
-     * Send a Pong frame to a client in response to a Ping.
+     * Send a Pong frame in response to a Ping.
      *
-     * @param \Socket $client The client socket.
+     * @param \Socket $client The client socket to send the Pong to.
      * @return void
      */
     private function sendPong($client): void
     {
-        $data = chr(0x8A) . chr(0x00);
-        $sent = @socket_write($client, $data);
-        if ($sent === false) {
-            $err = socket_last_error($client);
-            $this->logSocketError('sendPong failed', $err);
-            $this->disconnect($client);
-        }
+        @socket_write($client, chr(0x8A) . chr(0x00));
     }
 
     /**
-     * Log a socket error to stdout with human readable message.
+     * Send an RFC 6455 Close frame (server → client: unmasked).
+     * Without this, clients that sent Close often report code 1006 / wasClean false.
      */
+    private function sendCloseFrame($client, int $code = 1000, string $reason = ''): void
+    {
+        $payload = pack('n', $code) . $reason;
+        if (strlen($payload) > 125) {
+            $payload = pack('n', $code) . substr($reason, 0, 125 - 2);
+        }
+        if (strlen($payload) < 2) {
+            $payload = pack('n', 1000);
+        }
+        $len = strlen($payload);
+        $frame = chr(0x88) . chr($len) . $payload;
+        @socket_write($client, $frame, strlen($frame));
+    }
+
+    // ─────────────────────────────────────────────
+    // EVENT TRIGGERING AND UTILITY METHODS
+    // ─────────────────────────────────────────────
+
+    /**
+     * Trigger an event callback if it is set.
+     *
+     * @param string $event The name of the event ('onOpen', 'onMessage', 'onClose').
+     * @param array $args The arguments to pass to the event callback.
+     * @return void
+     */
+    private function triggerEvent(string $event, array $args): void
+    {
+        // Public $onOpen / $onMessage / $onClose shadow methods of the same name; reading
+        // $this->$event only sees the property. Prefer an assigned callable, else invoke method.
+        $handler = match ($event) {
+            'onOpen' => $this->onOpen,
+            'onMessage' => $this->onMessage,
+            'onClose' => $this->onClose,
+            default => null,
+        };
+
+        if ($handler !== null && is_callable($handler)) {
+            call_user_func_array($handler, $args);
+
+            return;
+        }
+
+        if (is_callable([$this, $event])) {
+            call_user_func_array([$this, $event], $args);
+        }
+    }
+
     private function logSocketError(string $context, int $errno): void
     {
         $msg = socket_strerror($errno);
-        $time = (new \DateTime())->format('H:i:s');
-        if (PHP_SAPI === 'cli') {
-            echo "[{$time}] Socket error ({$context}): ({$errno}) {$msg}\n";
-        } else {
-            error_log("Socket error ({$context}): ({$errno}) {$msg}");
-        }
+        echo "[Error] $context: ($errno) $msg\n";
     }
 
     /**
@@ -334,7 +361,8 @@ class WebSocket
      */
     private function disconnect($client): void
     {
-        $this->onClose($client);
+        $this->triggerEvent('onClose', [$client]);
+        $this->sendCloseFrame($client);
         unset($this->clients[spl_object_id($client)]);
         @socket_close($client);
     }

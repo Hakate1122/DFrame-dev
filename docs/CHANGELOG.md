@@ -1,4 +1,13 @@
 
+## `2026.4.12-dev` (2026-04-12)
+
+### Fixed
+
+- **WebSocket** (`src/Application/WebSocket.php`): `triggerEvent` now invokes overridden `onOpen` / `onMessage` / `onClose` methods when the public callback properties are `null`. In PHP those properties shadow same-named methods, so subclasses such as `App\Chat\Chat` previously never received events after a successful handshake (messages appeared to “send” from the browser but were not handled server-side).
+- **WebSocket**: frame reads use `readBytes()` so short TCP reads cannot corrupt parsing or disconnect clients unnecessarily.
+- **WebSocket**: `disconnect()` sends an RFC 6455 **Close** frame (unmasked server → client) before `socket_close`, completing the closing handshake when the client calls `close()` (e.g. Logout). This avoids abnormal closure **1006** / `wasClean: false` in typical browsers.
+- **WebSocket**: `disconnect()` calls `triggerEvent('onClose', …)` so a callable set on the `$onClose` property is honored like the other events.
+
 ## `2026.4.11-dev` (2026-04-11)
 
 ### Added
