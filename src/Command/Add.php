@@ -132,24 +132,27 @@ class Add
 			}
 
 			$file = $dir . '/' . $name . '.php';
-			if (file_exists($file)) {
-				$rel = 'app/Controller' . (!empty($dirParts) ? ('/' . implode('/', $dirParts)) : '') . "/$name.php";
+			$rel = 'app/Controller' . (!empty($dirParts) ? ('/' . implode('/', $dirParts)) : '') . "/$name.php";
+			$existedBefore = file_exists($file);
+			if ($existedBefore && !self::wantsForce($opts)) {
 				echo "Controller already exists: $rel\n";
 				return;
 			}
 
 			$namespace = 'App\\Controller' . (!empty($dirParts) ? ('\\' . implode('\\', $dirParts)) : '');
+			$apiCrud = (bool)($opts['api-crud'] ?? false);
 			$crud = (bool)($opts['crud'] ?? false);
 
-			if ($crud) {
+			if ($apiCrud) {
+				$template = "<?php\n\nnamespace $namespace;\n\nclass $name\n{\n    public function index()\n    {\n        header('Content-Type: application/json');\n        echo json_encode(['data' => []]);\n    }\n\n    public function store()\n    {\n        header('Content-Type: application/json');\n        // TODO: validate input and persist\n        echo json_encode(['message' => 'created'], JSON_UNESCAPED_UNICODE);\n    }\n\n    public function show(\$id)\n    {\n        header('Content-Type: application/json');\n        echo json_encode(['id' => \$id]);\n    }\n\n    public function update(\$id)\n    {\n        header('Content-Type: application/json');\n        // TODO: validate input and update\n        echo json_encode(['message' => 'updated', 'id' => \$id], JSON_UNESCAPED_UNICODE);\n    }\n\n    public function destroy(\$id)\n    {\n        header('Content-Type: application/json');\n        // TODO: delete resource\n        echo json_encode(['message' => 'deleted', 'id' => \$id], JSON_UNESCAPED_UNICODE);\n    }\n}\n";
+			} elseif ($crud) {
 				$template = "<?php\n\nnamespace $namespace;\n\nclass $name\n{\n    public function index()\n    {\n        // list\n        return null;\n    }\n\n    public function create()\n    {\n        // show create form\n        return null;\n    }\n\n    public function store()\n    {\n        // handle create\n        return null;\n    }\n\n    public function show(\$id)\n    {\n        // show one\n        return null;\n    }\n\n    public function edit(\$id)\n    {\n        // show edit form\n        return null;\n    }\n\n    public function update(\$id)\n    {\n        // handle update\n        return null;\n    }\n\n    public function destroy(\$id)\n    {\n        // handle delete\n        return null;\n    }\n}\n";
 			} else {
 				$template = "<?php\n\nnamespace $namespace;\n\nclass $name\n{\n    public function index()\n    {\n        echo \"This is $name\";\n    }\n}\n";
 			}
 
 			if (file_put_contents($file, $template) !== false) {
-				$rel = 'app/Controller' . (!empty($dirParts) ? ('/' . implode('/', $dirParts)) : '') . "/$name.php";
-				echo "Created controller: $rel\n";
+				echo ($existedBefore ? "Overwrote controller: $rel\n" : "Created controller: $rel\n");
 			} else {
 				echo "Failed to create controller: $file\n";
 			}
@@ -186,7 +189,8 @@ class Add
 			}
 
 			$file = $dir . '/' . $className . '.php';
-			if (file_exists($file)) {
+			$existedBefore = file_exists($file);
+			if ($existedBefore && !self::wantsForce($opts)) {
 				echo "Model already exists: app/Model/$className.php\n";
 				return;
 			}
@@ -200,7 +204,7 @@ class Add
 			$template = "<?php\n\nnamespace App\\Model;\n\nuse App\\Model\\Model;\n\nclass {$className} extends Model\n{\n{$body}}\n";
 
 			if (file_put_contents($file, $template) !== false) {
-				echo "Created model: app/Model/{$className}.php\n";
+				echo ($existedBefore ? "Overwrote model: app/Model/{$className}.php\n" : "Created model: app/Model/{$className}.php\n");
 			} else {
 				echo "Failed to create model: $file\n";
 			}
@@ -229,7 +233,8 @@ class Add
 			}
 
 			$file = $dir . '/' . $name . '.php';
-			if (file_exists($file)) {
+			$existedBefore = file_exists($file);
+			if ($existedBefore && !self::wantsForce($opts)) {
 				echo "View already exists: resource/view/$name.php\n";
 				return;
 			}
@@ -237,7 +242,7 @@ class Add
 			$template = "<?php\n\n/** View: $name */\n?>\n<h1>$name</h1>\n";
 
 			if (file_put_contents($file, $template) !== false) {
-				echo "Created view: resource/view/$name.php\n";
+				echo ($existedBefore ? "Overwrote view: resource/view/$name.php\n" : "Created view: resource/view/$name.php\n");
 			} else {
 				echo "Failed to create view: $file\n";
 			}
@@ -270,7 +275,8 @@ class Add
 			}
 
 			$file = $dir . '/' . $name . '.php';
-			if (file_exists($file)) {
+			$existedBefore = file_exists($file);
+			if ($existedBefore && !self::wantsForce($opts)) {
 				echo "Command already exists: src/Command/$name.php\n";
 				return;
 			}
@@ -278,7 +284,7 @@ class Add
 			$template = "<?php\n\nnamespace DFrame\\Command;\n\nclass $name\n{\n    public static function handle()\n    {\n        return function (\$argv = []) {\n            echo \"$name executed\";\n        };\n    }\n}\n";
 
 			if (file_put_contents($file, $template) !== false) {
-				echo "Created command: src/Command/$name.php\n";
+				echo ($existedBefore ? "Overwrote command: src/Command/$name.php\n" : "Created command: src/Command/$name.php\n");
 			} else {
 				echo "Failed to create command: $file\n";
 			}
@@ -311,7 +317,8 @@ class Add
 			}
 
 			$file = $dir . '/' . $name . '.php';
-			if (file_exists($file)) {
+			$existedBefore = file_exists($file);
+			if ($existedBefore && !self::wantsForce($opts)) {
 				echo "Middleware already exists: app/Middleware/$name.php\n";
 				return;
 			}
@@ -319,7 +326,7 @@ class Add
 			$template = "<?php\n\nnamespace App\\Middleware;\n\nuse DFrame\\Application\\Middleware;\n\nclass $name extends Middleware\n{\n    public static function sign(): void\n    {\n        Middleware::register('{$name}', function () {\n            // TODO: implement middleware logic\n            return null;\n        });\n    }\n}\n";
 
 			if (file_put_contents($file, $template) !== false) {
-				echo "Created middleware: app/Middleware/$name.php\n";
+				echo ($existedBefore ? "Overwrote middleware: app/Middleware/$name.php\n" : "Created middleware: app/Middleware/$name.php\n");
 			} else {
 				echo "Failed to create middleware: $file\n";
 			}
@@ -352,7 +359,8 @@ class Add
 			}
 
 			$file = $dir . '/' . $name . '.php';
-			if (file_exists($file)) {
+			$existedBefore = file_exists($file);
+			if ($existedBefore && !self::wantsForce($opts)) {
 				echo "Mail class already exists: app/Mail/$name.php\n";
 				return;
 			}
@@ -360,7 +368,7 @@ class Add
 			$template = "<?php\n\nnamespace App\\Mail;\n\nclass $name\n{\n    public function send(\$to, \$subject, \$body)\n    {\n        // integrate with Mailer\n        return true;\n    }\n}\n";
 
 			if (file_put_contents($file, $template) !== false) {
-				echo "Created mail class: app/Mail/$name.php\n";
+				echo ($existedBefore ? "Overwrote mail class: app/Mail/$name.php\n" : "Created mail class: app/Mail/$name.php\n");
 			} else {
 				echo "Failed to create mail class: $file\n";
 			}
@@ -448,6 +456,12 @@ class Add
 			$parts[] = "'" . addcslashes($c, "'\\") . "'";
 		}
 		return '[' . implode(', ', $parts) . ']';
+	}
+
+	/** True when --force is present (overwrite existing scaffold files). */
+	private static function wantsForce(array $opts): bool
+	{
+		return (bool)($opts['force'] ?? false);
 	}
 
 	private static function parseOptions(array $argv, int $start = 2): array

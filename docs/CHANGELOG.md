@@ -1,6 +1,12 @@
 
 ## `2026.4.12-dev` (2026-04-12)
 
+### Added
+
+- **CLI `add` scaffolds** (`src/Command/Add.php`): **`--force`** on every generator (`controller`, `model`, `view`, `command`, `middleware`, `mail`) overwrites the target file when it already exists; success message uses “Overwrote” instead of “Created”.
+- **`add:controller` / `add controller`**: **`--api-crud`** generates REST-style JSON stubs (`index`, `store`, `show`, `update`, `destroy`) with `Content-Type: application/json` and sample `json_encode` responses. If both `--crud` and `--api-crud` are passed, **`--api-crud` wins**.
+- **`php dli help:add`** documents `--force`, `--api-crud`, and updated examples (`src/Command/Core.php`).
+
 ### Fixed
 
 - **WebSocket** (`src/Application/WebSocket.php`): `triggerEvent` now invokes overridden `onOpen` / `onMessage` / `onClose` methods when the public callback properties are `null`. In PHP those properties shadow same-named methods, so subclasses such as `App\Chat\Chat` previously never received events after a successful handshake (messages appeared to “send” from the browser but were not handled server-side).

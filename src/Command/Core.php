@@ -297,13 +297,15 @@ class Core
 
             echo "Options (all generators):\n";
             echo "  " . cli_yellow("--name=Name") . "   Class / file base name (required)\n";
-            echo "  " . cli_yellow("-n Name") . "       Short form for name\n\n";
+            echo "  " . cli_yellow("-n Name") . "       Short form for name\n";
+            echo "  " . cli_yellow("--force") . "     Overwrite the target file if it already exists\n\n";
 
             echo cli_cyan("add:controller") . " / " . cli_cyan("add controller") . "\n";
             echo "  Output: app/Controller/…/{Name}Controller.php\n";
             echo "  Suffix " . cli_gray("Controller") . " is added if missing.\n";
             echo "  Use a path in the name for subfolders, e.g. " . cli_yellow("--name=Admin/Dashboard") . "\n";
-            echo "  " . cli_yellow("--crud") . " — scaffold index/create/store/show/edit/update/destroy stubs.\n\n";
+            echo "  " . cli_yellow("--crud") . " — scaffold index/create/store/show/edit/update/destroy stubs.\n";
+            echo "  " . cli_yellow("--api-crud") . " — REST-style JSON stubs: index/store/show/update/destroy (" . cli_gray("overrides --crud") . ").\n\n";
 
             echo cli_cyan("add:model") . " / " . cli_cyan("add model") . "\n";
             echo "  Output: app/Model/{Name}.php — class name is StudlyCase from " . cli_yellow("--name") . " (no forced Model suffix).\n";
@@ -325,7 +327,8 @@ class Core
             echo "  Output: app/Mail/{Name}.php — suffix " . cli_gray("Mail") . " if name does not end with Mail/Mailer.\n\n";
 
             echo "Examples:\n";
-            echo "  " . cli_gray("php dli add controller --name=Posts") . "\n";
+            echo "  " . cli_gray("php dli add controller --name=Posts --api-crud") . "\n";
+            echo "  " . cli_gray("php dli add:model --name=Posts --force") . "\n";
             echo "  " . cli_gray('php dli add:model --name=Posts --table=posts --selectable=[id,title,content,created_at]') . "\n";
             echo "  " . cli_gray("php dli add view -n home") . "\n";
         };
