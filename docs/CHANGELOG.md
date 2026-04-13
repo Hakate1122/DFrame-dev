@@ -1,4 +1,11 @@
 
+## `2026.4.13-dev` (2026-04-13)
+
+### Changed
+
+- **Helper namespace/layout refactor**: moved all helpers from `src/Application/helper/*` to `src/Helper/*` to group shared modules together.
+- **Remove `src/Kit`**: Kit utility functions have been consolidated into `src/Helper/functions.php`, reducing helper scattering and simplifying import points.
+
 ## `2026.4.12-dev` (2026-04-12)
 
 ### Added

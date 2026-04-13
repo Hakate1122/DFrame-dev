@@ -3,8 +3,6 @@
 namespace App\Controller;
 
 use App\Model\Users;
-use DFrame\Application\DB;
-use DFrame\Application\Log;
 use DFrame\Application\Validator;
 
 class UserController extends Controller
@@ -17,8 +15,7 @@ class UserController extends Controller
     }
     public function listUsers()
     {
-        $allUsers = Users::all();
-                         dd($allUsers);
+        $allUsers = $this->users->all();
         return $this->render('user1/list', ['users' => $allUsers]);
     }
 
@@ -56,11 +53,11 @@ class UserController extends Controller
         }
 
         $this->users
-             ->insert([
-             'name' => $name,
-             'email' => $email
-             ])
-             ->execute();
+            ->insert([
+                'name' => $name,
+                'email' => $email
+            ])
+            ->execute();
         return redirect()->route('user.list');
     }
 
@@ -99,7 +96,7 @@ class UserController extends Controller
             return $this->render('user1/edit', ['error' => $validator->errors(), 'user' => $user]);
         }
 
-        DB::table('users')
+        $this->users
             ->where('id', $id)
             ->update([
                 'name' => $name,
@@ -111,9 +108,9 @@ class UserController extends Controller
     public function deleteUser($id)
     {
         $this->users
-             ->where('id', $id)
-             ->delete()
-             ->execute();
+            ->where('id', $id)
+            ->delete()
+            ->execute();
         return redirect()->route('user.list');
     }
 }
