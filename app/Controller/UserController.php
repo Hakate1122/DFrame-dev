@@ -7,11 +7,8 @@ use DFrame\Application\Validator;
 
 class UserController extends Controller
 {
-    private Users $users;
-
-    public function __construct(Users $users)
+    public function __construct(private Users $users)
     {
-        $this->users = $users;
     }
     public function listUsers()
     {

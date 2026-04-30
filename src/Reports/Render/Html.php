@@ -424,7 +424,7 @@ class Html implements RenderInterface
         }
         $code = trim($code);
 
-        if (empty($code)) {
+        if ($code === '' || $code === '0') {
             return $leadingSpace;
         }
 
@@ -517,7 +517,7 @@ class Html implements RenderInterface
         }
 
         # Variables (but not inside already highlighted content)
-        $code = preg_replace('/(\$[a-zA-Z_][a-zA-Z0-9_]*)(?![^<]*>)/', '<span class="php-variable">$1</span>', $code);
+        $code = preg_replace('/(\$[a-zA-Z_]\w*)(?![^<]*>)/', '<span class="php-variable">$1</span>', $code);
 
         # Object operators and array access
         $code = preg_replace('/(-&gt;)/', '<span class="php-operator">-></span>', $code);
@@ -527,7 +527,7 @@ class Html implements RenderInterface
         $code = preg_replace('/\b(\d+\.?\d*)\b(?![^<]*>)/', '<span class="php-number">$1</span>', $code);
 
         # Function calls (word followed by opening parenthesis, but not keywords)
-        $code = preg_replace('/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()(?![^<]*>)(?!.*<span class="php-keyword">)/', '<span class="php-function">$1</span>', $code);
+        $code = preg_replace('/\b([a-zA-Z_]\w*)\s*(?=\()(?![^<]*>)(?!.*<span class="php-keyword">)/', '<span class="php-function">$1</span>', $code);
 
         # Constants (all caps words)
         $code = preg_replace('/\b([A-Z_][A-Z0-9_]{2,})\b(?![^<]*>)/', '<span class="php-constant">$1</span>', $code);

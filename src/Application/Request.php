@@ -65,7 +65,7 @@ class Request
         }
 
         $raw = file_get_contents('php://input');
-        if (!empty($raw)) {
+        if (!in_array($raw, ['', '0', false], true)) {
             return ['_raw' => $raw];
         }
 

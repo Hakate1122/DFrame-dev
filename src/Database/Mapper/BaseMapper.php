@@ -4,20 +4,13 @@ namespace DFrame\Database\Mapper;
 use DFrame\Database\Interfaces\MapperInterface;
 
 abstract class BaseMapper implements MapperInterface {
-    protected $adapter;
-    protected $table;
-
     protected ?bool $hasDeletedAt = null;
-
-    protected bool $useSoftDelete = false;
 
     /** Columns to select for queries (default: ['*']) */
     protected $columns = ['*'];
 
-    public function __construct($adapter, $table, bool $useSoftDelete = false) {
-        $this->adapter = $adapter;
-        $this->table = $table;
-        $this->useSoftDelete = $useSoftDelete;
+    public function __construct(protected $adapter, protected $table, protected bool $useSoftDelete = false)
+    {
     }
 
     /**
@@ -29,11 +22,7 @@ abstract class BaseMapper implements MapperInterface {
             $this->columns = $columns;
         } else {
             $args = func_get_args();
-            if (count($args) > 1) {
-                $this->columns = $args;
-            } else {
-                $this->columns = [$columns];
-            }
+            $this->columns = count($args) > 1 ? $args : [$columns];
         }
         return $this;
     }
@@ -48,7 +37,7 @@ abstract class BaseMapper implements MapperInterface {
         }
 
         try {
-            $adapterClass = get_class($this->adapter);
+            $adapterClass = $this->adapter::class;
             if (stripos($adapterClass, 'sqlite') !== false) {
                 $sql = "PRAGMA table_info(\"{$this->table}\")";
                 $res = $this->adapter->query($sql);
@@ -69,7 +58,7 @@ abstract class BaseMapper implements MapperInterface {
                     return true;
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             $this->hasDeletedAt = false;
             return false;
         }

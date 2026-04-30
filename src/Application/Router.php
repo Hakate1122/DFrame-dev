@@ -31,9 +31,6 @@ class Router
     /** @var list<callable> */
     private array $globalApiMiddleware = [];
 
-    private mixed $request;
-    private array $container = [];
-
     /** ----- STATIC REGISTRATION ----- */
     private static array $staticRoutes = [
         'GET' => [],
@@ -70,10 +67,8 @@ class Router
     ];
 
     /* --------------------------------------------------------------------- */
-    public function __construct($request = null, array $container = [])
+    public function __construct(private mixed $request = null, private array $container = [])
     {
-        $this->request = $request;
-        $this->container = $container;
     }
 
     /* --------------------------------------------------------------------- */
@@ -300,13 +295,13 @@ class Router
     /**
      * Scan controller classes for route attributes and register them.
      * @param array $controllers List of controller class names to scan.
-     * @return void
      */
     public static function scanControllerAttributes(array $controllers): void
     {
         foreach ($controllers as $class) {
-            if (!class_exists($class))
+            if (!class_exists($class)) {
                 continue;
+            }
             $ref = new ReflectionClass($class);
             foreach ($ref->getMethods(ReflectionMethod::IS_PUBLIC) as $m) {
                 foreach ($m->getAttributes() as $attr) {
@@ -322,8 +317,9 @@ class Router
                     $isApi = $args['isApi'] ?? $args['api'] ?? false;
                     $mw = $args['middleware'] ?? [];
 
-                    if (!$path)
+                    if (!$path) {
                         continue;
+                    }
 
                     $spec = "$http $path";
                     $handler = [$class, $m->getName()];
@@ -377,7 +373,7 @@ class Router
 
         // 4. 405 – collect allowed methods
         $allowed = $this->collectAllowed($uri);
-        if ($allowed) {
+        if ($allowed !== []) {
             http_response_code(405);
             header('Allow: ' . implode(', ', $allowed));
             throw new Exception("Method Not Allowed. Allowed: " . implode(', ', $allowed));
@@ -491,8 +487,9 @@ class Router
                 ? Middleware::run($m, $context)
                 : $m($context);
 
-            if ($res === false)
+            if ($res === false) {
                 return;
+            }
             if ($res !== null) {
                 if ($isApi) {
                     $code = is_array($res) && isset($res['code']) ? $res['code'] : 400;
@@ -511,8 +508,9 @@ class Router
             header('Content-Type: application/json');
             $code = is_array($result) && isset($result['code']) ? $result['code'] : 200;
             http_response_code($code);
-            if (isset($result['code']))
+            if (isset($result['code'])) {
                 unset($result['code']);
+            }
             echo json_encode($result, JSON_UNESCAPED_UNICODE);
         } else {
             echo $result;
@@ -562,17 +560,15 @@ class Router
             $args[] = null;
         }
 
-        $result = $ref instanceof ReflectionMethod
+        return $ref instanceof ReflectionMethod
             ? $ref->invokeArgs($instance, $args)
             : $ref->invokeArgs($args);
-
-        return $result;
     }
 
     private function emitDeprecationIfNeeded(ReflectionMethod $method): void
     {
         $attrs = $method->getAttributes(Deprecated::class);
-        if (!$attrs) {
+        if ($attrs === []) {
             $classAttrs = $method->getDeclaringClass()->getAttributes(Deprecated::class);
             if (!$classAttrs) {
                 return;
@@ -671,26 +667,23 @@ class Router
         $info = self::$routeNames[$name];
         $path = $info['path'];
 
-        if ($params) {
-            foreach ($params as $v) {
-                $path = preg_replace('#\{[^}]+\}#', $v, $path, 1);
-            }
+        foreach ($params as $v) {
+            $path = preg_replace('#\{[^}]+\}#', $v, $path, 1);
         }
 
         $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
         $scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '');
-        if ($scriptDir === '/' || $scriptDir === '\\' || $scriptDir === '.') {
+        if (in_array($scriptDir, ['/', '\\', '.'], true)) {
             $scriptDir = '';
         }
 
         $base ??= $scheme . '://' . $host . rtrim($scriptDir, '/');
 
         $url = rtrim($base, '/') . '/' . ltrim($path, '/');
-        $url = preg_replace('#(?<!:)//+#', '/', $url);
 
-        return $url;
+        return preg_replace('#(?<!:)//+#', '/', $url);
     }
 
     /**

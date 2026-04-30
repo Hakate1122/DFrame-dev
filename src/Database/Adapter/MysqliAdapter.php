@@ -57,13 +57,13 @@ class MysqliAdapter implements AdapterInterface
 		$values = [];
 		foreach ($params as $param) {
 			if (is_int($param)) {
-				$types .= 'i';
-			} else if (is_float($param)) {
-				$types .= 'd';
-			} else if ($param === null) {
-				$types .= 's';
-				$param = null;
-			} else {
+                $types .= 'i';
+            } elseif (is_float($param)) {
+                $types .= 'd';
+            } elseif ($param === null) {
+                $types .= 's';
+                $param = null;
+            } else {
 				$types .= 's';
 			}
 			$values[] = $param;
@@ -81,17 +81,12 @@ class MysqliAdapter implements AdapterInterface
 
 	public function fetch($result, $type = 'assoc')
 	{
-		switch ($type) {
-			case 'num':
-				return $result->fetch_array(MYSQLI_NUM);
-			case 'both':
-				return $result->fetch_array(MYSQLI_BOTH);
-			case 'object':
-				return $result->fetch_object();
-			case 'assoc':
-			default:
-				return $result->fetch_assoc();
-		}
+		return match ($type) {
+            'num' => $result->fetch_array(MYSQLI_NUM),
+            'both' => $result->fetch_array(MYSQLI_BOTH),
+            'object' => $result->fetch_object(),
+            default => $result->fetch_assoc(),
+        };
 	}
 
 	public function fetchAll($result, $type = 'assoc')

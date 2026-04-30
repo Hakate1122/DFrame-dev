@@ -35,17 +35,12 @@ class PdoMysqlAdapter implements AdapterInterface
 
     public function fetch($result, $type = 'assoc')
     {
-        switch ($type) {
-            case 'num':
-                return $result->fetch(\PDO::FETCH_NUM);
-            case 'both':
-                return $result->fetch(\PDO::FETCH_BOTH);
-            case 'object':
-                return $result->fetch(\PDO::FETCH_OBJ);
-            case 'assoc':
-            default:
-                return $result->fetch(\PDO::FETCH_ASSOC);
-        }
+        return match ($type) {
+            'num' => $result->fetch(\PDO::FETCH_NUM),
+            'both' => $result->fetch(\PDO::FETCH_BOTH),
+            'object' => $result->fetch(\PDO::FETCH_OBJ),
+            default => $result->fetch(\PDO::FETCH_ASSOC),
+        };
     }
 
     public function fetchAll($result, $type = 'assoc')

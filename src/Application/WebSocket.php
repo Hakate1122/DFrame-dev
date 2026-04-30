@@ -12,15 +12,13 @@ class WebSocket
 {
     protected \Socket $master;
     protected array $clients = [];
-    protected string $host;
-    protected int $port;
 
     /** @var callable|null */
-    public $onOpen = null;
+    public $onOpen;
     /** @var callable|null */
-    public $onMessage = null;
+    public $onMessage;
     /** @var callable|null */
-    public $onClose = null;
+    public $onClose;
 
     /**
      * Constructor to initialize the WebSocket server.
@@ -28,7 +26,7 @@ class WebSocket
      * @param string $host The host to bind the server to (default: '0.0.0.0')
      * @param int $port The port to bind the server to (default: 9501)
      */
-    public function __construct(string $host = '0.0.0.0', int $port = 9501)
+    public function __construct(protected string $host = '0.0.0.0', protected int $port = 9501)
     {
         if (php_sapi_name() !== 'cli') {
             die(cli_red("WebSocket server can only be run from the command line."));
@@ -36,8 +34,6 @@ class WebSocket
         if(!extension_loaded('sockets')) {
             die(cli_red("The sockets extension is required to run the WebSocket server."));
         }
-        $this->host = $host;
-        $this->port = $port;
     }
 
     /**
@@ -129,7 +125,9 @@ class WebSocket
     private function handshake($client): bool
     {
         $request = socket_read($client, 8192);
-        if (!$request) return false;
+        if (!$request) {
+            return false;
+        }
 
         if (!preg_match("/Sec-WebSocket-Key:\s*(.+)\r\n/i", $request, $match)) {
             return false;
@@ -195,7 +193,9 @@ class WebSocket
         $masked = ($byte2 & 0x80) !== 0;
         $len = $byte2 & 0x7F;
 
-        if (!$masked) return null; // Specification requires client frames to be masked
+        if (!$masked) {
+            return null;
+        } // Specification requires client frames to be masked
 
         // Handle extended payload length
         if ($len === 126) {
@@ -270,7 +270,6 @@ class WebSocket
      * Send a Pong frame in response to a Ping.
      *
      * @param \Socket $client The client socket to send the Pong to.
-     * @return void
      */
     private function sendPong($client): void
     {
@@ -298,13 +297,11 @@ class WebSocket
     // ─────────────────────────────────────────────
     // EVENT TRIGGERING AND UTILITY METHODS
     // ─────────────────────────────────────────────
-
     /**
      * Trigger an event callback if it is set.
      *
      * @param string $event The name of the event ('onOpen', 'onMessage', 'onClose').
      * @param array $args The arguments to pass to the event callback.
-     * @return void
      */
     private function triggerEvent(string $event, array $args): void
     {
@@ -339,7 +336,6 @@ class WebSocket
      *
      * @param string $message The message to broadcast.
      * @param \Socket|null $except The client socket to exclude from broadcasting.
-     * @return void
      */
     protected function broadcast(string $message, $except = null): void
     {
@@ -357,7 +353,6 @@ class WebSocket
      * Disconnect a client and clean up resources.
      *
      * @param \Socket $client The client socket to disconnect.
-     * @return void
      */
     private function disconnect($client): void
     {
@@ -371,7 +366,6 @@ class WebSocket
      * Handle new client connection.
      *
      * @param \Socket $client The client socket.
-     * @return void
      */
     protected function onOpen(\Socket $client): void
     {
@@ -383,7 +377,6 @@ class WebSocket
      *
      * @param \Socket $client The client socket.
      * @param string $message The received message.
-     * @return void
      */
     protected function onMessage(\Socket $client, string $message): void
     {
@@ -394,7 +387,6 @@ class WebSocket
      * Handle client disconnection.
      *
      * @param \Socket $client The client socket.
-     * @return void
      */
     protected function onClose(\Socket $client): void
     {

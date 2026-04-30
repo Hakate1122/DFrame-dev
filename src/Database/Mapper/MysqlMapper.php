@@ -44,7 +44,7 @@ class MysqlMapper extends BaseMapper {
 
     public function update($id, array $data) {
         $fields = array_keys($data);
-        $set = implode(', ', array_map(function($f) { return "`$f` = ?"; }, $fields));
+        $set = implode(', ', array_map(fn($f) => "`$f` = ?", $fields));
         $sql = "UPDATE `{$this->table}` SET $set WHERE id = ?";
         $params = array_values($data);
         $params[] = $id;

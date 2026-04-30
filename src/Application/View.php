@@ -33,7 +33,7 @@ class View
     {
         $configPath = ROOT_DIR . 'config/view.php';
         $config = file_exists($configPath) ? require $configPath : [];
-        $viewPath = $viewPath ?? ($config['view_path'] ?? ROOT_DIR . 'resource/view/');
+        $viewPath ??= $config['view_path'] ?? ROOT_DIR . 'resource/view/';
         $this->viewPath = rtrim($viewPath, '/');
         $this->engine = $config['engine'] ?? 'php';
 
@@ -78,10 +78,9 @@ class View
     {
         if ($this->engine === 'php' || !$this->engineInstance) {
             $view = str_replace(['..', '\\'], '', $view);
-            if (strpos($view, '.') !== false) {
+            if (str_contains($view, '.')) {
                 $view = str_replace('.', '/', $view);
             }
-
             $extensions = ['.php', '.blade.php', '.twig', '.tpl', '.html', '.htm'];
             $filePath = null;
             foreach ($extensions as $ext) {
@@ -91,22 +90,18 @@ class View
                     break;
                 }
             }
-
             if (!$filePath) {
                 throw new Exception("View file not found: " . $this->viewPath . '/' . $view . '.[php/html/htm]');
             }
-
             extract($data);
             ob_start();
             require $filePath;
             return ob_get_clean();
-        } else {
-            if (method_exists($this->engineInstance, 'render')) {
-                return $this->engineInstance->render($view, $data);
-            } else {
-                throw new Exception("View engine does not support render method");
-            }
         }
+        if (method_exists($this->engineInstance, 'render')) {
+            return $this->engineInstance->render($view, $data);
+        }
+        throw new Exception("View engine does not support render method");
     }
 
     /**

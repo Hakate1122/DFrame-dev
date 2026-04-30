@@ -16,19 +16,11 @@ use DFrame\Application\Command;
  */
 class CommandEntry
 {
-    public Command $parent;
-    public string $name;
-    public mixed $handler;
     public ?string $info = null;
     public ?string $alias = null;
-    public bool $hiddenOnPhar = false;
 
-    public function __construct(Command $parent, string $name, mixed $handler, bool $hiddenOnPhar = false)
+    public function __construct(public Command $parent, public string $name, public mixed $handler, public bool $hiddenOnPhar = false)
     {
-        $this->parent = $parent;
-        $this->name = $name;
-        $this->handler = $handler;
-        $this->hiddenOnPhar = $hiddenOnPhar;
     }
 
     /**

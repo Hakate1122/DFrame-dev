@@ -15,7 +15,6 @@ class Source
      *
      * @param string|array $file File path or config array
      * @param string|null $extension File extension
-     * @return string
      */
     public static function url($file = '', ?string $extension = null): string
     {
@@ -27,7 +26,7 @@ class Source
             $ext = $extension ?? '';
         }
 
-        if ($ext && strpos($filename, '.') !== false && strpos($filename, '/') === false) {
+        if ($ext && str_contains($filename, '.') && !str_contains($filename, '/')) {
             $parts = explode('.', $filename, 2);
             if (count($parts) === 2) {
                 $filename = $parts[0] . '/' . $parts[1];
@@ -57,7 +56,6 @@ class Source
      * Get the full path for a source file.
      *
      * @param string|array $file File name
-     * @return string
      */
     public static function path($file = ''): string
     {
@@ -80,7 +78,7 @@ class Source
         $realBase = realpath($baseDir);
         $realPath = realpath($filePath);
 
-        if ($realPath === false || strpos($realPath, $realBase) !== 0) {
+        if ($realPath === false || !str_starts_with($realPath, $realBase)) {
             return false;
         }
 
@@ -128,7 +126,6 @@ class Source
      *
      * @param string $oldFile Old file name
      * @param string $newFile New file name
-     * @return bool
      */
     public static function rename(string $oldFile, string $newFile): bool
     {
@@ -151,12 +148,11 @@ class Source
      * Remove a file from public/source.
      *
      * @param string $file File name
-     * @return bool
      */
     public static function remove(string $file): bool
     {
         $filePath = rtrim(INDEX_DIR, '/\\') . self::url($file);
-        return file_exists($filePath) ? unlink($filePath) : false;
+        return file_exists($filePath) && unlink($filePath);
     }
 
     /**
@@ -181,9 +177,6 @@ class Source
 if (!function_exists('source')) {
     /**
      * Get the URL for a source file (located in public_html/source).
-     *
-     * @param string $path
-     * @return string
      */
     function source(string $path = ''): string
     {
@@ -193,13 +186,13 @@ if (!function_exists('source')) {
         $scriptName = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? '');
         $path = ltrim(str_replace(['..', '\\'], '', $path), '/');
 
-        if (strpos($baseUrl, '/public/') !== false) {
+        if (str_contains($baseUrl, '/public/')) {
             return $baseUrl . 'source/' . $path;
         }
 
         if (
             preg_match('/^([a-zA-Z0-9\-\.]+)(:\d+)?$/', $host) &&
-            (strpos($scriptName, '/public/') === false)
+            (!str_contains($scriptName, '/public/'))
         ) {
             return $baseUrl . 'source/' . $path;
         }

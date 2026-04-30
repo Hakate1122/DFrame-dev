@@ -38,15 +38,19 @@ class BenchmarkSort
         $defaultSizes = [10, 100, 1000];
         $sizes = $defaultSizes;
         // Use $_SERVER['argv'] for CLI arguments to avoid undefined $argv
-        $cliArgs = isset($_SERVER['argv']) ? $_SERVER['argv'] : [];
+        $cliArgs = $_SERVER['argv'] ?? [];
         if (isset($cliArgs[1])) {
             $parts = array_filter(array_map('trim', explode(',', $cliArgs[1])));
             $tmp = [];
             foreach ($parts as $p) {
                 $v = (int)$p;
-                if ($v > 0) $tmp[] = $v;
+                if ($v > 0) {
+                    $tmp[] = $v;
+                }
             }
-            if (count($tmp) > 0) $sizes = $tmp;
+            if (count($tmp) > 0) {
+                $sizes = $tmp;
+            }
         }
         $repeats = 5;
 
@@ -64,7 +68,7 @@ class BenchmarkSort
 
             for ($r = 0; $r < $repeats; $r++) {
                 // generate a random integer array (non-negative) suitable for radix/count sorts
-                $maxVal = max(100, (int)($n * 10));
+                $maxVal = max(100, $n * 10);
                 $baseArray = [];
                 for ($i = 0; $i < $n; $i++) {
                     $baseArray[] = random_int(0, $maxVal);
@@ -131,10 +135,8 @@ class BenchmarkSort
             }
 
             // compute averages and print
-            foreach ($algorithms as $name => $class) {
-                $entries = array_filter($results[$n][$name], function ($v) {
-                    return is_array($v) && isset($v['time_us']) && is_numeric($v['time_us']);
-                });
+            foreach (array_keys($algorithms) as $name) {
+                $entries = array_filter($results[$n][$name], fn($v) => is_array($v) && isset($v['time_us']) && is_numeric($v['time_us']));
                 if (count($entries) === 0) {
                     printf("  %-15s : %s\n", $name, 'n/a');
                     continue;
@@ -144,13 +146,13 @@ class BenchmarkSort
                 $peaks = array_column($entries, 'peak_bytes');
                 $corrects = array_column($results[$n][$name], 'correct');
 
-                $validTimes = array_filter($times, function ($v) { return is_numeric($v); });
+                $validTimes = array_filter($times, fn($v) => is_numeric($v));
                 $avg = array_sum($validTimes) / count($validTimes);
                 $min = min($validTimes);
                 $max = max($validTimes);
                 $avgMem = array_sum($mems) / count($mems);
                 $avgPeak = array_sum($peaks) / count($peaks);
-                $correctCount = count(array_filter($corrects, function ($v) { return $v === true; }));
+                $correctCount = count(array_filter($corrects, fn($v) => $v === true));
                 $attempts = count($results[$n][$name]);
 
                 printf("  %-15s : avg %8.3f ms | min %8.3f ms | max %8.3f ms | mem avg %8.1f KB | correct %d/%d\n", $name, $avg / 1000.0, $min / 1000.0, $max / 1000.0, $avgMem / 1024.0, $correctCount, $attempts);

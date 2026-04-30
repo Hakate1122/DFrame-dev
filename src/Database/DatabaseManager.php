@@ -119,11 +119,12 @@ class DatabaseManager
      */
     protected function getConfig($driver)
     {
-        if (strpos($driver, 'sqlite') !== false) {
+        if (str_contains($driver, 'sqlite')) {
             return [
                 'database' => env('DB_NAME') . '.db',
             ];
-        } else if (strpos($driver, 'mysql') !== false) {
+        }
+        if (str_contains($driver, 'mysql')) {
             return [
                 'host'     => env('DB_HOST'),
                 'port'     => env('DB_PORT'),
@@ -132,6 +133,7 @@ class DatabaseManager
                 'database' => env('DB_NAME'),
             ];
         }
+        return null;
     }
 
     /**

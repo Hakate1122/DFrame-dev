@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DFrame\Utils\Sorting;
 
 /**
@@ -31,9 +33,9 @@ class GnomeSort
                 $a = $b;
                 $b++;
             } else {
-                list($array[$a], $array[$a - 1]) = array($array[$a - 1], $array[$a]);
+                [$array[$a], $array[$a - 1]] = [$array[$a - 1], $array[$a]];
                 $a--;
-                if ($a == 0) {
+                if ($a === 0) {
                     $a = $b;
                     $b++;
                 }

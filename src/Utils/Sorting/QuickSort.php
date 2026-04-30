@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DFrame\Utils\Sorting;
 
 use function sizeof;
@@ -22,13 +24,13 @@ class QuickSort
      */
     public static function sort(array $input): array
     {
-        if (empty($input)) {
+        if ($input === []) {
             return [];
         }
 
         $lt = [];
         $gt = [];
-        if (sizeof($input) < 2) {
+        if (count($input) < 2) {
             return $input;
         }
 

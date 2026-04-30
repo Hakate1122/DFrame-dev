@@ -18,7 +18,9 @@ class BucketSort
 {
     public static function sort(array $arr): array
     {
-        if (empty($arr)) return $arr;
+        if ($arr === []) {
+            return $arr;
+        }
 
         $n = count($arr);
         $buckets = array_fill(0, $n, []);

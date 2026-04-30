@@ -21,7 +21,6 @@ class Command
      * @param string $name Command name
      * @param callable|array|string $handler Function, method array, or class name
      * @param bool $hiddenOnPhar Whether to hide this command in Phar builds
-     * @return CommandEntry
      */
     public function register(string $name, callable|array|string $handler, bool $hiddenOnPhar = false): CommandEntry
     {
@@ -35,9 +34,7 @@ class Command
      *
      * Example: registerAlias('say:greet', 'greet')
      *
-     * @param string $alias
      * @param string $target Name of the existing command to alias
-     * @return CommandEntry
      */
     public function registerAlias(string $alias, string $target): CommandEntry
     {

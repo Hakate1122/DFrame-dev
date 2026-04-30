@@ -19,7 +19,7 @@ class CountSort
      */
     public static function sort(array $array): array
     {
-        $count = array();
+        $count = [];
         $min = min($array);
         $max = max($array);
 

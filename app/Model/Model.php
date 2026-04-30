@@ -45,16 +45,13 @@ class Model extends DatabaseManager
     //  * @var string
     //  */
     // protected $table;
-
     // /**
     //  * Optional columns to select (string|array|null)
     //  * @var mixed
     //  */
     // protected $selectable;
-
     /**
      * Check if this model uses SoftDelete trait
-     * @return bool
      */
     protected function usesSoftDelete(): bool
     {
@@ -86,7 +83,6 @@ class Model extends DatabaseManager
 
     /**
      * Set the table for the query.
-     * @param string $table
      * @return static
      */
     public static function table(string $table): self

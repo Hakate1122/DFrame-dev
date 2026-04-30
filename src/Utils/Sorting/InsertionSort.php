@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DFrame\Utils\Sorting;
 
 /**
@@ -19,7 +21,8 @@ class InsertionSort
      */
     public static function sort(array $array): array
     {
-        for ($i = 1; $i < count($array); $i++) {
+        $counter = count($array);
+        for ($i = 1; $i < $counter; $i++) {
             $currentVal = $array[$i];
 
             for ($j = $i - 1; $j >= 0 && $array[$j] > $currentVal; $j--) {

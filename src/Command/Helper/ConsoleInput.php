@@ -23,7 +23,6 @@ class ConsoleInput
      * @param string $message The prompt message.
      * @param string|null $default The default value if input is empty.
      * @param callable|null $validator  Return true if valid, or string error message if invalid.
-     * @return string
      */
     public static function prompt(
         string $message,
@@ -74,10 +73,9 @@ class ConsoleInput
     /**
      * Ask Yes/No question.
      * Return: true = Yes, false = No
-     * 
+     *
      * @param string $message The question message.
      * @param bool $default Default answer if input is empty (true = Yes, false = No).
-     * @return bool
      */
     public static function askYesNo(
         string $message,
@@ -95,8 +93,12 @@ class ConsoleInput
 
             $lower = strtolower($input);
 
-            if (in_array($lower, ['y', 'yes'], true)) return true;
-            if (in_array($lower, ['n', 'no'], true)) return false;
+            if (in_array($lower, ['y', 'yes'], true)) {
+                return true;
+            }
+            if (in_array($lower, ['n', 'no'], true)) {
+                return false;
+            }
 
             echo "Please answer yes or no.\n";
         }
@@ -106,7 +108,6 @@ class ConsoleInput
      * Shortcut for askYesNo with default = false.
      *
      * @param string $message The question message.
-     * @return bool
      */
     public static function confirm(string $message): bool
     {
@@ -118,7 +119,6 @@ class ConsoleInput
      *
      * @param string $message The prompt message.
      * @param array $options Key-value pairs of options (key => label).
-     * @param string|null $defaultKey
      * @return string selected key
      */
     public static function select(
@@ -192,31 +192,27 @@ class ConsoleInput
 
     /**
      * Prompt for secret input (e.g., password) without echoing.
-     * 
+     *
      * **Note:** Not working on Windows consoles.
      *
      * @param string $message The prompt message.
      * @param string|null $default The default value if input is empty.
-     * @return string
      */
     public static function promptSecret(
         string $message,
         ?string $default = null
     ): string {
-        if (strncasecmp(PHP_OS, 'WIN', 3) == 0) {
+        if (strncasecmp(PHP_OS, 'WIN', 3) === 0) {
             echo "Warning: Secret input may be visible on Windows consoles.\n";
             return self::prompt($message, $default);
-        } else {
-            $cmd = "/usr/bin/env bash -c 'read -s -p \"" . addslashes($message) . ": \" mypassword && echo \$mypassword'";
-            $input = rtrim(shell_exec($cmd));
-            echo "\n";
-
-            if ($input === '' && $default !== null) {
-                return $default;
-            }
-
-            return $input;
         }
+        $cmd = "/usr/bin/env bash -c 'read -s -p \"" . addslashes($message) . ": \" mypassword && echo \$mypassword'";
+        $input = rtrim(shell_exec($cmd));
+        echo "\n";
+        if ($input === '' && $default !== null) {
+            return $default;
+        }
+        return $input;
     }
 
 
@@ -225,60 +221,48 @@ class ConsoleInput
     /* Validate that input is not empty. */
     public static function validateNotEmpty(): callable
     {
-        return function ($value) {
-            return $value !== ''
-                ? true
-                : "Value cannot be empty.";
-        };
+        return fn($value) => $value !== ''
+            ? true
+            : "Value cannot be empty.";
     }
 
     /* Validate that input is a string. */
     public static function validateString(): callable
     {
-        return function ($value) {
-            return is_string($value)
-                ? true
-                : "Value must be a string.";
-        };
+        return fn($value) => is_string($value)
+            ? true
+            : "Value must be a string.";
     }
 
     /* Validate that input is a valid URL. */
     public static function validateUrl(): callable
     {
-        return function ($value) {
-            return filter_var($value, FILTER_VALIDATE_URL)
-                ? true
-                : "Invalid URL format.";
-        };
+        return fn($value) => filter_var($value, FILTER_VALIDATE_URL)
+            ? true
+            : "Invalid URL format.";
     }
 
     /** Validate that input is a number. */
     public static function validateNumber(): callable
     {
-        return function ($value) {
-            return is_numeric($value)
-                ? true
-                : "Value must be a number.";
-        };
+        return fn($value) => is_numeric($value)
+            ? true
+            : "Value must be a number.";
     }
 
     /** Validate that input is a valid email address. */
     public static function validateEmail(): callable
     {
-        return function ($value) {
-            return filter_var($value, FILTER_VALIDATE_EMAIL)
-                ? true
-                : "Invalid email format.";
-        };
+        return fn($value) => filter_var($value, FILTER_VALIDATE_EMAIL)
+            ? true
+            : "Invalid email format.";
     }
 
     /** Validate that input matches a regex pattern. */
     public static function validateRegex(string $pattern): callable
     {
-        return function ($value) use ($pattern) {
-            return preg_match($pattern, $value)
-                ? true
-                : "Input does not match required pattern.";
-        };
+        return fn($value) => preg_match($pattern, $value)
+            ? true
+            : "Input does not match required pattern.";
     }
 }

@@ -7,7 +7,6 @@ use DFrame\Application\Session;
 if (!function_exists('old')) {
     /**
      * Get old input value from the previous request.
-     * @param string $key
      * @param mixed $default
      * @return mixed|null
      */
@@ -65,28 +64,27 @@ if (!function_exists('dd')) {
             $varNames = array_map('trim', explode(',', $m[1]));
         }
         $output = '';
-        if (empty($vars) && empty($varNames)) {
+        if ($vars === [] && $varNames === []) {
             $output = "Variable does not exist!\n";
         }
         foreach ($varNames as $i => $raw) {
             $raw = trim($raw);
-            if (preg_match('/^[$][a-zA-Z_][a-zA-Z0-9_]*$/', $raw)) {
+            if (preg_match('/^[$][a-zA-Z_]\w*$/', $raw)) {
                 if (array_key_exists($i, $vars)) {
                     $output .= $raw . ' = ' . craft_custom_var_dump($vars[$i]) . "\n";
                 } else {
                     $output .= $raw . ' = *UNDEFINED*' . "\n";
                 }
+            } elseif (array_key_exists($i, $vars)) {
+                $output .= craft_custom_var_dump($vars[$i]) . "\n";
             } else {
-                if (array_key_exists($i, $vars)) {
-                    $output .= craft_custom_var_dump($vars[$i]) . "\n";
-                } else {
-                    $output .= '*UNDEFINED*' . "\n";
-                }
+                $output .= '*UNDEFINED*' . "\n";
             }
         }
 
         if (count($vars) > count($varNames)) {
-            for ($j = count($varNames); $j < count($vars); $j++) {
+            $counter = count($vars);
+            for ($j = count($varNames); $j < $counter; $j++) {
                 $output .= craft_custom_var_dump($vars[$j]) . "\n";
             }
         }
@@ -125,28 +123,27 @@ if (!function_exists('dump')) {
             $varNames = array_map('trim', explode(',', $m[1]));
         }
         $output = '';
-        if (empty($vars) && empty($varNames)) {
+        if ($vars === [] && $varNames === []) {
             $output = "Variable does not exist!\n";
         }
         foreach ($varNames as $i => $raw) {
             $raw = trim($raw);
-            if (preg_match('/^[$][a-zA-Z_][a-zA-Z0-9_]*$/', $raw)) {
+            if (preg_match('/^[$][a-zA-Z_]\w*$/', $raw)) {
                 if (array_key_exists($i, $vars)) {
                     $output .= $raw . ' = ' . craft_custom_var_dump($vars[$i]) . "\n";
                 } else {
                     $output .= $raw . ' = *UNDEFINED*' . "\n";
                 }
+            } elseif (array_key_exists($i, $vars)) {
+                $output .= craft_custom_var_dump($vars[$i]) . "\n";
             } else {
-                if (array_key_exists($i, $vars)) {
-                    $output .= craft_custom_var_dump($vars[$i]) . "\n";
-                } else {
-                    $output .= '*UNDEFINED*' . "\n";
-                }
+                $output .= '*UNDEFINED*' . "\n";
             }
         }
 
         if (count($vars) > count($varNames)) {
-            for ($j = count($varNames); $j < count($vars); $j++) {
+            $counter = count($vars);
+            for ($j = count($varNames); $j < $counter; $j++) {
                 $output .= craft_custom_var_dump($vars[$j]) . "\n";
             }
         }
@@ -161,11 +158,10 @@ if (!function_exists('dump')) {
 
 /**
  * Custom var_dump function that supports HTML output and recursion detection.
- * 
+ *
  * @param mixed $var The variable to dump.
  * @param int $indent The current indentation level.
  * @param array $references Array to track references for recursion detection.
- * @return string
  */
 function craft_custom_var_dump($var, $indent = 0, &$references = []): string
 {
@@ -201,7 +197,7 @@ function craft_custom_var_dump($var, $indent = 0, &$references = []): string
         }
         $out .= "{$indentation}}}\n";
     } elseif (is_object($var)) {
-        $className = get_class($var);
+        $className = $var::class;
         $out = "{$indentation}object($className) {\n";
         $properties = (array) $var;
         foreach ($properties as $key => $value) {
@@ -281,9 +277,8 @@ if (!function_exists('session')) {
     {
         if ($value === null) {
             return Session::get($key);
-        } else {
-            Session::set($key, $value);
         }
+        Session::set($key, $value);
     }
 }
 
@@ -292,7 +287,6 @@ if (!function_exists("flash")) {
      * Flash data to session.
      * @param string $key The session flash key.
      * @param mixed $value The session flash value.
-     * @return void
      */
     function flash(string $key, $value): void
     {
@@ -303,7 +297,6 @@ if (!function_exists("flash")) {
 if (!function_exists('getFlash')) {
     /**
      * Get flash data from session.
-     * @param string $key
      * @return mixed|null
      */
     function getFlash(string $key)
@@ -315,8 +308,6 @@ if (!function_exists('getFlash')) {
 if (!function_exists('getBaseUrl')) {
     /**
      * Get the dynamic base URL of the application.
-     *
-     * @return string
      */
     function getBaseUrl(): string
     {
@@ -337,7 +328,6 @@ if (!function_exists('getBaseUrl')) {
 if (!function_exists('csrf_field')) {
     /**
      * Generate a hidden input field with CSRF token.
-     * @return string
      */
     function csrf_field(): string
     {

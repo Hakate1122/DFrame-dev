@@ -47,7 +47,6 @@ class TokenGenerator
      * @param array $payload The payload data to include in the token.
      * @param string $secret The secret key used to sign the token.
      * @param int $expiry The token expiry time in seconds. Default is 3600 seconds (1 hour).
-     * @return string
      */
     public static function jwt_generate(array $payload, string $secret, int $expiry = 3600): string
     {
@@ -87,10 +86,6 @@ class TokenGenerator
         }
 
         $payload = json_decode(base64_decode(str_replace(['-', '_'], ['+', '/'], $base64UrlPayload)), true);
-        if (isset($payload['exp']) && time() > $payload['exp']) {
-            return false;
-        }
-
-        return true;
+        return !(isset($payload['exp']) && time() > $payload['exp']);
     }
 }

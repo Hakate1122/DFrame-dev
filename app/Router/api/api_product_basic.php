@@ -5,6 +5,7 @@ $router = new DFrame\Application\Router();
 $router->signApi('GET /products', function(){
     $products = new App\Model\Products();
     $allProducts = $products->fetchAll();
+    dd($allProducts);
     return ([
         'ok' => true,
         'products' => $allProducts
@@ -62,7 +63,7 @@ $router->signApi('PUT /products/{id}', function($id){
 
     // dd($data); // kiểm tra dữ liệu
 
-    if (!is_array($data) || empty($data)) {
+    if (!is_array($data) || $data === []) {
         return [
             'ok' => false,
             'message' => 'Invalid or empty input data'

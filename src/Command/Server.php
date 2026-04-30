@@ -25,7 +25,8 @@ class Server
                 exit(1);
             }
             $opts = [];
-            for ($i = 2; $i < count($argv); $i++) {
+            $counter = count($argv);
+            for ($i = 2; $i < $counter; $i++) {
                 $arg = $argv[$i];
                 if (str_starts_with($arg, '--')) {
                     $parts = explode('=', substr($arg, 2), 2);
@@ -45,7 +46,7 @@ class Server
 
             $appUrl = null;
             if (function_exists('env')) {
-                $appUrl = env('APP_URL', null);
+                $appUrl = env('APP_URL');
             } elseif (getenv('APP_URL')) {
                 $appUrl = getenv('APP_URL');
             }
@@ -57,7 +58,7 @@ class Server
             if ($appUrl) {
                 $parsed = parse_url($appUrl);
                 if (isset($parsed['host'])) {
-                    $bind = $bind ?? $parsed['host'];
+                    $bind ??= $parsed['host'];
                 }
                 if (isset($parsed['port'])) {
                     $port = $port ?: $parsed['port'];
@@ -75,17 +76,23 @@ class Server
                 if (stripos(PHP_OS, 'WIN') === 0) {
                     @exec('ipconfig', $out);
                     foreach ($out as $line) {
-                        if (preg_match('/IPv4[^\:]*:\s*([\d\.]+)/i', $line, $m)) return $m[1];
+                        if (preg_match('/IPv4[^\:]*:\s*([\d\.]+)/i', $line, $m)) {
+                            return $m[1];
+                        }
                     }
                 } else {
                     @exec('hostname -I', $out);
-                    if (!empty($out[0])) {
+                    if (isset($out[0]) && ($out[0] !== '' && $out[0] !== '0')) {
                         $ips = preg_split('/\s+/', trim($out[0]));
-                        foreach ($ips as $i) if (!str_starts_with($i, '127.')) return $i;
+                        foreach ($ips as $i) if (!str_starts_with($i, '127.')) {
+                            return $i;
+                        }
                     }
                     @exec("ip -4 addr show scope global", $out);
                     foreach ($out as $line) {
-                        if (preg_match('/inet\s+([\d\.]+)/', $line, $m)) return $m[1];
+                        if (preg_match('/inet\s+([\d\.]+)/', $line, $m)) {
+                            return $m[1];
+                        }
                     }
                 }
                 return '0.0.0.0';

@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace DFrame\Utils\Sorting;
 
 use function count;
@@ -16,7 +19,9 @@ class TimSort
 	public static function sort(array $arr): array
 	{
 		$n = count($arr);
-		if ($n <= 1) return $arr;
+		if ($n <= 1) {
+            return $arr;
+        }
 
 		$minRun = self::minRunLength($n);
 
@@ -53,7 +58,8 @@ class TimSort
 		// Merge runs pairwise until single run remains (simple merging strategy)
 		while (count($runs) > 1) {
 			$newRuns = [];
-			for ($r = 0; $r < count($runs); $r += 2) {
+            $counter = count($runs);
+			for ($r = 0; $r < $counter; $r += 2) {
 				if ($r + 1 < count($runs)) {
 					$a = $runs[$r];
 					$b = $runs[$r + 1];
@@ -102,11 +108,7 @@ class TimSort
 		$i = 0; $j = 0;
 		$ln = count($leftArray); $rn = count($rightArray);
 		while ($i < $ln && $j < $rn) {
-			if ($leftArray[$i] <= $rightArray[$j]) {
-				$result[] = $leftArray[$i++];
-			} else {
-				$result[] = $rightArray[$j++];
-			}
+			$result[] = $leftArray[$i] <= $rightArray[$j] ? $leftArray[$i++] : $rightArray[$j++];
 		}
 		while ($i < $ln) $result[] = $leftArray[$i++];
 		while ($j < $rn) $result[] = $rightArray[$j++];

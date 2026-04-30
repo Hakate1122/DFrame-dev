@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DFrame\Utils\Sorting;
 
 /**
@@ -23,7 +25,7 @@ class PancakeSort{
 
             // Move the maximum element to end of current array if it's not
             // already at the end
-            if ($max_index != $curr_size - 1) {
+            if ($max_index !== $curr_size - 1) {
                 // To move at the end, first move maximum number to beginning
                 self::flip($arr, $max_index);
 

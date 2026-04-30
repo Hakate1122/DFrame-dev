@@ -30,7 +30,6 @@ class Middleware
     /**
      * Get a middleware by name
      * @param string $name Middleware name
-     * @return callable|null
      */
     public static function get(string $name): ?callable
     {
@@ -40,7 +39,6 @@ class Middleware
     /**
      * Check if middleware exists
      * @param string $name Middleware name
-     * @return bool
      */
     public static function exists(string $name): bool
     {

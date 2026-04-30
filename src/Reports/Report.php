@@ -38,12 +38,11 @@ final class Report
 
     /**
      * Throw a report
-     * 
+     *
      * @param string $type The type of report (e.g., 'error', 'warning', 'info')
      * @param string $message The report message
      * @param string $file The file where the report is generated
      * @param int $line The line number where the report is generated
-     * @return void 
      */
     public static function throw(string $type, string $message, string $file = __FILE__, int $line = __LINE__): void
     {

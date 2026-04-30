@@ -14,7 +14,7 @@ trait Authenticatable
      *
      * @var string|null
      */
-    protected $authenticated_at = null;
+    protected $authenticated_at;
 
     /**
      * Mark the object as authenticated.

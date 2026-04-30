@@ -16,7 +16,9 @@ namespace DFrame\Utils\Sorting;
 class BeadSort{
      public static function sort(array $arr): array
     {
-        if (empty($arr)) return $arr;
+        if ($arr === []) {
+            return $arr;
+        }
 
         $max = max($arr);
         $n = count($arr);

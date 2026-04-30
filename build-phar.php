@@ -3,7 +3,7 @@
 /** Simple PHAR builder CLI */
 class BuildPhar
 {
-    public const VERSION = '0.0.2-dev';
+    public const VERSION = 'v2026.5.1-dev';
 }
 
 if (PHP_SAPI !== 'cli') {
@@ -35,6 +35,7 @@ function show_helper()
     echo "  --stub-file=FILE          Path to stub file to use\n";
     echo "  --stub-string=STRING      Provide stub contents directly\n";
     echo "  --root-extras=FILES       Comma-separated root files to include (default: .env,cacert.pem,composer.json,composer.lock)\n";
+    echo "  --ignore=PATHS            Comma-separated file/dir patterns to exclude from build\n";
     echo "  --force                   Overwrite existing output file without prompt\n";
     echo "\n";
     echo "Extract options:\n";
@@ -123,9 +124,10 @@ function normalize_rel($path)
     return str_replace('\\', '/', ltrim($path, '/\\'));
 }
 
-function collect_files(array $includes, $baseDir)
+function collect_files(array $includes, $baseDir, array $ignores = [])
 {
     $collected = [];
+    $normalizedIgnores = array_map('normalize_rel', $ignores);
     foreach ($includes as $inc) {
         $inc = trim($inc);
         if ($inc === '') {
@@ -134,6 +136,19 @@ function collect_files(array $includes, $baseDir)
         $full = $baseDir . DIRECTORY_SEPARATOR . $inc;
         if (is_file($full)) {
             $rel = normalize_rel(substr($full, strlen($baseDir) + 1));
+            $skip = false;
+            foreach ($normalizedIgnores as $ig) {
+                if ($ig === '') {
+                    continue;
+                }
+                if (strpos($rel, rtrim($ig, '/')) === 0) {
+                    $skip = true;
+                    break;
+                }
+            }
+            if ($skip) {
+                continue;
+            }
             $collected[$full] = $rel;
             continue;
         }
@@ -143,6 +158,19 @@ function collect_files(array $includes, $baseDir)
                 if ($file->isFile()) {
                     $path = $file->getPathname();
                     $rel = normalize_rel(substr($path, strlen($baseDir) + 1));
+                    $skip = false;
+                    foreach ($normalizedIgnores as $ig) {
+                        if ($ig === '') {
+                            continue;
+                        }
+                        if (strpos($rel, rtrim($ig, '/')) === 0) {
+                            $skip = true;
+                            break;
+                        }
+                    }
+                    if ($skip) {
+                        continue;
+                    }
                     $collected[$path] = $rel;
                 }
             }
@@ -225,7 +253,7 @@ function build_phar(array $opts)
         $includes = array_map('trim', explode(',', $line));
     }
 
-    $files = collect_files($includes, $baseDir);
+    $files = collect_files($includes, $baseDir, $opts['ignore'] ?? []);
     $rootExtras = $opts['root-extras'] ?? [];
     if (empty($rootExtras)) {
         echo "No root files specified. Please enter comma-separated root files to include (e.g. .env,cacert.pem,composer.json): ";
@@ -392,6 +420,9 @@ if ($cmd === 'build') {
             // Includes
             if (!empty($jsonConfig['path']) && is_array($jsonConfig['path'])) {
                 $opts['include'] = $jsonConfig['path'];
+            }
+            if (!empty($jsonConfig['ignore']) && is_array($jsonConfig['ignore'])) {
+                $opts['ignore'] = $jsonConfig['ignore'];
             }
             // Root files
             if (!empty($jsonConfig['root']) && is_array($jsonConfig['root'])) {

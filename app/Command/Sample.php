@@ -150,19 +150,12 @@ class Sample
         echo "Attempting to connect to {$dbType} database at {$host}:{$port} with user '{$user}'...\n";
 
         try {
-            switch (strtolower($dbType)) {
-                case 'mysql':
-                    $dsn = "mysql:host={$host};port={$port}";
-                    break;
-                case 'postgres':
-                    $dsn = "pgsql:host={$host};port={$port}";
-                    break;
-                case 'sqlite':
-                    $dsn = "sqlite:{$host}";
-                    break;
-                default:
-                    throw new \Exception("Unsupported database type.");
-            }
+            $dsn = match (strtolower($dbType)) {
+                'mysql' => "mysql:host={$host};port={$port}",
+                'postgres' => "pgsql:host={$host};port={$port}",
+                'sqlite' => "sqlite:{$host}",
+                default => throw new \Exception("Unsupported database type."),
+            };
 
             $pdo = new \PDO($dsn, $user, $pass);
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);

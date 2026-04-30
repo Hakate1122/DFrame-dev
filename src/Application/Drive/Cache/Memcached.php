@@ -29,7 +29,7 @@ class Memcached
      */
     private function connect(): \Memcached
     {
-        if ($this->client !== null) {
+        if ($this->client instanceof \Memcached) {
             return $this->client;
         }
 
@@ -38,7 +38,7 @@ class Memcached
 
         // Kiểm tra kết nối thật
         $check = $mem->getVersion();
-        if (!is_array($check) || empty($check)) {
+        if (!is_array($check) || $check === []) {
             throw new \RuntimeException("Cannot connect to Memcached at {$this->host}:{$this->port}");
         }
 

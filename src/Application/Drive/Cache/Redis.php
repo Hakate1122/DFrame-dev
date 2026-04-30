@@ -39,7 +39,7 @@ class Redis
     /** Lazy connection */
     private function connect(): void
     {
-        if ($this->client !== null) {
+        if ($this->client instanceof \Redis) {
             return;
         }
 
@@ -54,7 +54,7 @@ class Redis
                 echo "[Redis] Connected to {$this->host}:{$this->port}\n";
             }
         } catch (\Throwable $e) {
-            throw new \RuntimeException("Redis connection failed: " . $e->getMessage());
+            throw new \RuntimeException("Redis connection failed: " . $e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -88,7 +88,7 @@ class Redis
     {
         $this->connect();
 
-        $ttl = $ttl ?? $this->defaultTTL;
+        $ttl ??= $this->defaultTTL;
         $key = $this->key($key);
         $data = $this->encode($value);
 
@@ -102,7 +102,7 @@ class Redis
             }
 
             return $result;
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             return false;
         }
     }

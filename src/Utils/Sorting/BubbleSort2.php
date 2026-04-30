@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DFrame\Utils\Sorting;
 
 use function sizeof;
@@ -28,7 +30,7 @@ class BubbleSort2
         do {
             $swapped = false;
 
-            for ($i = 0, $count = sizeof($input) - 1; $i < $count; $i++) {
+            for ($i = 0, $count = count($input) - 1; $i < $count; $i++) {
                 if ($input[$i + 1] < $input[$i]) {
                     [$input[$i + 1], $input[$i]] = [$input[$i], $input[$i + 1]];
                     $swapped = true;

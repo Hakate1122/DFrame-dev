@@ -30,7 +30,9 @@ class DCloudController extends Controller
         $list = [];
         $items = scandir($path);
         foreach ($items as $it) {
-            if ($it === '.' || $it === '..') continue;
+            if ($it === '.' || $it === '..') {
+                continue;
+            }
             $full = $path . '/' . $it;
             $rel = ($dir !== '' ? ($dir . '/') : '') . $it;
             $list[] = [
@@ -90,14 +92,10 @@ class DCloudController extends Controller
             return;
         }
 
-        if (is_dir($full)) {
-            $ok = @rmdir($full);
-        } else {
-            $ok = @unlink($full);
-        }
+        $ok = is_dir($full) ? @rmdir($full) : @unlink($full);
 
         header('Content-Type: application/json');
-        echo json_encode(['success' => (bool)$ok]);
+        echo json_encode(['success' => $ok]);
     }
 
     public function rename()
@@ -123,6 +121,6 @@ class DCloudController extends Controller
 
         $ok = @rename($oldp, $newp);
         header('Content-Type: application/json');
-        echo json_encode(['success' => (bool)$ok]);
+        echo json_encode(['success' => $ok]);
     }
 }

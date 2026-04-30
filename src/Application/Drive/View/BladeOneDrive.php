@@ -24,10 +24,8 @@ class BladeOneDrive implements ViewEngine
         }
 
         if ($cachePath) {
-            if (!is_dir($cachePath)) {
-                if (false === @mkdir($cachePath, 0777, true)) {
-                    throw new \Exception("BladeOneDrive: Unable to create cache directory: $cachePath");
-                }
+            if (!is_dir($cachePath) && false === @mkdir($cachePath, 0777, true)) {
+                throw new \Exception("BladeOneDrive: Unable to create cache directory: $cachePath");
             }
             if (!is_writable($cachePath)) {
                 @chmod($cachePath, 0777);

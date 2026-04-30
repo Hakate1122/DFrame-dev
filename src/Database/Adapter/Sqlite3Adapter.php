@@ -48,7 +48,7 @@ class Sqlite3Adapter implements AdapterInterface
 				// SQLite3 bind indexes are 1-based
 				$stmt->bindValue($key + 1, $value, $this->getSqlite3Type($value));
 			} else {
-				$param = (strpos($key, ':') === 0) ? $key : ':' . $key;
+				$param = (str_starts_with($key, ':')) ? $key : ':' . $key;
 				$stmt->bindValue($param, $value, $this->getSqlite3Type($value));
 			}
 		}
@@ -58,33 +58,27 @@ class Sqlite3Adapter implements AdapterInterface
 
 	// Helper to map PHP value types to SQLITE3_* constants
 	protected function getSqlite3Type($value)
-	{
-		if (is_int($value)) {
-			return \SQLITE3_INTEGER;
-		} elseif (is_float($value)) {
-			return \SQLITE3_FLOAT;
-		} elseif ($value === null) {
-			return \SQLITE3_NULL;
-		} elseif (is_string($value)) {
-			return \SQLITE3_TEXT;
-		} else {
-			return \SQLITE3_TEXT;
-		}
-	}
+    {
+        if (is_int($value)) {
+            return \SQLITE3_INTEGER;
+        }
+        if (is_float($value)) {
+            return \SQLITE3_FLOAT;
+        }
+        if ($value === null) {
+            return \SQLITE3_NULL;
+        }
+        return \SQLITE3_TEXT;
+    }
 
 	public function fetch($result, $type = 'assoc')
 	{
-		switch ($type) {
-			case 'num':
-				return $result->fetchArray(SQLITE3_NUM);
-			case 'both':
-				return $result->fetchArray(SQLITE3_BOTH);
-			case 'object':
-				return $result->fetchObject();
-			case 'assoc':
-			default:
-				return $result->fetchArray(SQLITE3_ASSOC);
-		}
+		return match ($type) {
+            'num' => $result->fetchArray(SQLITE3_NUM),
+            'both' => $result->fetchArray(SQLITE3_BOTH),
+            'object' => $result->fetchObject(),
+            default => $result->fetchArray(SQLITE3_ASSOC),
+        };
 	}
 
 	public function fetchAll($result, $type = 'assoc')

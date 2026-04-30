@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use DFrame\Application\View;
@@ -15,7 +18,7 @@ class Controller
      */
     public function render(string $view, array $data = [])
     {
-        $viewObj = new View(null);
+        $viewObj = new View();
         echo $viewObj->view($view, $data);
     }
 }

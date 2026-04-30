@@ -1,10 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 $router = new DFrame\Application\Router();
 
-$router->signApi('GET /', function () {
-    return "Hello, World!";
-})->name('api.home');
+$router->signApi('GET /', fn() => "Hello, World!")->name('api.home');
 
 // Demo Send Mail
 $router->signApi('GET /demo/mail', function () {
@@ -38,7 +38,7 @@ $router->signApi('GET /demo/cache', function () {
 
     // store complex value
     $cache->set('user:1', ['id' => 1, 'name' => 'Dat']);
-    $user = $cache->get('user:1', null);
+    $user = $cache->get('user:1');
 
     // check exists
     $hasUser = $cache->has('user:1');

@@ -47,8 +47,12 @@ class Mail
         $this->from       = env('MAIL_FROM_ADDRESS') ?? $config['from'] ?? $this->username;
         $this->from_name  = env('MAIL_FROM_NAME') ?? $config['fromname'] ?? "No-Reply";
 
-        if (isset($config['host'])) $this->smtp_host = $config['host'];
-        if (isset($config['port'])) $this->smtp_port = $config['port'];
+        if (isset($config['host'])) {
+            $this->smtp_host = $config['host'];
+        }
+        if (isset($config['port'])) {
+            $this->smtp_port = $config['port'];
+        }
     }
 
     /**
@@ -85,7 +89,9 @@ class Mail
     private function getLine($fp): string
     {
         $line = fgets($fp, 515);
-        if ($line === false) throw new \RuntimeException("SMTP read failed");
+        if ($line === false) {
+            throw new \RuntimeException("SMTP read failed");
+        }
         return $line;
     }
 
@@ -97,7 +103,9 @@ class Mail
     private function getMultiline($fp): void
     {
         while (($line = fgets($fp, 515)) !== false) {
-            if (substr($line, 3, 1) !== '-') break;
+            if (substr($line, 3, 1) !== '-') {
+                break;
+            }
         }
     }
 
@@ -111,7 +119,9 @@ class Mail
      */
     public function to(string $email): self
     {
-        if (filter_var($email, FILTER_VALIDATE_EMAIL)) $this->to[] = $email;
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->to[] = $email;
+        }
         return $this;
     }
 
@@ -123,7 +133,9 @@ class Mail
      */
     public function cc(string $email): self
     {
-        if (filter_var($email, FILTER_VALIDATE_EMAIL)) $this->cc[] = $email;
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->cc[] = $email;
+        }
         return $this;
     }
 
@@ -135,7 +147,9 @@ class Mail
      */
     public function bcc(string $email): self
     {
-        if (filter_var($email, FILTER_VALIDATE_EMAIL)) $this->bcc[] = $email;
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->bcc[] = $email;
+        }
         return $this;
     }
 
@@ -280,7 +294,7 @@ class Mail
         $this->sendLine($fp, base64_encode($this->password));
         $resp = $this->getLine($fp);
         
-        if (strpos($resp, '235') === false) {
+        if (!str_contains($resp, '235')) {
              throw new \RuntimeException("SMTP Auth Failed. Check App Password.");
         }
 
@@ -291,7 +305,9 @@ class Mail
 
         // RCPT TO (Send to everyone, but BCC is hidden in header later)
         $allRecipients = array_merge($this->to, $this->cc, $this->bcc);
-        if (empty($allRecipients)) throw new \RuntimeException("No recipients specified.");
+        if ($allRecipients === []) {
+            throw new \RuntimeException("No recipients specified.");
+        }
 
         foreach ($allRecipients as $rcpt) {
             $this->sendLine($fp, "RCPT TO:<$rcpt>");
@@ -312,8 +328,12 @@ class Mail
         $headers .= "Subject: {$this->subject}\r\n";
         
         // Visible Recipients in Header
-        if (!empty($this->to)) $headers .= "To: " . implode(", ", $this->to) . "\r\n";
-        if (!empty($this->cc)) $headers .= "Cc: " . implode(", ", $this->cc) . "\r\n";
+        if (!empty($this->to)) {
+            $headers .= "To: " . implode(", ", $this->to) . "\r\n";
+        }
+        if (!empty($this->cc)) {
+            $headers .= "Cc: " . implode(", ", $this->cc) . "\r\n";
+        }
         // BCC header is intentionally OMITTED for privacy
 
         // Content-Type for Mixed (Body + Attachments)

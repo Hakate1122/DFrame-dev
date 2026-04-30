@@ -33,7 +33,7 @@ class MysqlBuilder extends BaseBuilder implements BuilderInterface {
         }
         if ($op === 'update') {
             $fields = array_keys($this->pendingData);
-            $set = implode(', ', array_map(function($f) { return "`$f` = ?"; }, $fields));
+            $set = implode(', ', array_map(fn($f) => "`$f` = ?", $fields));
             $sql = "UPDATE `{$this->table}` SET $set";
             if ($this->wheres) {
                 $whereSql = '';
@@ -133,7 +133,6 @@ class MysqlBuilder extends BaseBuilder implements BuilderInterface {
     /**
      * Soft delete by ID (internal method)
      * @param int|string $id
-     * @return int
      */
     protected function softDeleteById($id): int {
         if (!$this->tableHasDeletedAt()) {

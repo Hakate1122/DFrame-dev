@@ -60,11 +60,7 @@ final class Session
     {
         self::start();
 
-        if (isset($_SESSION[self::FLASH_KEY]['old'][$key])) {
-            return $_SESSION[self::FLASH_KEY]['old'][$key];
-        }
-
-        return $default;
+        return $_SESSION[self::FLASH_KEY]['old'][$key] ?? $default;
     }
 
     private static function ageFlash(): void
@@ -121,11 +117,7 @@ final class Session
             setcookie(
                 session_name(),
                 '',
-                time() - 42000,
-                $params['path'],
-                $params['domain'],
-                $params['secure'],
-                $params['httponly']
+                ['expires' => time() - 42000, 'path' => $params['path'], 'domain' => $params['domain'], 'secure' => $params['secure'], 'httponly' => $params['httponly']]
             );
         }
 

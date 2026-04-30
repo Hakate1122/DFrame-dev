@@ -26,9 +26,13 @@ class SitemapController
         $paths = [];
 
         foreach ($routesInfo['static'] as $method => $map) {
-            if ($method !== 'GET') continue;
+            if ($method !== 'GET') {
+                continue;
+            }
             foreach ($map as $path => $meta) {
-                if (strpos($path, '{') !== false) continue;
+                if (str_contains($path, '{')) {
+                    continue;
+                }
                 $paths[$path] = [
                     'loc' => rtrim(getBaseUrl(), '/') . $path,
                     'lastmod' => date('c'),
@@ -38,10 +42,14 @@ class SitemapController
             }
         }
 
-        foreach ($routesInfo['names'] as $name => $info) {
-            if (!empty($info['api'])) continue;
+        foreach ($routesInfo['names'] as $info) {
+            if (!empty($info['api'])) {
+                continue;
+            }
             $p = $info['path'];
-            if (strpos($p, '{') !== false) continue;
+            if (str_contains($p, '{')) {
+                continue;
+            }
             $loc = rtrim(getBaseUrl(), '/') . $p;
             $paths[$p] = [
                 'loc' => $loc,
@@ -53,7 +61,7 @@ class SitemapController
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL;
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . PHP_EOL;
-        foreach ($paths as $p => $info) {
+        foreach ($paths as $info) {
             $xml .= "  <url>\n";
             $xml .= "    <loc>" . htmlspecialchars($info['loc'], ENT_XML1 | ENT_COMPAT, 'UTF-8') . "</loc>\n";
             $xml .= "    <lastmod>{$info['lastmod']}</lastmod>\n";
@@ -61,7 +69,6 @@ class SitemapController
             $xml .= "    <priority>{$info['priority']}</priority>\n";
             $xml .= "  </url>\n";
         }
-        $xml .= '</urlset>' . PHP_EOL;
-        return $xml;
+        return $xml . ('</urlset>' . PHP_EOL);
     }
 }

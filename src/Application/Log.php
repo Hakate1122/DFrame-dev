@@ -32,7 +32,6 @@ class Log implements LoggerInterface
      * @param string $level Log level (e.g., emergency, alert, critical, error, warning, notice, info, debug)
      * @param string $message Log message
      * @param array $context Additional context data
-     * @return void
      */
     public function log($level, $message, array $context = []): void
     {
@@ -40,7 +39,7 @@ class Log implements LoggerInterface
             return;
         }
         $level = env('LOG_LEVEL', $level);
-        $contextString = !empty($context) ? ' ' . json_encode($context) : '';
+        $contextString = $context === [] ? '' : ' ' . json_encode($context);
 
         $now = (new DateTimeImmutable())->format('Y-m-d H:i:s');
         $logEntry = sprintf(
@@ -97,13 +96,11 @@ class Log implements LoggerInterface
     }
 
     /* ----- Fast Log Method ----- */
-
     /**
      * Fast log method for quick logging without instantiating the class. Not implementing context.
-     * 
+     *
      * @param string $logFilePath Path to the log file
      * @param string $message Log message
-     * @return void
      */
     public static function fast(string $logFilePath, string $message): void
     {

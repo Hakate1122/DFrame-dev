@@ -58,7 +58,6 @@ class DB extends DatabaseManager
     /**
      * Check if this class uses SoftDelete trait
      * Allows child models extending DB to automatically detect SoftDelete trait
-     * @return bool
      */
     protected function usesSoftDelete(): bool
     {
@@ -91,7 +90,6 @@ class DB extends DatabaseManager
 
     /**
      * Set the table for the query.
-     * @param string $table
      * @return static
      */
     public static function table(string $table): self

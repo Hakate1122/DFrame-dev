@@ -1,9 +1,9 @@
 <?php
+declare(strict_types=1);
+
 if (!function_exists('cli_echo')) {
     /**
      * Echo a message to the CLI.
-     * @param string $message
-     * @return void
      */
     function cli_echo(string $message): void
     {

@@ -2,13 +2,10 @@
 if (!function_exists('getErrorPage')) {
   /**
    * Get error page content
-   * @param int $code
-   * @param string $message
-   * @return string
    */
   function getErrorPage(int $code, string $message): string
   {
-    $html = <<<HTML
+    return <<<HTML
   <!doctype html>
   <html lang="vi">
   <head>
@@ -71,14 +68,12 @@ if (!function_exists('getErrorPage')) {
   </body>
   </html>
   HTML;
-    return $html;
   }
 }
 
 if (!function_exists('get404pages')) {
   /**
    * Get 404 page content
-   * @return bool|string
    */
   function get404pages($message = ''): string
   {
@@ -89,7 +84,6 @@ if (!function_exists('get404pages')) {
 if (!function_exists('get403pages')) {
   /**
    * Get 403 page content
-   * @return bool|string
    */
   function get403pages(string $message = ''): string
   {
@@ -111,7 +105,6 @@ if (!function_exists('get500pages')) {
 if (!function_exists('get503pages')) {
   /**
    * Get 503 page content
-   * @return bool|string
    */
   function get503pages(string $message = ''): string
   {

@@ -7,23 +7,18 @@ use function \is_array;
 use function \count;
 
 abstract class BaseBuilder implements BuilderInterface {
-    protected $adapter;
     protected $table;
     protected $columns = ['*'];
     protected $wheres = []; // mỗi entry: [column, operator, value, boolean('AND'|'OR')]
     protected $bindings = [];
-    protected $operation = null; // select|insert|update|delete|softDelete
+    protected $operation; // select|insert|update|delete|softDelete
     protected $pendingData = [];
 
     protected ?bool $tableHasDeletedAtCache = null;
 
-    protected bool $useSoftDelete = false;
-
-    public function __construct($adapter, string $table, bool $useSoftDelete = false)
+    public function __construct(protected $adapter, string $table, protected bool $useSoftDelete = false)
     {
-        $this->adapter = $adapter;
         $this->table = $table;
-        $this->useSoftDelete = $useSoftDelete;
     }
 
     public function table(string $table): BuilderInterface {
@@ -104,7 +99,7 @@ abstract class BaseBuilder implements BuilderInterface {
             return $this->tableHasDeletedAtCache;
         }
         try {
-            $adapterClass = get_class($this->adapter);
+            $adapterClass = $this->adapter::class;
             if (stripos($adapterClass, 'sqlite') !== false) {
                 $sql = "PRAGMA table_info(\"{$this->table}\")";
                 $res = $this->adapter->query($sql);
@@ -125,7 +120,7 @@ abstract class BaseBuilder implements BuilderInterface {
                     return true;
                 }
             }
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             $this->tableHasDeletedAtCache = false;
             return false;
         }

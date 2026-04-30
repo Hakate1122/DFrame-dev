@@ -32,7 +32,7 @@ class Core
         if (!is_array($lines) || count($lines) === 0) {
             return null;
         }
-        $line = trim((string) $lines[0]);
+        $line = trim($lines[0]);
         return $line !== '' ? $line : null;
     }
 
@@ -59,8 +59,7 @@ class Core
         }
 
         if (preg_match('/^https?:\\/\\/(.+)$/i', $remote)) {
-            $remote = preg_replace('/\\.git$/i', '', $remote);
-            return $remote;
+            return preg_replace('/\\.git$/i', '', $remote);
         }
 
         return preg_replace('/\\.git$/i', '', $remote);
@@ -95,7 +94,10 @@ class Core
         }
         foreach (preg_split('/\R/', $content) as $line) {
             $line = trim($line);
-            if ($line === '' || str_starts_with($line, '#')) {
+            if ($line === '') {
+                continue;
+            }
+            if (str_starts_with($line, '#')) {
                 continue;
             }
             if (str_starts_with($line, 'PRETTY_NAME=')) {
@@ -128,13 +130,16 @@ class Core
 
         foreach (preg_split('/\R/', $out) as $line) {
             $line = trim($line);
-            if ($line === '' || stripos($line, $valueName) === false) {
+            if ($line === '') {
+                continue;
+            }
+            if (stripos($line, $valueName) === false) {
                 continue;
             }
             
             $parts = preg_split('/\s{2,}/', $line);
             if (is_array($parts) && count($parts) >= 3) {
-                $value = trim((string) end($parts));
+                $value = trim(end($parts));
                 if (preg_match('/^0x[0-9a-f]+$/i', $value)) {
                     $value = (string) hexdec(substr($value, 2));
                 }
@@ -245,10 +250,8 @@ class Core
             }
             echo "Usage: php dli <command> [options]\n\n";
 
-            if (!App::isRunningFromPhar()) {
-                if ($scriptName !== 'dli' && $scriptName !== 'dli.php') {
-                    echo cli_gray("Don't change name, dli is fast too!\n\n");
-                }
+            if (!App::isRunningFromPhar() && ($scriptName !== 'dli' && $scriptName !== 'dli.php')) {
+                echo cli_gray("Don't change name, dli is fast too!\n\n");
             }
 
             if (App::isRunningFromPhar()) {
@@ -362,7 +365,7 @@ class Core
                 echo $label . ": " . cli_cyan($origin) . "\n";
             }
             if ($branch || $commit) {
-                $ref = trim(($branch ? $branch : '') . ($commit ? (' @ ' . $commit) : ''));
+                $ref = trim(($branch ?: '') . ($commit ? (' @ ' . $commit) : ''));
                 if ($ref !== '') {
                     echo "Git: " . cli_yellow($ref) . "\n";
                 }

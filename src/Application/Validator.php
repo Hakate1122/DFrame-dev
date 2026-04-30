@@ -18,7 +18,6 @@ class Validator
 
     /**
      * The first validation error encountered (preserve order)
-     * @var string|null
      */
     private ?string $firstError = null;
 
@@ -56,7 +55,9 @@ class Validator
 
     public static function boolean($value): bool
     {
-        if (is_bool($value)) return true;
+        if (is_bool($value)) {
+            return true;
+        }
         return in_array($value, ['true', 'false', '1', '0', 1, 0], true);
     }
 
@@ -102,7 +103,9 @@ class Validator
 
     public static function isImage($value): bool
     {
-        if (!self::isFile($value)) return false;
+        if (!self::isFile($value)) {
+            return false;
+        }
 
         $mime = mime_content_type($value['tmp_name']);
         return in_array($mime, [
@@ -117,7 +120,9 @@ class Validator
 
     public static function mimes($value, string $param): bool
     {
-        if (!self::isFile($value)) return false;
+        if (!self::isFile($value)) {
+            return false;
+        }
 
         $allowed = explode(',', strtolower($param));
         $ext = strtolower(pathinfo($value['name'], PATHINFO_EXTENSION));
@@ -127,7 +132,9 @@ class Validator
 
     public static function mimeTypes($value, string $param): bool
     {
-        if (!self::isFile($value)) return false;
+        if (!self::isFile($value)) {
+            return false;
+        }
 
         $allowed = explode(',', strtolower($param));
         $mime = strtolower(mime_content_type($value['tmp_name']));
@@ -137,14 +144,18 @@ class Validator
 
     public static function maxFile($value, int $maxKB): bool
     {
-        if (!self::isFile($value)) return false;
+        if (!self::isFile($value)) {
+            return false;
+        }
 
         return ($value['size'] / 1024) <= $maxKB;
     }
 
     public static function betweenFile($value, string $param): bool
     {
-        if (!self::isFile($value)) return false;
+        if (!self::isFile($value)) {
+            return false;
+        }
 
         [$min, $max] = array_map('intval', explode(',', $param));
         $sizeKB = $value['size'] / 1024;
@@ -168,7 +179,7 @@ class Validator
                 $param = null;
                 $ruleName = $rule;
 
-                if (strpos($rule, ':') !== false) {
+                if (str_contains($rule, ':')) {
                     [$ruleName, $param] = explode(':', $rule, 2);
                 }
 
@@ -225,7 +236,7 @@ class Validator
 
     public function fails(): bool
     {
-        return !empty($this->errors);
+        return $this->errors !== [];
     }
 
     public function errors(): array

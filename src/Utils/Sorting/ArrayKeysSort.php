@@ -30,7 +30,7 @@ class ArrayKeysSort
         string $order = self::ORDER_ASC,
         bool $isCaseSensitive = false
     ): array {
-        if (empty($collection) || empty($keys)) {
+        if ($collection === [] || $keys === []) {
             return $collection;
         }
 

@@ -73,6 +73,6 @@ class Hash
             throw new RuntimeException('Hash verification failed. Please check your credentials.');
         }
 
-        return (bool)$verified;
+        return $verified;
     }
 }

@@ -20,13 +20,9 @@ $router->sign('GET /test',function(){
     return "You searched for: " . $q;
 });
 
-$router->sign('GET /morse', function () {
-    return View::render('morse');
-})->name('morse');
+$router->sign('GET /morse', fn() => View::render('morse'))->name('morse');
 
-$router->sign('GET /ws/chat', function () {
-    return View::render('ws/chat');
-})->name('ws.chat');
+$router->sign('GET /ws/chat', fn() => View::render('ws/chat'))->name('ws.chat');
 
 $router->sign('GET|POST /mail', function () {
 
@@ -68,23 +64,16 @@ $router->sign('GET|POST /mail', function () {
             $log = new Log();
             $log->warning('No attachment uploaded or there was an upload error.', ['file_error' => $file['error'] ?? 'No file']);
         }
-
-        try {
-            $mail->to($to)
-                ->cc($cc)
-                ->bcc($bcc)
-                ->subject($subject)
-                ->html($body)
-                ->send();
-
-            if ($movedAttachmentPath && file_exists($movedAttachmentPath)) {
-                @unlink($movedAttachmentPath);
-            }
-
-            flash('success', 'Email sent successfully!');
-        } catch (\RuntimeException $e) {
-            throw $e;
+        $mail->to($to)
+            ->cc($cc)
+            ->bcc($bcc)
+            ->subject($subject)
+            ->html($body)
+            ->send();
+        if ($movedAttachmentPath && file_exists($movedAttachmentPath)) {
+            @unlink($movedAttachmentPath);
         }
+        flash('success', 'Email sent successfully!');
     }
     // css
     echo '<style>
@@ -128,7 +117,7 @@ $router->sign('GET|POST /mail', function () {
 </form>';
 })->name('mail');
 
-$router->sign('GET /sitemap.xml', [\App\Controller\SitemapController::class, 'index'])->name('sitemap');
+$router->sign('GET /site-map', [\App\Controller\SitemapController::class, 'index'])->name('sitemap');
 
 $router->scanControllerAttributes([
     App\Controller\UserController::class,

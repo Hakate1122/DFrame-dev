@@ -24,8 +24,9 @@ class RadixSort
         $maxDigitsCount = self::maxDigits($nums);
         for ($k = 0; $k < $maxDigitsCount; $k++) {
             $digitBucket = array_fill(0, 10, []);
+            $counter = count($nums);
 
-            for ($i = 0; $i < count($nums); $i++) {
+            for ($i = 0; $i < $counter; $i++) {
                 $digitBucket[self::getDigit($nums[$i], $k)][] = $nums[$i];
             }
 
@@ -43,7 +44,7 @@ class RadixSort
      */
     private static function getDigit(int $num, int $i): int
     {
-        return floor(abs($num) / pow(10, $i)) % 10;
+        return floor(abs($num) / 10 ** $i) % 10;
     }
 
     /**
@@ -53,7 +54,7 @@ class RadixSort
      */
     private static function digitsCount(int $num): int
     {
-        if ($num == 0) {
+        if ($num === 0) {
             return 1;
         }
         return floor(log10(abs($num))) + 1;
@@ -67,8 +68,9 @@ class RadixSort
     private static function maxDigits(array $arr): int
     {
         $maxDigits = 0;
+        $counter = count($arr);
 
-        for ($i = 0; $i < count($arr); $i++) {
+        for ($i = 0; $i < $counter; $i++) {
             $maxDigits = max($maxDigits, self::digitsCount($arr[$i]));
         }
 
@@ -83,8 +85,9 @@ class RadixSort
     private static function concat(array $array): array
     {
         $newArray = [];
+        $counter = count($array);
 
-        for ($i = 0; $i < count($array); $i++) {
+        for ($i = 0; $i < $counter; $i++) {
             for ($j = 0; $j < count($array[$i]); $j++) {
                 $newArray[] = $array[$i][$j];
             }

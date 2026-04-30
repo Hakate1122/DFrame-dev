@@ -17,7 +17,7 @@ trait Freeze
     /**
      * @var string|null
      */
-    protected $frozen_at = null;
+    protected $frozen_at;
 
     /**
      * Freeze the object.

@@ -22,7 +22,7 @@ class App
      * Version of DFrame Framework.
      * @var string
      */
-    public const VERSION = '2026.4.13-dev';
+    public const VERSION = '2026.5.1-dev';
     /**
      * Alias for version constant
      */
@@ -47,31 +47,21 @@ class App
 
     /**
      * Whether a .env file was successfully loaded
-     * @var bool
      */
     private static bool $envLoaded = false;
 
     /**
      * Flags to track if web routes have been loaded
-     * @var bool
      */
     private bool $webRoutesLoaded = false;
 
     /**
      * Flag to track if API routes have been loaded
-     * @var bool
      */
     private bool $apiRoutesLoaded = false;
 
     /**
-     * Flag to track if DLI routes have been loaded
-     * @var bool
-     */
-    private bool $dliRoutesLoaded = false;
-
-    /**
      * Optional stored path for DLI/command routes when set via `setUpDliRoutes()`.
-     * @var string|null
      */
     private ?string $dliRoutesPath = null;
 
@@ -98,7 +88,7 @@ class App
     /**
      * Initialize application configuration
      */
-    private static function initializeConfig(): void
+    private function initializeConfig(): void
     {
         self::$environment = env('APP_ENVIRONMENT', 'production');
         self::$debug = env('APP_DEBUG', 'false');
@@ -147,7 +137,7 @@ class App
     /**
      * Internal: apply security headers for web requests
      */
-    private static function applySecurityHeaders(): void
+    private function applySecurityHeaders(): void
     {
         if (headers_sent()) {
             return;
@@ -193,8 +183,8 @@ class App
             $endTime = null;
         } else {
             $maintenanceMode = env('MAINTENANCE_MODE', 'false');
-            $startTime = env('MAINTENANCE_START_TIME', null);
-            $endTime = env('MAINTENANCE_END_TIME', null);
+            $startTime = env('MAINTENANCE_START_TIME');
+            $endTime = env('MAINTENANCE_END_TIME');
         }
         $currentTime = time();
 
@@ -245,7 +235,7 @@ class App
      * @return void
      * @throws Exception
      */
-    private static function validateSessionConfig()
+    private function validateSessionConfig()
     {
         if (self::isProduction()) {
             ini_set('session.cookie_httponly', '1');
@@ -266,7 +256,7 @@ class App
      * @return void
      * @throws Exception
      */
-    private static function validateServiceConfig()
+    private function validateServiceConfig()
     {
         if (self::isRunningFromPhar() && self::$envLoaded === false) {
             return;
@@ -284,7 +274,7 @@ class App
      *
      * @return bool
      */
-    private static function checkRunningFromPhar()
+    private function checkRunningFromPhar()
     {
         $pharRunning = false;
 
@@ -301,7 +291,7 @@ class App
 
         if (!$pharRunning) {
             $selfPath = __FILE__;
-            if (is_string($selfPath) && str_starts_with($selfPath, 'phar://')) {
+            if (str_starts_with($selfPath, 'phar://')) {
                 $pharRunning = true;
             }
         }
@@ -310,10 +300,8 @@ class App
 
     /**
      * Validate application health
-     *
-     * @return array
      */
-    private static function healthCheck(): array
+    private function healthCheck(): array
     {
         $health = [
             'status' => 'healthy',
@@ -352,7 +340,7 @@ class App
      *
      * @return void
      */
-    private static function loadEnvironmentVariables()
+    private function loadEnvironmentVariables()
     {
         if (!class_exists(TinyEnv::class)) {
             throw new Exception('TinyEnv is not installed. Please run "composer require datahihi1/tiny-env"');
@@ -395,7 +383,7 @@ class App
      *
      * @return void
      */
-    private static function configureErrorReporting()
+    private function configureErrorReporting()
     {
         if (self::$environment === 'production') {
             error_reporting(0);
@@ -446,7 +434,7 @@ class App
      *
      * @return void
      */
-    private static function configureTimezone()
+    private function configureTimezone()
     {
         $timezone = env('APP_TIMEZONE', 'UTC');
         if (!in_array($timezone, \DateTimeZone::listIdentifiers())) {
@@ -483,8 +471,6 @@ class App
      * Include a web routes file and mark web routes as loaded.
      *
      * @param string|null $path Optional path to the web routes file. If not provided, defaults to ROOT_DIR . 'app/Router/web.php'.
-     *
-     * @return self
      */
     public function setUpWebRoutes(string $path): self
     {
@@ -521,7 +507,7 @@ class App
      */
     public function setSecurityHeaders(): self
     {
-        self::applySecurityHeaders();
+        $this->applySecurityHeaders();
         return $this;
     }
 
@@ -531,7 +517,6 @@ class App
     public function setUpDliRoutes(string $path): self
     {
         $this->dliRoutesPath = $path;
-        $this->dliRoutesLoaded = false;
         return $this;
     }
 
@@ -542,26 +527,26 @@ class App
     public function bootWeb()
     {
 
-        self::$runningFromPhar = self::checkRunningFromPhar();
+        self::$runningFromPhar = $this->checkRunningFromPhar();
 
         // Load environment files (.env, encrypted .env if present)
-        self::loadEnvironmentVariables();
+        $this->loadEnvironmentVariables();
 
         // Initialize configuration
-        self::initializeConfig();
+        $this->initializeConfig();
 
         // Configure error reporting
-        self::configureErrorReporting();
+        $this->configureErrorReporting();
 
         // Configure timezone
-        self::configureTimezone();
+        $this->configureTimezone();
 
         // Validate session configuration
-        self::validateSessionConfig();
+        $this->validateSessionConfig();
 
         // Validate required environment variables for services
-        self::validateServiceConfig();
-        $healthStatus = self::healthCheck();
+        $this->validateServiceConfig();
+        $healthStatus = $this->healthCheck();
         if ($healthStatus['status'] === 'unhealthy') {
             throw new Exception('Application health check failed.');
         }
@@ -592,27 +577,27 @@ class App
      */
     public function bootDli(array $argv)
     {
-        self::$runningFromPhar = self::checkRunningFromPhar();
+        self::$runningFromPhar = $this->checkRunningFromPhar();
 
         // Load environment files (.env, encrypted .env if present)
-        self::loadEnvironmentVariables();
+        $this->loadEnvironmentVariables();
 
         // Initialize configuration
-        self::initializeConfig();
+        $this->initializeConfig();
 
         // Configure error reporting
-        self::configureErrorReporting();
+        $this->configureErrorReporting();
 
         // Configure timezone
-        self::configureTimezone();
+        $this->configureTimezone();
 
         // Validate session configuration
-        self::validateSessionConfig();
+        $this->validateSessionConfig();
 
         // Validate required environment variables for services
-        self::validateServiceConfig();
+        $this->validateServiceConfig();
 
-        $healthStatus = self::healthCheck();
+        $healthStatus = $this->healthCheck();
         if ($healthStatus['status'] === 'unhealthy') {
             throw new Exception('Application health check failed.');
         }
@@ -623,11 +608,8 @@ class App
         // Load core commands
         (new Register())->core($cli);
 
-        if ($this->dliRoutesPath) {
-            if (file_exists($this->dliRoutesPath)) {
-                require_once $this->dliRoutesPath;
-                $this->dliRoutesLoaded = true;
-            }
+        if ($this->dliRoutesPath && file_exists($this->dliRoutesPath)) {
+            require_once $this->dliRoutesPath;
         }
 
         // Boot the CLI application

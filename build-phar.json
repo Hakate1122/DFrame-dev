@@ -11,6 +11,9 @@
         "src",
         "vendor"
     ],
+    "ignore":[
+        "public/source"
+    ],
     "root": [
         ".env",
         "cacert.pem",

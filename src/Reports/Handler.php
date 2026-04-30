@@ -11,8 +11,6 @@ use DFrame\Reports\Interface\RenderInterface;
  */
 class Handler implements HandlerInterface
 {
-    private bool $saveLog;
-    private string $logFile;
     private RenderInterface $renderer;
 
     /**
@@ -22,10 +20,8 @@ class Handler implements HandlerInterface
      * @param string $logFile The log file path
      * @param mixed $renderer The renderer instance to use
      */
-    public function __construct(bool $saveLog = false, string $logFile = 'errors.log', ?RenderInterface $renderer = null)
+    public function __construct(private bool $saveLog = false, private string $logFile = 'errors.log', ?RenderInterface $renderer = null)
     {
-        $this->saveLog = $saveLog;
-        $this->logFile = $logFile;
         $this->renderer = $renderer ?? $this->detectRenderer();
 
         set_error_handler([$this, 'handleError']);
@@ -42,8 +38,9 @@ class Handler implements HandlerInterface
 
     public function handleError(int $errno, string $errstr, string $errfile, int $errline): bool
     {
-        if (!(error_reporting() & $errno))
+        if ((error_reporting() & $errno) === 0) {
             return false;
+        }
 
         $type = match ($errno) {
             E_PARSE => 'parse',
@@ -75,7 +72,6 @@ class Handler implements HandlerInterface
 
     /**
      * Handle parse errors on shutdown
-     * @return void 
      */
     public function handleParse(): void
     {
@@ -113,17 +109,19 @@ class Handler implements HandlerInterface
 
     public function log(string $type, string $message, string $file, int $line, array $context = []): void
     {
-        if (!$this->saveLog)
+        if (!$this->saveLog) {
             return;
+        }
 
-        if (strpos($this->logFile, 'phar://') === 0) {
+        if (str_starts_with($this->logFile, 'phar://')) {
             $rel = preg_replace('#^phar://[^/]+/#', '', $this->logFile);
             $this->logFile = getcwd() . DIRECTORY_SEPARATOR . $rel;
         }
 
         $dir = dirname($this->logFile);
-        if (!is_dir($dir))
+        if (!is_dir($dir)) {
             mkdir($dir, 0755, true);
+        }
 
         $log = sprintf(
             "[%s] %s | %s:%d | %s | %s | %s | %s\n",

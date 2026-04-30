@@ -13,7 +13,7 @@ class Add
 		$value = str_replace(['-', '_'], ' ', $value);
 		$value = preg_replace('/\s+/', ' ', (string) $value);
 		$value = ucwords(strtolower((string) $value));
-		return str_replace(' ', '', (string) $value);
+		return str_replace(' ', '', $value);
 	}
 
 	/**
@@ -105,11 +105,11 @@ class Add
 				return;
 			}
 
-			$classPart = (string) array_pop($pathParts);
+			$classPart = array_pop($pathParts);
 			$dirParts = $pathParts;
 
 			$dirParts = array_values(array_filter(array_map(
-				static fn ($p) => preg_replace('/[^A-Za-z0-9_]/', '', (string) $p),
+				static fn ($p) => preg_replace('/[^A-Za-z0-9_]/', '', $p),
 				$dirParts
 			), static fn ($p) => $p !== ''));
 
@@ -123,23 +123,21 @@ class Add
 				$name .= 'Controller';
 			}
 
-			$dir = __DIR__ . '/../../app/Controller' . (!empty($dirParts) ? ('/' . implode('/', $dirParts)) : '');
-			if (!is_dir($dir)) {
-				if (!@mkdir($dir, 0755, true)) {
-					echo "Failed to create directory: $dir\n";
-					return;
-				}
-			}
+			$dir = __DIR__ . '/../../app/Controller' . ($dirParts === [] ? ('') : '/' . implode('/', $dirParts));
+			if (!is_dir($dir) && !@mkdir($dir, 0755, true)) {
+                echo "Failed to create directory: $dir\n";
+                return;
+            }
 
 			$file = $dir . '/' . $name . '.php';
-			$rel = 'app/Controller' . (!empty($dirParts) ? ('/' . implode('/', $dirParts)) : '') . "/$name.php";
+			$rel = 'app/Controller' . ($dirParts === [] ? ('') : '/' . implode('/', $dirParts)) . "/$name.php";
 			$existedBefore = file_exists($file);
 			if ($existedBefore && !self::wantsForce($opts)) {
 				echo "Controller already exists: $rel\n";
 				return;
 			}
 
-			$namespace = 'App\\Controller' . (!empty($dirParts) ? ('\\' . implode('\\', $dirParts)) : '');
+			$namespace = 'App\\Controller' . ($dirParts === [] ? ('') : '\\' . implode('\\', $dirParts));
 			$apiCrud = (bool)($opts['api-crud'] ?? false);
 			$crud = (bool)($opts['crud'] ?? false);
 
@@ -181,12 +179,10 @@ class Add
 			$selectable = self::parseModelSelectable($opts);
 
 			$dir = __DIR__ . '/../../app/Model';
-			if (!is_dir($dir)) {
-				if (!@mkdir($dir, 0755, true)) {
-					echo "Failed to create directory: $dir\n";
-					return;
-				}
-			}
+			if (!is_dir($dir) && !@mkdir($dir, 0755, true)) {
+                echo "Failed to create directory: $dir\n";
+                return;
+            }
 
 			$file = $dir . '/' . $className . '.php';
 			$existedBefore = file_exists($file);
@@ -225,12 +221,10 @@ class Add
 
 			$name = preg_replace('/[^A-Za-z0-9_\.\-]/', '', $name);
 			$dir = __DIR__ . '/../../resource/view';
-			if (!is_dir($dir)) {
-				if (!@mkdir($dir, 0755, true)) {
-					echo "Failed to create directory: $dir\n";
-					return;
-				}
-			}
+			if (!is_dir($dir) && !@mkdir($dir, 0755, true)) {
+                echo "Failed to create directory: $dir\n";
+                return;
+            }
 
 			$file = $dir . '/' . $name . '.php';
 			$existedBefore = file_exists($file);
@@ -267,12 +261,10 @@ class Add
 			}
 
 			$dir = __DIR__ . '/..'; // src/Command
-			if (!is_dir($dir)) {
-				if (!@mkdir($dir, 0755, true)) {
-					echo "Failed to create directory: $dir\n";
-					return;
-				}
-			}
+			if (!is_dir($dir) && !@mkdir($dir, 0755, true)) {
+                echo "Failed to create directory: $dir\n";
+                return;
+            }
 
 			$file = $dir . '/' . $name . '.php';
 			$existedBefore = file_exists($file);
@@ -309,12 +301,10 @@ class Add
 			}
 
 			$dir = __DIR__ . '/../../app/Middleware';
-			if (!is_dir($dir)) {
-				if (!@mkdir($dir, 0755, true)) {
-					echo "Failed to create directory: $dir\n";
-					return;
-				}
-			}
+			if (!is_dir($dir) && !@mkdir($dir, 0755, true)) {
+                echo "Failed to create directory: $dir\n";
+                return;
+            }
 
 			$file = $dir . '/' . $name . '.php';
 			$existedBefore = file_exists($file);
@@ -351,12 +341,10 @@ class Add
 			}
 
 			$dir = __DIR__ . '/../../app/Mail';
-			if (!is_dir($dir)) {
-				if (!@mkdir($dir, 0755, true)) {
-					echo "Failed to create directory: $dir\n";
-					return;
-				}
-			}
+			if (!is_dir($dir) && !@mkdir($dir, 0755, true)) {
+                echo "Failed to create directory: $dir\n";
+                return;
+            }
 
 			$file = $dir . '/' . $name . '.php';
 			$existedBefore = file_exists($file);
@@ -412,7 +400,7 @@ class Add
 		}
 
 		$v = $opts['selectable'];
-		if ($v === true || $v === false || $v === null) {
+		if (in_array($v, [true, false, null], true)) {
 			return null;
 		}
 		if (!is_string($v)) {
@@ -439,7 +427,7 @@ class Add
 			if ($p === '') {
 				continue;
 			}
-			if (!preg_match('/^[a-zA-Z0-9_]+$/', $p)) {
+			if (!preg_match('/^\w+$/', $p)) {
 				continue;
 			}
 			$cols[] = $p;
@@ -467,7 +455,8 @@ class Add
 	private static function parseOptions(array $argv, int $start = 2): array
 	{
 		$opts = [];
-		for ($i = $start; $i < count($argv); $i++) {
+        $counter = count($argv);
+		for ($i = $start; $i < $counter; $i++) {
 			$arg = $argv[$i];
 			if (str_starts_with($arg, '--')) {
 				$parts = explode('=', substr($arg, 2), 2);

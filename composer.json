@@ -9,7 +9,7 @@
         "ext-pdo": "*",
         "ext-mbstring": "*",
         "ext-sockets": "*",
-        "datahihi1/tiny-env": "^1.0",
+        "datahihi1/tiny-env": "^1",
         "psr/log": "^3"
     },
     "autoload": {
@@ -36,5 +36,10 @@
         "post-create-project-cmd": [
             "@CopyEnv"
         ]
+    },
+    "require-dev": {
+        "rector/rector": ">=2.4",
+        "phpstan/phpstan": ">=2.1",
+        "phpunit/phpunit": ">=9.6"
     }
 }
