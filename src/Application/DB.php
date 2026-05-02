@@ -7,6 +7,7 @@ use DFrame\Database\Adapter\Sqlite3Adapter;
 use DFrame\Database\Adapter\PdoMysqlAdapter;
 use DFrame\Database\Adapter\PdoSqliteAdapter;
 use DFrame\Database\DatabaseManager;
+use DFrame\Database\Exception\CallWrongMethodOnDbDesign;
 
 /**
  * **Database Handler**
@@ -104,6 +105,23 @@ class DB extends DatabaseManager
     }
 
     /**
+     * Create a mapper-based DB instance regardless of env DB_DESIGN.
+     */
+    public static function mapper(): self
+    {
+        $instance = new static();
+        return $instance->switchDesign('mapper');
+    }
+
+    /**
+     * Switch current DB instance to builder design.
+     */
+    public function builder(): self
+    {
+        return $this->switchDesign('builder');
+    }
+
+    /**
      * Handle dynamic method calls into the model.
      * @param string $method
      * @param array $args
@@ -111,6 +129,11 @@ class DB extends DatabaseManager
      */
     public function __call($method, $args)
     {
+        if (!is_object($this->mapper) || !method_exists($this->mapper, $method)) {
+            $design = (string) env('DB_DESIGN');
+            throw CallWrongMethodOnDbDesign::fromMethod((string) $method, $design);
+        }
+
         return call_user_func_array([$this->mapper, $method], $args);
     }
 
@@ -123,6 +146,11 @@ class DB extends DatabaseManager
     public static function __callStatic($method, $args)
     {
         $instance = new static();
+        if (!is_object($instance->mapper) || !method_exists($instance->mapper, $method)) {
+            $design = (string) env('DB_DESIGN');
+            throw CallWrongMethodOnDbDesign::fromMethod((string) $method, $design);
+        }
+
         return call_user_func_array([$instance->mapper, $method], $args);
     }
 

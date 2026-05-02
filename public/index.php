@@ -63,9 +63,11 @@ if (!file_exists($autoloadFile)) {
 require_once $autoloadFile;
 
 /*
-| Set Maintenance Mode if needed
+| Set Maintenance Mode if needed (localhost will be bypassed)
 |------------------------------------------------------------------------------------------------
 | This checks the environment variable to determine if maintenance mode should be enabled.
+| **NOTE**: Maintenance mode will be bypassed for requests coming from localhost
+|------------------------------------------------------------------------------------------------
 */
 
 // \DFrame\Application\App::setMaintenanceMode(true);

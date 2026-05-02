@@ -13,14 +13,15 @@ class Register
     {
         $cli->register('help', fn($argv = null) => Core::help()($argv))->info('Show help information');
         $cli->register('help:add', Core::helpAdd())->info('Show detailed help for add / add:<type>');
-        $cli->register('-h', fn($argv = null) => Core::help()($argv))->infoAlias('help');
+        $cli->registerAlias('-h', 'help')->infoAlias('help');
         $cli->register('version', Core::version())->info('Show application version');
-        $cli->register('-v', Core::version())->infoAlias('version');
+        $cli->registerAlias('-v', 'version')->infoAlias('version');
         $cli->register('server', Server::server())->info('Start the development server');
-        $cli->register('-s', Server::server())->infoAlias('server');
+        $cli->registerAlias('-s', 'server')->infoAlias('server');
         $cli->register('list', Core::list($cli->list()))->info('List all available commands');
         $cli->register('setting', Setting::handle())->info('Show or set application settings');
         $cli->register('add', Add::handle())->info('Add a new component');
+        $cli->registerAlias('make', 'add')->infoAlias('add');
         $cli->register('add:controller', Add::controller())->info('Create a new controller');
         $cli->register('add:model', Add::model())->info('Create a new model');
         $cli->register('add:view', Add::view())->info('Create a new view');

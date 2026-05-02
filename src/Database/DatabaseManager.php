@@ -97,19 +97,47 @@ class DatabaseManager
         }
         $this->adapter->connect($config);
 
-        if ($design === 'mapper') {
-            if (in_array($driver, ['mysqli', 'pdo_mysql'])) {
-                $this->mapperClass = MysqlMapper::class;
-            } elseif (in_array($driver, ['sqlite3', 'pdo_sqlite'])) {
-                $this->mapperClass = SqliteMapper::class;
-            }
-        } elseif ($design === 'builder') {
-            if (in_array($driver, ['mysqli', 'pdo_mysql'])) {
-                $this->mapperClass = MysqlBuilder::class;
-            } elseif (in_array($driver, ['sqlite3', 'pdo_sqlite'])) {
-                $this->mapperClass = SqliteBuilder::class;
-            }
+        $this->mapperClass = $this->resolveMapperClass($design, $driver);
+    }
+
+    /**
+     * Resolve mapper/builder class from design and driver.
+     */
+    protected function resolveMapperClass(string $design, string $driver): string
+    {
+        if (!in_array($design, self::SUPPORTED_DESIGNS, true)) {
+            throw new UnsupportedDesignException("Invalid DB_DESIGN: $design" . ". Accepts: " . implode(', ', self::SUPPORTED_DESIGNS) . ".");
         }
+
+        if ($design === 'mapper') {
+            if (in_array($driver, ['mysqli', 'pdo_mysql'], true)) {
+                return MysqlMapper::class;
+            }
+            return SqliteMapper::class;
+        }
+
+        if (in_array($driver, ['mysqli', 'pdo_mysql'], true)) {
+            return MysqlBuilder::class;
+        }
+
+        return SqliteBuilder::class;
+    }
+
+    /**
+     * Switch current instance database design dynamically.
+     */
+    public function switchDesign(string $design): self
+    {
+        $driver = (string) env('DB_DRIVER');
+        $this->mapperClass = $this->resolveMapperClass($design, $driver);
+
+        if (!empty($this->table)) {
+            $selectable = property_exists($this, 'selectable') ? $this->selectable : null;
+            $useSoftDelete = method_exists($this, 'usesSoftDelete') ? (bool) $this->usesSoftDelete() : false;
+            $this->mapper = $this->getMapper($this->table, $useSoftDelete, $selectable);
+        }
+
+        return $this;
     }
 
     /**

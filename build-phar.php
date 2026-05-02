@@ -3,7 +3,7 @@
 /** Simple PHAR builder CLI */
 class BuildPhar
 {
-    public const VERSION = 'v2026.5.1-dev';
+    public const VERSION = '2026.5.1-dev';
 }
 
 if (PHP_SAPI !== 'cli') {

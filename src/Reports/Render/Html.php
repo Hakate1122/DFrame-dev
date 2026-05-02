@@ -3,6 +3,7 @@
 namespace DFrame\Reports\Render;
 
 use DFrame\Reports\Interface\RenderInterface;
+use function count;
 
 /**
  * HTML Renderer for error and exception reporting.

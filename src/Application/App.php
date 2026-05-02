@@ -22,7 +22,7 @@ class App
      * Version of DFrame Framework.
      * @var string
      */
-    public const VERSION = '2026.5.1-dev';
+    public const VERSION = '2026.5.2-dev';
     /**
      * Alias for version constant
      */
@@ -532,6 +532,9 @@ class App
         // Load environment files (.env, encrypted .env if present)
         $this->loadEnvironmentVariables();
 
+        // Set maintenance mode if enabled
+        self::setMaintenanceMode();
+
         // Initialize configuration
         $this->initializeConfig();
 
@@ -550,9 +553,6 @@ class App
         if ($healthStatus['status'] === 'unhealthy') {
             throw new Exception('Application health check failed.');
         }
-
-        // Set maintenance mode if enabled
-        self::setMaintenanceMode();
 
         // Start session
         Session::start();

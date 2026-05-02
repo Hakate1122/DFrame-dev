@@ -42,9 +42,10 @@ class Add
 	{
 		return function ($argv = []) {
 			$type = $argv[2] ?? null;
-			if (!$type) {
-				echo "Usage: php dli add <type> --name=Name\n";
-				echo "Example: php dli add controller --name=MyController\n";
+
+			$opts = self::parseOptions($argv, 2);
+			if ($type === null || str_starts_with((string) $type, '-') || isset($opts['help']) || isset($opts['h'])) {
+				(Core::helpAdd())();
 				return;
 			}
 
