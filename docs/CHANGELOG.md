@@ -1,3 +1,12 @@
+## `2026.5.3-dev` (2026-05-03)
+
+### Added
+- Add Docker runtime detection in `src/Application/App.php` via `App::isRunningFromDocker()` with checks for `DOCKER_RUNNING`, `/.dockerenv`, and container cgroup markers. This allows the framework and CLI to adapt behavior when running inside Docker.
+- Add Docker runtime notice in `src/Command/Core.php` help output, so `dli` now explicitly informs users when commands are executed inside a container.
+
+### Changed
+- Update `docker-compose.yml` to set `DOCKER_RUNNING=true` for the `dframe-app` service, providing an explicit runtime flag that complements filesystem/cgroup detection in containerized environments.
+
 ## `2026.5.2-dev` (2026-05-02)
 
 ### Added

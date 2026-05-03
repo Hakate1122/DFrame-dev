@@ -5,14 +5,18 @@ namespace DFrame\Application;
 use DFrame\Application\View;
 
 /**
- * **Secure Gmail Mailer**
+ * **Secure SMTP Mailer**
  *
- * Secure Mail class supporting Gmail SMTP, CC, BCC, and Attachments.
+ * Secure Mail class supporting multiple SMTP providers, CC, BCC, and attachments.
  */
 class Mail
 {
-    private $smtp_host = "smtp.gmail.com";
+    private $smtp_host = "localhost";
     private $smtp_port = 587;
+    private $smtp_encryption = 'tls';
+    private $smtp_auth = true;
+    private $smtp_timeout = 10;
+    private $ehlo_domain = 'localhost';
     private $username;
     private $password;
     private $from;
@@ -25,6 +29,20 @@ class Mail
     private $subject;
     private $body;
     private $attachments = [];
+    private const SERVICE_PRESETS = [
+        'gmail' => ['host' => 'smtp.gmail.com', 'port' => 587, 'encryption' => 'tls', 'auth' => true],
+        'google' => ['host' => 'smtp.gmail.com', 'port' => 587, 'encryption' => 'tls', 'auth' => true],
+        'googlemail' => ['host' => 'smtp.gmail.com', 'port' => 587, 'encryption' => 'tls', 'auth' => true],
+        'outlook' => ['host' => 'smtp.office365.com', 'port' => 587, 'encryption' => 'tls', 'auth' => true],
+        'office365' => ['host' => 'smtp.office365.com', 'port' => 587, 'encryption' => 'tls', 'auth' => true],
+        'hotmail' => ['host' => 'smtp.office365.com', 'port' => 587, 'encryption' => 'tls', 'auth' => true],
+        'yahoo' => ['host' => 'smtp.mail.yahoo.com', 'port' => 587, 'encryption' => 'tls', 'auth' => true],
+        'zoho' => ['host' => 'smtp.zoho.com', 'port' => 587, 'encryption' => 'tls', 'auth' => true],
+        'mailgun' => ['host' => 'smtp.mailgun.org', 'port' => 587, 'encryption' => 'tls', 'auth' => true],
+        'sendgrid' => ['host' => 'smtp.sendgrid.net', 'port' => 587, 'encryption' => 'tls', 'auth' => true],
+        'ses' => ['host' => 'email-smtp.us-east-1.amazonaws.com', 'port' => 587, 'encryption' => 'tls', 'auth' => true],
+        'aws' => ['host' => 'email-smtp.us-east-1.amazonaws.com', 'port' => 587, 'encryption' => 'tls', 'auth' => true],
+    ];
 
     /**
      * Constructor to initialize SMTP settings. If no config is provided, it will attempt to load from environment variables by TinyEnv or from a config file at ROOT_DIR/config/mail.php. The config array can contain keys like host, port, username, password, from, and fromname.
@@ -42,17 +60,39 @@ class Mail
         if ($config === null && file_exists(ROOT_DIR . '/config/mail.php')) {
             $config = include_once ROOT_DIR . '/config/mail.php';
         }
+        $config = is_array($config) ? $config : [];
+
+        $service = strtolower(trim((string) (env('MAIL_SERVICE') ?? $config['service'] ?? '')));
+        if ($service !== '' && isset(self::SERVICE_PRESETS[$service])) {
+            $preset = self::SERVICE_PRESETS[$service];
+            $this->smtp_host = $preset['host'];
+            $this->smtp_port = $preset['port'];
+            $this->smtp_encryption = $preset['encryption'];
+            $this->smtp_auth = $preset['auth'];
+        }
+
+        $this->smtp_host = env('MAIL_HOST') ?? $config['host'] ?? $this->smtp_host;
+        $this->smtp_port = (int) (env('MAIL_PORT') ?? $config['port'] ?? $this->smtp_port);
+        $this->smtp_encryption = strtolower((string) (env('MAIL_ENCRYPTION') ?? $config['encryption'] ?? $this->smtp_encryption));
+        $this->smtp_auth = $this->toBool(env('MAIL_AUTH') ?? $config['auth'] ?? $this->smtp_auth);
+        $this->smtp_timeout = (int) (env('MAIL_TIMEOUT') ?? $config['timeout'] ?? $this->smtp_timeout);
+        $this->ehlo_domain = (string) (env('MAIL_EHLO_DOMAIN') ?? $config['ehlo_domain'] ?? gethostname() ?: 'localhost');
+
         $this->username   = env('MAIL_USERNAME') ?? $config['username'] ?? '';
         $this->password   = env('MAIL_PASSWORD') ?? $config['password'] ?? '';
         $this->from       = env('MAIL_FROM_ADDRESS') ?? $config['from'] ?? $this->username;
         $this->from_name  = env('MAIL_FROM_NAME') ?? $config['fromname'] ?? "No-Reply";
+    }
 
-        if (isset($config['host'])) {
-            $this->smtp_host = $config['host'];
+    private function toBool($value): bool
+    {
+        if (is_bool($value)) {
+            return $value;
         }
-        if (isset($config['port'])) {
-            $this->smtp_port = $config['port'];
+        if (is_numeric($value)) {
+            return (int) $value === 1;
         }
+        return in_array(strtolower((string) $value), ['1', 'true', 'yes', 'on'], true);
     }
 
     /**
@@ -247,7 +287,7 @@ class Mail
      */
     public function send(): bool
     {
-        if (empty($this->username) || empty($this->password)) {
+        if ($this->smtp_auth && (empty($this->username) || empty($this->password))) {
             throw new \RuntimeException("SMTP credentials not configured.");
         }
 
@@ -261,9 +301,10 @@ class Mail
         ]);
 
         $errno = $errstr = null;
+        $transport = $this->smtp_encryption === 'ssl' ? 'ssl' : 'tcp';
         $fp = @stream_socket_client(
-            "tcp://{$this->smtp_host}:{$this->smtp_port}", 
-            $errno, $errstr, 10, STREAM_CLIENT_CONNECT, $context
+            "{$transport}://{$this->smtp_host}:{$this->smtp_port}",
+            $errno, $errstr, $this->smtp_timeout, STREAM_CLIENT_CONNECT, $context
         );
 
         if (!$fp) {
@@ -273,29 +314,36 @@ class Mail
 
         // 2. Handshake & Auth
         $this->getLine($fp);
-        $this->sendLine($fp, "EHLO " . gethostname());
+        $this->sendLine($fp, "EHLO " . $this->ehlo_domain);
         $this->getMultiline($fp);
 
-        // STARTTLS
-        $this->sendLine($fp, "STARTTLS");
-        $this->getLine($fp);
-        if (!stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
-             throw new \RuntimeException("TLS Negotiation Failed");
+        // STARTTLS for explicit TLS mode
+        if ($this->smtp_encryption === 'tls') {
+            $this->sendLine($fp, "STARTTLS");
+            $tlsResp = $this->getLine($fp);
+            if (!str_contains($tlsResp, '220')) {
+                throw new \RuntimeException("Server does not support STARTTLS.");
+            }
+            if (!stream_socket_enable_crypto($fp, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
+                throw new \RuntimeException("TLS negotiation failed.");
+            }
+
+            $this->sendLine($fp, "EHLO " . $this->ehlo_domain);
+            $this->getMultiline($fp);
         }
-        
-        $this->sendLine($fp, "EHLO " . gethostname());
-        $this->getMultiline($fp);
 
         // AUTH
-        $this->sendLine($fp, "AUTH LOGIN");
-        $this->getLine($fp);
-        $this->sendLine($fp, base64_encode($this->username));
-        $this->getLine($fp);
-        $this->sendLine($fp, base64_encode($this->password));
-        $resp = $this->getLine($fp);
-        
-        if (!str_contains($resp, '235')) {
-             throw new \RuntimeException("SMTP Auth Failed. Check App Password.");
+        if ($this->smtp_auth) {
+            $this->sendLine($fp, "AUTH LOGIN");
+            $this->getLine($fp);
+            $this->sendLine($fp, base64_encode($this->username));
+            $this->getLine($fp);
+            $this->sendLine($fp, base64_encode($this->password));
+            $resp = $this->getLine($fp);
+
+            if (!str_contains($resp, '235')) {
+                throw new \RuntimeException("SMTP authentication failed. Check username/password.");
+            }
         }
 
         // 3. Send Recipients (To + CC + BCC)

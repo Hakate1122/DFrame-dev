@@ -22,7 +22,7 @@ class App
      * Version of DFrame Framework.
      * @var string
      */
-    public const VERSION = '2026.5.2-dev';
+    public const VERSION = '2026.5.3-dev';
     /**
      * Alias for version constant
      */
@@ -44,6 +44,12 @@ class App
      * @var bool
      */
     private static $runningFromPhar = false;
+
+    /**
+     * Whether the application is running from a Docker container
+     * @var bool
+     */
+    private static $runningFromDocker = false;
 
     /**
      * Whether a .env file was successfully loaded
@@ -124,6 +130,14 @@ class App
     public static function isRunningFromPhar(): bool
     {
         return self::$runningFromPhar;
+    }
+    
+    /**
+     * Check if running from a Docker container
+     */
+    public static function isRunningFromDocker(): bool
+    {
+        return self::$runningFromDocker;
     }
 
     /**
@@ -298,6 +312,26 @@ class App
         return $pharRunning;
     }
 
+    private function checkRunningFromDocker(): bool
+    {
+        if (getenv('DOCKER_RUNNING') === 'true') {
+            return true;
+        }
+
+        if (file_exists('/.dockerenv')) {
+            return true;
+        }
+
+        if (is_file('/proc/1/cgroup')) {
+            $cgroup = file_get_contents('/proc/1/cgroup');
+            if (is_string($cgroup) && (str_contains($cgroup, 'docker') || str_contains($cgroup, 'kubepods') || str_contains($cgroup, 'containerd'))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Validate application health
      */
@@ -418,7 +452,6 @@ class App
                     if (!headers_sent()) {
                         http_response_code(500);
                     }
-                    $path = ROOT_DIR . 'src/Kit/helper/default_pages.php';
                     echo function_exists('get500pages') ? get500pages() : 'Internal Server Error';
                 }
             });
@@ -528,6 +561,7 @@ class App
     {
 
         self::$runningFromPhar = $this->checkRunningFromPhar();
+        self::$runningFromDocker = $this->checkRunningFromDocker();
 
         // Load environment files (.env, encrypted .env if present)
         $this->loadEnvironmentVariables();
@@ -578,6 +612,7 @@ class App
     public function bootDli(array $argv)
     {
         self::$runningFromPhar = $this->checkRunningFromPhar();
+        self::$runningFromDocker = $this->checkRunningFromDocker();
 
         // Load environment files (.env, encrypted .env if present)
         $this->loadEnvironmentVariables();

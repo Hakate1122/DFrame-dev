@@ -77,7 +77,7 @@ if (!function_exists('get404pages')) {
    */
   function get404pages($message = ''): string
   {
-    return getErrorPage(404, $message ?: 'Not Found');
+    return getErrorPage(404, trim($message) ?: 'Not Found');
   }
 }
 
@@ -87,7 +87,7 @@ if (!function_exists('get403pages')) {
    */
   function get403pages(string $message = ''): string
   {
-    return getErrorPage(403, $message ?: 'Forbidden');
+    return getErrorPage(403, trim($message) ?: 'Forbidden');
   }
 }
 
@@ -98,7 +98,7 @@ if (!function_exists('get500pages')) {
    */
   function get500pages($message = '')
   {
-    return getErrorPage(500, $message ?: 'Internal Server Error');
+    return getErrorPage(500, trim($message) ?: 'Internal Server Error');
   }
 }
 
@@ -108,6 +108,6 @@ if (!function_exists('get503pages')) {
    */
   function get503pages(string $message = ''): string
   {
-    return getErrorPage(503, $message ?: 'Service Unavailable');
+    return getErrorPage(503, trim($message) ?: 'Service Unavailable');
   }
 }

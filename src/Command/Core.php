@@ -257,6 +257,10 @@ class Core
             if (App::isRunningFromPhar()) {
                 echo cli_yellow("Detected: dli is running from a PHAR archive. Some features may not work (e.g., starting the server, or file writing)\n\n");
             }
+
+            if (App::isRunningFromDocker()) {
+                echo cli_gray("dli is running inside a Docker container.\n\n");
+            }
             
             echo "Available commands:\n";
             echo "  help, -h             Show this help message\n";

@@ -1,6 +1,7 @@
 services:
-
   dframe-app:
+    environment:
+      - DOCKER_RUNNING=true
     build: .
     container_name: dframe_backend
     restart: always
