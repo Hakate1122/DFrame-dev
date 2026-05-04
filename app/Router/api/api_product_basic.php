@@ -5,7 +5,6 @@ $router = new DFrame\Application\Router();
 $router->signApi('GET /products', function(){
     $products = new App\Model\Products();
     $allProducts = $products->fetchAll();
-    dd($allProducts);
     return ([
         'ok' => true,
         'products' => $allProducts

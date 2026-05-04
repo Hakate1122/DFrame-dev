@@ -1,3 +1,8 @@
+## `2026.5.4-dev` (2026-05-04)
+
+### Changed
+- Update function `dd()` / `dump()` output formatting and enhance `craft_custom_var_dump()` with CLI ANSI colors and HTML color spans.
+
 ## `2026.5.3-dev` (2026-05-03)
 
 ### Added
@@ -6,6 +11,7 @@
 
 ### Changed
 - Update `docker-compose.yml` to set `DOCKER_RUNNING=true` for the `dframe-app` service, providing an explicit runtime flag that complements filesystem/cgroup detection in containerized environments.
+- Class `Mail` now supports multiple SMTP providers via `SERVICE_PRESETS` constant, allowing easy configuration of different mail services (e.g. Gmail, Outlook, Yahoo, etc.).
 
 ## `2026.5.2-dev` (2026-05-02)
 

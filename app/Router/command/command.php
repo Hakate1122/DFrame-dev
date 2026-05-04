@@ -37,3 +37,11 @@ $cli->register('websocket:server', function () {
 });
 
 $cli->registerAlias('ws:server', 'websocket:server');
+
+$cli->register('env',function(){
+    $env = new Datahihi1\TinyEnv\TinyEnv(ROOT_DIR);
+    dump($env);
+    $env->load();
+    dump($env);
+    dd(env());
+});

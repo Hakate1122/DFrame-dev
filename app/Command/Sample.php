@@ -126,7 +126,7 @@ class Sample
         try {
             $pdo = new \PDO("mysql:host={$host};port={$port}", $user, $pass);
             $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-            echo "Connected successfully!\n";
+            dd($pdo);
         } catch (\Exception $e) {
             echo "Connection failed: " . $e->getMessage() . "\n";
         }

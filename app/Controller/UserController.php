@@ -12,7 +12,7 @@ class UserController extends Controller
     }
     public function listUsers()
     {
-        $allUsers = $this->users->all();
+        $allUsers = $this->users->fetchAll();
         return $this->render('user1/list', ['users' => $allUsers]);
     }
 

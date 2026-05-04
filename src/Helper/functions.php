@@ -92,7 +92,7 @@ if (!function_exists('dd')) {
         if ($isCli) {
             echo $output . PHP_EOL;
         } else {
-            echo '<pre style="background:#222;color:#eee;padding:5px 10px;border-radius:8px;overflow:auto;font-size:13px;line-height:1.2;box-shadow:0 2px 8px #0002;">' . htmlspecialchars($output) . '</pre>';
+            echo '<pre style="background:#222;color:#eee;padding:5px 10px;border-radius:8px;overflow:auto;font-size:13px;line-height:1.2;box-shadow:0 2px 8px #0002;">' . $output . '</pre>';
         }
         die();
     }
@@ -151,7 +151,7 @@ if (!function_exists('dump')) {
         if ($isCli) {
             echo $output . PHP_EOL;
         } else {
-            echo '<pre style="background:#222;color:#eee;padding:5px 10px;border-radius:8px;overflow:auto;font-size:13px;line-height:1.2;box-shadow:0 2px 8px #0002;">' . htmlspecialchars($output) . '</pre>';
+            echo '<pre style="background:#222;color:#eee;padding:5px 10px;border-radius:8px;overflow:auto;font-size:13px;line-height:1.2;box-shadow:0 2px 8px #0002;">' . $output . '</pre>';
         }
     }
 }
@@ -167,48 +167,86 @@ function craft_custom_var_dump($var, $indent = 0, &$references = []): string
 {
     $indentation = str_repeat("  ", $indent);
     $varKey = null;
+    $isCli = (PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg');
+
+    $ansi = function(string $text, string $color) use ($isCli): string {
+        if (!$isCli) return $text;
+        $map = [
+            'gray' => "\033[0;37m",
+            'magenta' => "\033[0;35m",
+            'cyan' => "\033[0;36m",
+            'green' => "\033[0;32m",
+            'yellow' => "\033[0;33m",
+            'blue' => "\033[0;34m",
+            'red' => "\033[0;31m",
+            'reset' => "\033[0m",
+        ];
+        return ($map[$color] ?? '') . $text . ($map['reset'] ?? '');
+    };
+
+    $htmlWrap = function(string $text, string $color) use ($isCli): string {
+        if ($isCli) return $text;
+        $map = [
+            'gray' => '#888888',
+            'magenta' => '#b14c9c',
+            'cyan' => '#00aabb',
+            'green' => '#2aa198',
+            'yellow' => '#b58900',
+            'blue' => '#268bd2',
+            'red' => '#dc322f',
+        ];
+        $esc = htmlspecialchars($text, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        return '<span style="color: ' . ($map[$color] ?? '#000') . '">' . $esc . '</span>';
+    };
+
+    $colorize = function(string $text, string $color) use ($isCli, $ansi, $htmlWrap): string {
+        return $isCli ? $ansi($text, $color) : $htmlWrap($text, $color);
+    };
     if (is_object($var)) {
         $varKey = spl_object_hash($var);
     } elseif (is_array($var)) {
         $varKey = md5(json_encode($var, JSON_PARTIAL_OUTPUT_ON_ERROR));
     }
     if ($varKey && in_array($varKey, $references)) {
-        return "{$indentation}*RECURSION*\n";
+        return "{$indentation}" . $colorize("*RECURSION*", 'red') . "\n";
     }
     if ($varKey) {
         $references[] = $varKey;
     }
+
     $out = '';
     if (is_null($var)) {
-        $out = "{$indentation}NULL\n";
+        $out = "{$indentation}" . $colorize('NULL', 'gray') . "\n";
     } elseif (is_bool($var)) {
-        $out = "{$indentation}bool(" . ($var ? 'true' : 'false') . ")\n";
+        $out = "{$indentation}" . $colorize('bool(' . ($var ? 'true' : 'false') . ')', 'magenta') . "\n";
     } elseif (is_int($var)) {
-        $out = "{$indentation}int($var)\n";
+        $out = "{$indentation}" . $colorize('int(' . $var . ')', 'cyan') . "\n";
     } elseif (is_float($var)) {
-        $out = "{$indentation}float($var)\n";
+        $out = "{$indentation}" . $colorize('float(' . $var . ')', 'cyan') . "\n";
     } elseif (is_string($var)) {
-        $out = "{$indentation}string(" . strlen($var) . ") \"$var\"\n";
+        $str = '"' . $var . '"';
+        $out = "{$indentation}" . $colorize('string(' . strlen($var) . ') ', 'green') . $colorize($str, 'green') . "\n";
     } elseif (is_array($var)) {
-        $out = "{$indentation}array(" . count($var) . ") {\n";
+        $out = "{$indentation}" . $colorize('array(' . count($var) . ') {', 'yellow') . "\n";
         foreach ($var as $key => $value) {
-            $line = "{$indentation}  [" . (is_string($key) ? "\"$key\"" : $key) . "]=>\n";
+            $keyText = is_string($key) ? '"' . $key . '"' : (string)$key;
+            $line = "{$indentation}  [" . $colorize($keyText, 'blue') . "]=>\n";
             $out .= $line . craft_custom_var_dump($value, $indent + 1, $references);
         }
-        $out .= "{$indentation}}}\n";
+        $out .= "{$indentation}" . $colorize('}', 'yellow') . "\n";
     } elseif (is_object($var)) {
         $className = $var::class;
-        $out = "{$indentation}object($className) {\n";
+        $out = "{$indentation}" . $colorize('object(' . $className . ') {', 'blue') . "\n";
         $properties = (array) $var;
         foreach ($properties as $key => $value) {
-            $line = "{$indentation}  [$key]=>\n";
+            $line = "{$indentation}  [" . $colorize((string)$key, 'blue') . "]=>\n";
             $out .= $line . craft_custom_var_dump($value, $indent + 1, $references);
         }
-        $out .= "{$indentation}}}\n";
+        $out .= "{$indentation}" . $colorize('}', 'blue') . "\n";
     } elseif (is_resource($var)) {
-        $out = "{$indentation}resource(" . get_resource_type($var) . ")\n";
+        $out = "{$indentation}" . $colorize('resource(' . get_resource_type($var) . ')', 'red') . "\n";
     } else {
-        $out = "{$indentation}unknown type\n";
+        $out = "{$indentation}" . $colorize('unknown type', 'red') . "\n";
     }
     return $out;
 }
