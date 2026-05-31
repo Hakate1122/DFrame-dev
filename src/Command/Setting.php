@@ -1,13 +1,13 @@
 <?php
 
-namespace DFrame\Command;
+namespace DLight\Command;
 
 class Setting
 {
     public static function handle()
     {
         return function ($argv = null) {
-            echo "DLI - DFrame CLI Settings\n";
+            echo "DLI - DLight CLI Settings\n";
             echo "Usage: php dli setting [key] [value]\n\n";
 
             if (isset($argv[2])) {

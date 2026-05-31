@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace DFrame\Attribute;
+namespace DLight\Attribute;
 
-use DFrame\Application\Router;
+use DLight\Application\Router;
 
 /**
  * Route extends Router to define route attributes for controller methods.
@@ -33,7 +33,5 @@ class Route extends Router
 
     public function signScanUseAttribute()
     {
-        // This method can be used to perform any additional processing after scanning the route attributes
-        // For example, you could register the route with the router here if needed
     }
 }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DFrame\Attribute;
+namespace DLight\Attribute;
 
 /**
  * Deprecate attribute to mark methods or classes as deprecated.

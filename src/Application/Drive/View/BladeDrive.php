@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace DFrame\Application\Drive\View;
+namespace DLight\Application\Drive\View;
 
-use DFrame\Application\Interfaces\ViewEngine;
+use DLight\Application\Interfaces\ViewEngine;
 
 /**
  * BladeDrive View Engine using Blade templating engine.

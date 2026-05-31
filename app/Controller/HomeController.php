@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use DFrame\Application\View;
+use DLight\Application\View;
 
 class HomeController
 {
@@ -12,7 +12,7 @@ class HomeController
     {
         return View::render('home', [
             'phpVersion' => phpversion(),
-            'dframeVersion' => \DFrame\Application\App::version,
+            'dlightVersion' => \DLight\Application\App::version,
             'os' => PHP_OS,
             'server' => $_SERVER['SERVER_SOFTWARE'] ?? 'N/A',
             'memory' => memory_get_usage(true),

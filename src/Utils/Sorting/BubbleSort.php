@@ -1,6 +1,6 @@
 <?php
 
-namespace DFrame\Utils\Sorting;
+namespace DLight\Utils\Sorting;
 
 use function count;
 

@@ -3,7 +3,7 @@
 /**
  * **Source File Helper**
  *
- * Utility class for managing source files located in public/source.
+ * Utility class for managing source files located in INDEX_DIR/source.
  */
 class Source
 {
@@ -11,7 +11,12 @@ class Source
     private const SOURCE_DIR = 'source';
 
     /**
-     * Build URL for a source file (located in public/source).
+     * Shared finfo instance.
+     */
+    private static ?finfo $finfo = null;
+
+    /**
+     * Build URL for a source file (located in INDEX_DIR/source).
      *
      * @param string|array $file File path or config array
      * @param string|null $extension File extension
@@ -63,7 +68,45 @@ class Source
     }
 
     /**
-     * Check if a source file exists in public/source.
+     * Return full filesystem path to meta file for a source file.
+     */
+    public static function metaPath(string $file): string
+    {
+        $path = rtrim(INDEX_DIR, '/\\') . '/' . self::SOURCE_DIR . '/' . ltrim($file, '/');
+        return $path . '.meta.json';
+    }
+
+    /**
+     * Write metadata array for a file (JSON) next to the file.
+     */
+    public static function writeMeta(string $file, array $meta): bool
+    {
+        $mp = self::metaPath($file);
+        $dir = dirname($mp);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+        return file_put_contents($mp, json_encode($meta, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) !== false;
+    }
+
+    /**
+     * Read metadata JSON for a file if exists.
+     * @return array|null
+     */
+    public static function getMeta(string $file): ?array
+    {
+        $mp = self::metaPath($file);
+        if (!file_exists($mp))
+            return null;
+        $s = file_get_contents($mp);
+        if ($s === false)
+            return null;
+        $j = json_decode($s, true);
+        return is_array($j) ? $j : null;
+    }
+
+    /**
+     * Check if a source file exists in INDEX_DIR/source.
      *
      * @param string|array $file File name
      * @param bool $showInfo Return file info if true
@@ -83,7 +126,7 @@ class Source
         }
 
         if ($showInfo) {
-            return [
+            $info = [
                 'path' => $realPath,
                 'size' => filesize($realPath),
                 'modified' => filemtime($realPath),
@@ -91,12 +134,66 @@ class Source
                 'is_writable' => is_writable($realPath),
                 'is_executable' => is_executable($realPath)
             ];
+
+            // name & extension
+            $info['name'] = basename($realPath);
+            $info['extension'] = pathinfo($realPath, PATHINFO_EXTENSION);
+
+            // mime
+            $m = self::detectMime($realPath);
+            $info['mime'] = $m;
+
+            // category & inspect media
+            if (str_starts_with($m, 'image/')) {
+                $info['category'] = 'image';
+                $gs = @getimagesize($realPath);
+                if ($gs && isset($gs[0], $gs[1])) {
+                    $info['resolution'] = $gs[0] . 'x' . $gs[1];
+                }
+            } elseif (str_starts_with($m, 'video/')) {
+                $info['category'] = 'video';
+                $esc = escapeshellarg($realPath);
+                $res = @shell_exec("ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 $esc 2>&1");
+                if ($res) {
+                    $res = trim($res);
+                    if ($res !== '')
+                        $info['resolution'] = $res;
+                }
+                $dur = @shell_exec("ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $esc 2>&1");
+                if ($dur) {
+                    $info['duration'] = (float) trim($dur);
+                }
+            } elseif (str_starts_with($m, 'audio/')) {
+                $info['category'] = 'audio';
+                $esc = escapeshellarg($realPath);
+                $dur = @shell_exec("ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $esc 2>&1");
+                if ($dur) {
+                    $info['duration'] = (float) trim($dur);
+                }
+            } elseif (in_array($m, ['application/zip', 'application/x-rar-compressed', 'application/x-tar'])) {
+                $info['category'] = 'archive';
+            } else {
+                $info['category'] = 'document';
+            }
+
+            // include stored metadata if exists (meta has precedence for user-provided values)
+            $meta = self::getMeta($file);
+            if ($meta && is_array($meta)) {
+                $info['meta'] = $meta;
+                // merge specific keys if present
+                foreach (['name', 'extension', 'mime', 'category', 'resolution', 'duration'] as $k) {
+                    if (isset($meta[$k]))
+                        $info[$k] = $meta[$k];
+                }
+            }
+
+            return $info;
         }
         return true;
     }
 
     /**
-     * Upload a file to a specified location within public/source.
+     * Upload a file to a specified location within INDEX_DIR/source.
      *
      * @param array $file File from $_FILES
      * @param string $location Target subdirectory inside /source
@@ -116,13 +213,65 @@ class Source
         $targetFile = $targetDir . '/' . basename($file['name']);
 
         if (move_uploaded_file($file['tmp_name'], $targetFile)) {
+            // attempt to write metadata for the file
+            $relative = ltrim($location . '/' . basename($file['name']), '/');
+            $meta = [];
+            $meta['name'] = basename($file['name']);
+            $meta['extension'] = pathinfo($file['name'], PATHINFO_EXTENSION);
+
+            // detect mime
+            $m = self::detectMime($targetFile);
+            $meta['mime'] = $m;
+
+            // categorize
+            if (str_starts_with($m, 'image/')) {
+                $meta['category'] = 'image';
+                // resolution
+                $gs = @getimagesize($targetFile);
+                if ($gs && isset($gs[0], $gs[1])) {
+                    $meta['resolution'] = $gs[0] . 'x' . $gs[1];
+                }
+            } elseif (str_starts_with($m, 'video/')) {
+                $meta['category'] = 'video';
+                // try ffprobe for resolution/duration
+                $esc = escapeshellarg($targetFile);
+                $res = @shell_exec("ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 $esc 2>&1");
+                if ($res) {
+                    $res = trim($res);
+                    if ($res !== '')
+                        $meta['resolution'] = $res;
+                }
+                $dur = @shell_exec("ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $esc 2>&1");
+                if ($dur) {
+                    $meta['duration'] = (float) trim($dur);
+                }
+            } elseif (str_starts_with($m, 'audio/')) {
+                $meta['category'] = 'audio';
+                $esc = escapeshellarg($targetFile);
+                $dur = @shell_exec("ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $esc 2>&1");
+                if ($dur) {
+                    $meta['duration'] = (float) trim($dur);
+                }
+            } elseif (in_array($m, ['application/zip', 'application/x-rar-compressed', 'application/x-tar'])) {
+                $meta['category'] = 'archive';
+            } else {
+                $meta['category'] = 'document';
+            }
+
+            // size & modified
+            $meta['size'] = filesize($targetFile);
+            $meta['modified'] = filemtime($targetFile);
+
+            // write meta
+            self::writeMeta($relative, $meta);
+
             return $targetFile;
         }
         return false;
     }
 
     /**
-     * Rename a file in public/source.
+     * Rename a file in INDEX_DIR/source.
      *
      * @param string $oldFile Old file name
      * @param string $newFile New file name
@@ -141,18 +290,33 @@ class Source
             mkdir($dir, 0755, true);
         }
 
-        return rename($oldPath, $newPath);
+        $ok = rename($oldPath, $newPath);
+        // move meta if exists
+        $oldMeta = self::metaPath($oldFile);
+        $newMeta = self::metaPath($newFile);
+        if (file_exists($oldMeta)) {
+            $mdir = dirname($newMeta);
+            if (!is_dir($mdir))
+                mkdir($mdir, 0755, true);
+            @rename($oldMeta, $newMeta);
+        }
+
+        return $ok;
     }
 
     /**
-     * Remove a file from public/source.
+     * Remove a file from INDEX_DIR/source.
      *
      * @param string $file File name
      */
     public static function remove(string $file): bool
     {
         $filePath = rtrim(INDEX_DIR, '/\\') . self::url($file);
-        return file_exists($filePath) && unlink($filePath);
+        $ok = file_exists($filePath) && unlink($filePath);
+        $meta = self::metaPath($file);
+        if (file_exists($meta))
+            @unlink($meta);
+        return $ok;
     }
 
     /**
@@ -169,14 +333,39 @@ class Source
         }
 
         $location = dirname($oldFile);
-        return self::upload($newFile, $location);
+        $res = self::upload($newFile, $location);
+        // if uploaded, update meta name if needed
+        if ($res !== false) {
+            $newRel = ltrim($location . '/' . basename($newFile['name']), '/');
+            $meta = self::getMeta($newRel);
+            if ($meta) {
+                $meta['name'] = basename($newFile['name']);
+                self::writeMeta($newRel, $meta);
+            }
+        }
+        return $res;
+    }
+
+    /**
+     * Detect MIME type safely.
+     */
+    private static function detectMime(string $file): string
+    {
+        if (!extension_loaded('fileinfo')) {
+            return mime_content_type($file) ?: 'application/octet-stream';
+        }
+
+        self::$finfo ??= new finfo(FILEINFO_MIME_TYPE);
+
+        return self::$finfo->file($file)
+            ?: 'application/octet-stream';
     }
 }
 
 
 if (!function_exists('source')) {
     /**
-     * Get the URL for a source file (located in public_html/source).
+     * Get the URL for a source file (located in INDEX_DIR/source).
      */
     function source(string $path = ''): string
     {

@@ -1,11 +1,31 @@
 <?php
 
-namespace DFrame\Application;
+namespace DLight\Application;
+
+use function ord;
+use function chr;
+use function pack;
+use function base64_encode;
+use function in_array;
+use function preg_match;
+use function socket_create;
+use function socket_set_option;
+use function socket_bind;
+use function socket_listen;
+use function socket_accept;
+use function socket_read;
+use function socket_write;
+use function socket_close;
+use function socket_select;
+use function socket_strerror;
+use function spl_object_id;
+use function call_user_func_array;
+use function is_callable;
 
 /**
  * **WebSocket Server**
  * 
- * A robust WebSocket server implementation in PHP using low-level sockets.
+ * A simple WebSocket server implementation in PHP using low-level sockets.
  * Handles handshake, frame parsing (RFC 6455), and event-based messaging.
  */
 class WebSocket
@@ -122,7 +142,7 @@ class WebSocket
      * @param \Socket $client The client socket to perform the handshake with.
      * @return bool True if the handshake was successful, false otherwise.
      */
-    private function handshake($client): bool
+    private function handshake(\Socket $client): bool
     {
         $request = socket_read($client, 8192);
         if (!$request) {
@@ -154,7 +174,7 @@ class WebSocket
      * @param \Socket $client
      * @return string|null Full buffer or null on EOF/error.
      */
-    private function readBytes($client, int $length): ?string
+    private function readBytes(\Socket $client, int $length): ?string
     {
         if ($length < 0) {
             return null;
@@ -179,7 +199,7 @@ class WebSocket
      * @param \Socket $client The client socket to read from.
      * @return array|null An associative array with 'type' and 'payload' keys, or null on failure.
      */
-    private function readFrame($client): ?array
+    private function readFrame(\Socket $client): ?array
     {
         $header = $this->readBytes($client, 2);
         if ($header === null) {
@@ -249,7 +269,7 @@ class WebSocket
      * @param string $message The message to send.
      * @return bool True on success, false on failure.
      */
-    public function send($client, string $message): bool
+    public function send(\Socket $client, string $message): bool
     {
         $frame = chr(0x81); // Final fragment, text frame
         $len = strlen($message);
@@ -271,7 +291,7 @@ class WebSocket
      *
      * @param \Socket $client The client socket to send the Pong to.
      */
-    private function sendPong($client): void
+    private function sendPong(\Socket $client): void
     {
         @socket_write($client, chr(0x8A) . chr(0x00));
     }
@@ -280,7 +300,7 @@ class WebSocket
      * Send an RFC 6455 Close frame (server → client: unmasked).
      * Without this, clients that sent Close often report code 1006 / wasClean false.
      */
-    private function sendCloseFrame($client, int $code = 1000, string $reason = ''): void
+    private function sendCloseFrame(\Socket $client, int $code = 1000, string $reason = ''): void
     {
         $payload = pack('n', $code) . $reason;
         if (strlen($payload) > 125) {
@@ -337,7 +357,7 @@ class WebSocket
      * @param string $message The message to broadcast.
      * @param \Socket|null $except The client socket to exclude from broadcasting.
      */
-    protected function broadcast(string $message, $except = null): void
+    protected function broadcast(string $message, ?\Socket $except = null): void
     {
         $exceptId = $except ? spl_object_id($except) : null;
 
@@ -354,7 +374,7 @@ class WebSocket
      *
      * @param \Socket $client The client socket to disconnect.
      */
-    private function disconnect($client): void
+    private function disconnect(\Socket $client): void
     {
         $this->triggerEvent('onClose', [$client]);
         $this->sendCloseFrame($client);

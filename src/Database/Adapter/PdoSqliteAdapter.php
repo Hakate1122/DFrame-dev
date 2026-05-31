@@ -1,7 +1,7 @@
 <?php
-namespace DFrame\Database\Adapter;
+namespace DLight\Database\Adapter;
 
-use DFrame\Database\Interfaces\AdapterInterface;
+use DLight\Database\Interfaces\AdapterInterface;
 
 /**
  * #### PDO SQLite Database Adapter using pdo_sqlite extension
@@ -12,7 +12,10 @@ class PdoSqliteAdapter implements AdapterInterface
 	protected $pdo;
 
 	/**
-	 * Get connection
+	 * Get connection - Connect to a SQLite database using PDO.
+	 * 
+	 * @param array $config Configuration array with keys:
+	 * - `database`: (string) Database file name (default: `:memory:` for in-memory database)
 	 */
 	public function connect(array $config)
 	{

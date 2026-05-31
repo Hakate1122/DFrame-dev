@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Controller\UserController;
 
-use DFrame\Application\Router;
+use DLight\Application\Router;
 
 Router::group('/user')::action(function (Router $router) {
     $router->sign('GET /list', [UserController::class, 'listUsers'])->name('user.list');

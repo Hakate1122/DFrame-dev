@@ -1,13 +1,13 @@
 <?php
 
 use App\Middleware\UserAuthencation;
-use DFrame\Application\Log;
-use DFrame\Application\View;
-use DFrame\Application\Mail as Gmail;
+use DLight\Application\Log;
+use DLight\Application\View;
+use DLight\Application\Mail as Gmail;
 
 UserAuthencation::sign();
 
-$router = new DFrame\Application\Router();
+$router = new DLight\Application\Router();
 
 $router->sign('GET /', [\App\Controller\HomeController::class, 'home'])->name('home');
 
@@ -15,12 +15,7 @@ $router->sign('GET /h', function () {
     echo "<img src='" . asset('unnamed.jpg') . "' alt='Logo'>";
 })->name('home.alias');
 
-$router->sign('GET /test',function(){
-    $q = $_GET['q'] ?? '';
-    return "You searched for: " . $q;
-});
-
-$router->sign('GET /morse', fn() => View::render('morse'))->name('morse');
+$router->sign('GET /test',fn() => View::render('test'))->name('test');
 
 $router->sign('GET /ws/chat', fn() => View::render('ws/chat'))->name('ws.chat');
 
@@ -30,7 +25,7 @@ $router->sign('GET|POST /mail', function () {
         'username' => 'datahihi1100@gmail.com',
         'password' => 'iead lols hpgi dova',
         'from' => '',
-        'fromname' => 'DFrame Mailer',
+        'fromname' => 'DLight Mailer',
     ]);
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DFrame\Utils\Sorting;
+namespace DLight\Utils\Sorting;
 
 /**
  * **Utility: Sorting - GnomeSort**

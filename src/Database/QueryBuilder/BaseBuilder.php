@@ -1,7 +1,7 @@
 <?php
-namespace DFrame\Database\QueryBuilder;
+namespace DLight\Database\QueryBuilder;
 
-use DFrame\Database\Interfaces\BuilderInterface;
+use DLight\Database\Interfaces\BuilderInterface;
 
 use function \is_array;
 use function \count;

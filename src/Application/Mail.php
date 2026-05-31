@@ -1,8 +1,8 @@
 <?php
 
-namespace DFrame\Application;
+namespace DLight\Application;
 
-use DFrame\Application\View;
+use DLight\Application\View;
 
 /**
  * **Secure SMTP Mailer**
@@ -367,7 +367,7 @@ class Mail
         $this->getLine($fp);
 
         // Generate a unique boundary for multipart
-        $boundary = "dframe_" . md5(uniqid(time()));
+        $boundary = "dlight_" . md5(uniqid(time()));
 
         // --- Headers ---
         $headers  = "MIME-Version: 1.0\r\n";

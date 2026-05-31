@@ -1,8 +1,8 @@
 <?php
 
-use DFrame\Application\Router;
-use DFrame\Application\View;
-use DFrame\Application\Session;
+use DLight\Application\Router;
+use DLight\Application\View;
+use DLight\Application\Session;
 
 if (!function_exists('old')) {
     /**
@@ -76,7 +76,7 @@ if (!function_exists('dd')) {
                     $output .= $raw . ' = *UNDEFINED*' . "\n";
                 }
             } elseif (array_key_exists($i, $vars)) {
-                $output .= craft_custom_var_dump($vars[$i]) . "\n";
+                $output .= $raw . ' = ' . craft_custom_var_dump($vars[$i]) . "\n";
             } else {
                 $output .= '*UNDEFINED*' . "\n";
             }
@@ -135,7 +135,7 @@ if (!function_exists('dump')) {
                     $output .= $raw . ' = *UNDEFINED*' . "\n";
                 }
             } elseif (array_key_exists($i, $vars)) {
-                $output .= craft_custom_var_dump($vars[$i]) . "\n";
+                $output .= $raw . ' = ' . craft_custom_var_dump($vars[$i]) . "\n";
             } else {
                 $output .= '*UNDEFINED*' . "\n";
             }
@@ -390,7 +390,7 @@ if (!function_exists('view')) {
 
 if (!function_exists('df_config')) {
     /**
-     * DFrame configuration helper.
+     * DLight configuration helper.
      *
      * - df_config()               → get all config
      * - df_config('app.name')     → get specific config value

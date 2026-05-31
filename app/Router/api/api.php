@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-$router = new DFrame\Application\Router();
+$router = new DLight\Application\Router();
 
 $router->signApi('GET /', fn() => "Hello, World!")->name('api.home');
 
 // Demo Send Mail
 $router->signApi('GET /demo/mail', function () {
     try {
-        $mail = new DFrame\Application\Mail();
+        $mail = new DLight\Application\Mail();
         $mail->to(email: 'datndph42403@gmail.com')
-            ->subject(subject: 'Test Email from DFrame Mailer 2.0')
-            ->body('This is a test email sent from DFrame Mailer 2.0.');
+            ->subject(subject: 'Test Email from DLight Mailer 2.0')
+            ->body('This is a test email sent from DLight Mailer 2.0.');
         $mail->send();
         return 'Email sent successfully!';
     } catch (\Exception $e) {
@@ -22,10 +22,10 @@ $router->signApi('GET /demo/mail', function () {
 
 // Demo Redis Cache
 $router->signApi('GET /demo/cache', function () {
-    $cache = new \DFrame\Application\Drive\Cache\Redis([
+    $cache = new \DLight\Application\Drive\Cache\Redis([
         'host'        => '127.0.0.1',
         'port'        => 6379,
-        'prefix'      => 'dframe:',
+        'prefix'      => 'dlight:',
         'default_ttl' => 60,
     ]);
 

@@ -1,9 +1,9 @@
 <?php
 
-namespace DFrame\Application\Drive\Cache;
+namespace DLight\Application\Drive\Cache;
 
 /**
- * A Memcached-based cache driver for DFrame Framework.
+ * A Memcached-based cache driver for DLight Framework.
  */
 class Memcached
 {

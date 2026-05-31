@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DFrame\Command\Helper;
+namespace DLight\Command\Helper;
 
 /**
  * **ConsoleOutput Helper**

@@ -1,6 +1,6 @@
 <?php
 
-namespace DFrame\Command;
+namespace DLight\Command;
 
 class Add
 {
@@ -274,7 +274,7 @@ class Add
 				return;
 			}
 
-			$template = "<?php\n\nnamespace DFrame\\Command;\n\nclass $name\n{\n    public static function handle()\n    {\n        return function (\$argv = []) {\n            echo \"$name executed\";\n        };\n    }\n}\n";
+			$template = "<?php\n\nnamespace DLight\\Command;\n\nclass $name\n{\n    public static function handle()\n    {\n        return function (\$argv = []) {\n            echo \"$name executed\";\n        };\n    }\n}\n";
 
 			if (file_put_contents($file, $template) !== false) {
 				echo ($existedBefore ? "Overwrote command: src/Command/$name.php\n" : "Created command: src/Command/$name.php\n");
@@ -314,7 +314,7 @@ class Add
 				return;
 			}
 
-			$template = "<?php\n\nnamespace App\\Middleware;\n\nuse DFrame\\Application\\Middleware;\n\nclass $name extends Middleware\n{\n    public static function sign(): void\n    {\n        Middleware::register('{$name}', function () {\n            // TODO: implement middleware logic\n            return null;\n        });\n    }\n}\n";
+			$template = "<?php\n\nnamespace App\\Middleware;\n\nuse DLight\\Application\\Middleware;\n\nclass $name extends Middleware\n{\n    public static function sign(): void\n    {\n        Middleware::register('{$name}', function () {\n            // TODO: implement middleware logic\n            return null;\n        });\n    }\n}\n";
 
 			if (file_put_contents($file, $template) !== false) {
 				echo ($existedBefore ? "Overwrote middleware: app/Middleware/$name.php\n" : "Created middleware: app/Middleware/$name.php\n");

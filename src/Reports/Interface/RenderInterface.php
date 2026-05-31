@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DFrame\Reports\Interface;
+namespace DLight\Reports\Interface;
 
 /**
  * RenderInterface - Interface for renderers

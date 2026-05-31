@@ -5,7 +5,7 @@ return [
     'drives' => [
         // BladeOne view drive configuration
         'bladeone' => [
-            'class' => \DFrame\Application\Drive\View\BladeOneDrive::class,
+            'class' => \DLight\Application\Drive\View\BladeOneDrive::class,
             'options' => [
                 'compiled_path' => INDEX_DIR . 'cache/view/compiled/',
                 'cache' => true,
@@ -14,13 +14,13 @@ return [
         ],
         // Twig view drive configuration
         'twig' => [
-            'class' => \DFrame\Application\Drive\View\TwigDrive::class,
+            'class' => \DLight\Application\Drive\View\TwigDrive::class,
             'options' => [
                 'cache' => false,
                 // Register custom functions for Twig templates
                 'functions' => [
                     // key is the function name in Twig, value is the callable
-                    'route' => [\DFrame\Application\Router::class, 'route'],
+                    'route' => [\DLight\Application\Router::class, 'route'],
                     'dump' => 'dump',
                     'dd' => 'dd',
                     // Add more functions if needed

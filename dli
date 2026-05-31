@@ -1,9 +1,9 @@
 #!/usr/bin/env php
 <?php
 
-// dli - DFrame Command Line Interface Bootstrapper
+// dli - DLight Command Line Interface Bootstrapper
 /*
- * DFrame - A lightweight PHP framework for web and CLI applications.
+ * DLight - A lightweight PHP framework for web and CLI applications.
  * 
  * @author Datahihi1
 */
@@ -23,8 +23,8 @@ if (!file_exists(ROOT_DIR . 'vendor/autoload.php')) {
 
 require_once ROOT_DIR . 'vendor/autoload.php';
 
-use DFrame\Application\App;
-use DFrame\Reports\Report;
+use DLight\Application\App;
+use DLight\Reports\Report;
 
 Report::setup(true, INDEX_DIR . 'logs/cli.log', Report::cli());
 

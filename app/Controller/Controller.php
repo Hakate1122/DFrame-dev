@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use DFrame\Application\View;
+use DLight\Application\View;
 use \Exception;
 
 class Controller

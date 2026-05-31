@@ -1,10 +1,10 @@
 <?php
 
-namespace DFrame\Reports;
+namespace DLight\Reports;
 
-use DFrame\Application\App;
-use DFrame\Reports\Interface\HandlerInterface;
-use DFrame\Reports\Interface\RenderInterface;
+use DLight\Application\App;
+use DLight\Reports\Interface\HandlerInterface;
+use DLight\Reports\Interface\RenderInterface;
 
 /**
  * Handler - Error and exception handling class
@@ -32,8 +32,8 @@ class Handler implements HandlerInterface
     private function detectRenderer(): RenderInterface
     {
         return php_sapi_name() === 'cli'
-            ? new \DFrame\Reports\Render\Cli()
-            : new \DFrame\Reports\Render\Html();
+            ? new \DLight\Reports\Render\Cli()
+            : new \DLight\Reports\Render\Html();
     }
 
     public function handleError(int $errno, string $errstr, string $errfile, int $errline): bool

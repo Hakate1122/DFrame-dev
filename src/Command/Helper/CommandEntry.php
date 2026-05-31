@@ -1,8 +1,8 @@
 <?php
 
-namespace DFrame\Command\Helper;
+namespace DLight\Command\Helper;
 
-use DFrame\Application\Command;
+use DLight\Application\Command;
 
 /**
  * **CommandEntry**

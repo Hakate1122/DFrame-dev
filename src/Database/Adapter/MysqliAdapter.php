@@ -1,7 +1,7 @@
 <?php
-namespace DFrame\Database\Adapter;
+namespace DLight\Database\Adapter;
 
-use DFrame\Database\Interfaces\AdapterInterface;
+use DLight\Database\Interfaces\AdapterInterface;
 
 use function \is_float;
 use function \is_int;
@@ -15,7 +15,14 @@ class MysqliAdapter implements AdapterInterface
 	protected $conn;
 
 	/**
-	 * Get connection
+	 * Get connection - Connect to a MySQL database using MySQLi.
+	 * 
+	 * @param array $config Configuration array with keys:
+	 * - `host`: (string) Database host (default: `localhost`)
+	 * - `user`: (string) Database username (default: `root`)
+	 * - `password`: (string) Database password (default: empty)
+	 * - `database`: (string) Database name (default: `manga_reader`)
+	 * - `port`: (int) Database port (default: 3306)
 	 */
 	public function connect(array $config)
 	{

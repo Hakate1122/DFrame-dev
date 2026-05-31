@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DFrame\Database\Interfaces;
+namespace DLight\Database\Interfaces;
 
 /**
  * Interface for building and executing database queries.

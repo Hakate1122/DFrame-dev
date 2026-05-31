@@ -1,6 +1,6 @@
 <?php
 
-namespace DFrame\Command\Helper;
+namespace DLight\Command\Helper;
 
 /**
  * **ConsoleInput Helper**

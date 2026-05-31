@@ -1,9 +1,9 @@
 <?php
 
-namespace DFrame\Command;
+namespace DLight\Command;
 
-use DFrame\Application\App;
-use DFrame\Command\Helper\ConsoleInput;
+use DLight\Application\App;
+use DLight\Command\Helper\ConsoleInput;
 
 /**
  * Core command implementations for the CLI application.
@@ -238,7 +238,7 @@ class Core
         return function ($argv = null) use ($detectDeviceRuntime, $dfver) {
             $scriptName = isset($argv[0]) ? basename($argv[0]) : '';
             $os = self::getOsDetails();
-            echo "DLI - DFrame CLI Core Helper\n";
+            echo "DLI - DLight CLI Core Helper\n";
             echo "Version: " . cli_cyan($dfver) . " | PHP: " . cli_blue(phpversion()) . " on " . cli_yellow($detectDeviceRuntime()) . "\n";
             if (!empty($os['name']) || !empty($os['version']) || !empty($os['build'])) {
                 $osName = (string) ($os['name'] ?? $os['family'] ?? 'unknown');
@@ -268,6 +268,7 @@ class Core
             echo "  version, -v          Show application version\n";
             echo "  server, -s           Start the development server\n";
             echo "  list                 List all available commands\n";
+            echo "  test                 Run unit tests\n";
             echo "\n";
             echo "Add commands - create a new components:\n";
             echo "  add <type>           Create a new component[controller, model, view, middleware, command, mail]\n";
@@ -323,7 +324,7 @@ class Core
             echo "  Output: resource/view/{name}.php (PHP template stub)\n\n";
 
             echo cli_cyan("add:command") . " / " . cli_cyan("add command") . "\n";
-            echo "  Output: src/Command/{Name}Command.php (namespace DFrame\\Command)\n";
+            echo "  Output: src/Command/{Name}Command.php (namespace DLight\\Command)\n";
             echo "  Suffix " . cli_gray("Command") . " is added if missing.\n\n";
 
             echo cli_cyan("add:middleware") . " / " . cli_cyan("add middleware") . "\n";

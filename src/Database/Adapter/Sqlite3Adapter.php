@@ -1,7 +1,7 @@
 <?php
-namespace DFrame\Database\Adapter;
+namespace DLight\Database\Adapter;
 
-use DFrame\Database\Interfaces\AdapterInterface;
+use DLight\Database\Interfaces\AdapterInterface;
 
 use function \is_float;
 use function \is_int;
@@ -17,7 +17,10 @@ class Sqlite3Adapter implements AdapterInterface
 	protected $conn;
 
 	/**
-	 * Get connection
+	 * Get connection - Connect to a SQLite database using the SQLite3 extension.
+	 * 
+	 * @param array $config - Configuration array with keys:
+	 *   - database: (string) Path to the SQLite database file (relative to ROOT_DIR . 'app/database/') or ':memory:' for in-memory database.
 	 */
 	public function connect(array $config)
 	{

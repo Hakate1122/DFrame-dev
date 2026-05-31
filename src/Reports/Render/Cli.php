@@ -1,11 +1,11 @@
 <?php
 
-namespace DFrame\Reports\Render;
+namespace DLight\Reports\Render;
 
-use DFrame\Reports\Interface\RenderInterface;
+use DLight\Reports\Interface\RenderInterface;
 
 /**
- * CLI Renderer for DFrame Reports
+ * CLI Renderer for DLight Reports
  */
 class Cli implements RenderInterface
 {
@@ -18,11 +18,18 @@ class Cli implements RenderInterface
         'bold' => "\033[1m",
     ];
 
+    private static $highlights = [
+        'error' => "\033[45m\033[30m",
+        'exception' => "\033[41m\033[30m",
+        'parse' => "\033[44m\033[30m",
+        'runtime' => "\033[43m\033[30m",
+    ];
+
     public function render(string $type, string $message, string $file, int $line, array $context = []): void
     {
-        $dfversion = class_exists(\DFrame\Application\App::class)
-        ? \DFrame\Application\App::VERSION
-        : 'Non-DFrame Env';
+        $dfversion = class_exists(\DLight\Application\App::class)
+        ? \DLight\Application\App::VERSION
+        : 'Non-DLight Env';
         
         $phpversion = PHP_VERSION;
         
@@ -30,11 +37,9 @@ class Cli implements RenderInterface
         $reset = self::$colors['reset'];
         $bold = self::$colors['bold'];
 
-        echo "$color{$bold}DFrame Report$reset" . PHP_EOL;
-        echo "$color Version: $reset$dfversion" . PHP_EOL;
-        echo "$color PHP Version: $reset$phpversion" . PHP_EOL;
+        echo "$color{$bold}DLight Report$reset - Oops, DLight Report detected a bug!" . PHP_EOL;
+        echo "$color DLight Version: $reset$dfversion |$color PHP Version: $reset$phpversion" . PHP_EOL;
         echo PHP_EOL;
-        echo "Oops, DFrame Report detected a bug!" . PHP_EOL;
         echo "Type: $color{$bold}$type$reset" . PHP_EOL;
         echo "$color{$bold}==============================$reset" . PHP_EOL;
         echo "$color Message: $reset$message" . PHP_EOL;
@@ -54,8 +59,14 @@ class Cli implements RenderInterface
             echo "$color Nearby: $reset" . PHP_EOL;
             for ($i = $start; $i < $end; $i++) {
                 $num = $i + 1;
-                $prefix = $num == $line ? "$bold>$reset " : "  ";
-                echo "  $prefix$num: " . rtrim($lines[$i]) . PHP_EOL;
+                $lineContent = rtrim($lines[$i]);
+                echo match ($num) {
+                    $line => (function() use ($num, $lineContent, $type, $color, $bold, $reset) {
+                        $hl = self::$highlights[$type] ?? (self::$colors['highlight'] ?? $color);
+                        return "  " . ($bold . "> " . $reset) . "$num: " . $hl . $bold . $lineContent . $reset . PHP_EOL;
+                    })(),
+                    default => "    $num: " . $lineContent . PHP_EOL,
+                };
             }
         }
 

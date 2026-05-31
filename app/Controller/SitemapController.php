@@ -22,7 +22,7 @@ class SitemapController
     protected function buildSitemapXml(): string
     {
 
-        $routesInfo = \DFrame\Application\Router::getRegisteredRoutes();
+        $routesInfo = \DLight\Application\Router::getRegisteredRoutes();
         $paths = [];
 
         foreach ($routesInfo['static'] as $method => $map) {

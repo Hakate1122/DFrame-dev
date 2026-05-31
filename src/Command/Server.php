@@ -1,8 +1,8 @@
 <?php
 
-namespace DFrame\Command;
+namespace DLight\Command;
 
-use DFrame\Application\App;
+use DLight\Application\App;
 
 /**
  * A command to start a local development server.
@@ -113,13 +113,15 @@ class Server
                 }
             }
 
-            echo "Starting development server (mode: $mode)\n";
+            echo "Starting development server (mode: $mode) | PHP: " . PHP_VERSION . "\n";
             echo "Document root: $public\n";
             echo "Listening on: $bindHost:$port\n";
             echo "Accessible at: http://" . $displayHost . ":" . $port . "\n";
             echo "Press Ctrl+C to stop\n\n";
 
-            passthru(sprintf('php -S %s:%d -t %s', $bindHost, $port, escapeshellarg($public)));
+            $phpBin = PHP_OS_FAMILY === 'Windows' ? '"' . PHP_BINARY . '"' : escapeshellarg(PHP_BINARY);
+            $cmd = sprintf('%s -S %s:%d -t %s', $phpBin, $bindHost, $port, escapeshellarg($public));
+            passthru($cmd);
         };
     }
 }

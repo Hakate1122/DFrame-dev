@@ -1,10 +1,10 @@
 <?php
 
-namespace DFrame\Reports;
+namespace DLight\Reports;
 
-use DFrame\Reports\Handler;
-use DFrame\Reports\Render\Html;
-use DFrame\Reports\Render\Cli;
+use DLight\Reports\Handler;
+use DLight\Reports\Render\Html;
+use DLight\Reports\Render\Cli;
 
 /**
  * Report - Global error and exception handling class

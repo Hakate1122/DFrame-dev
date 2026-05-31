@@ -1,20 +1,20 @@
 <?php
 
-namespace DFrame\Database;
+namespace DLight\Database;
 
-use DFrame\Database\Adapter\MysqliAdapter;
-use DFrame\Database\Adapter\PdoMysqlAdapter;
-use DFrame\Database\Adapter\Sqlite3Adapter;
-use DFrame\Database\Adapter\PdoSqliteAdapter;
+use DLight\Database\Adapter\MysqliAdapter;
+use DLight\Database\Adapter\PdoMysqlAdapter;
+use DLight\Database\Adapter\Sqlite3Adapter;
+use DLight\Database\Adapter\PdoSqliteAdapter;
 
-use DFrame\Database\Exception\UnsupportedDesignException;
-use DFrame\Database\Exception\UnsupportedDriverException;
+use DLight\Database\Exception\UnsupportedDesignException;
+use DLight\Database\Exception\UnsupportedDriverException;
 
-use DFrame\Database\Mapper\MysqlMapper;
-use DFrame\Database\Mapper\SqliteMapper;
+use DLight\Database\Mapper\MysqlMapper;
+use DLight\Database\Mapper\SqliteMapper;
 
-use DFrame\Database\QueryBuilder\MysqlBuilder;
-use DFrame\Database\QueryBuilder\SqliteBuilder;
+use DLight\Database\QueryBuilder\MysqlBuilder;
+use DLight\Database\QueryBuilder\SqliteBuilder;
 
 use function \in_array;
 
@@ -36,6 +36,7 @@ class DatabaseManager
     protected const SUPPORTED_DESIGNS = ['mapper', 'builder'];
 
     // properties for adapter, mapper/builder class.
+    protected $driver;
     /** Adapter instance */
     protected $adapter;
     /** Mapper or Builder instance */
@@ -64,6 +65,7 @@ class DatabaseManager
     public function __construct()
     {
         $driver = env('DB_DRIVER');
+        $this->driver = $driver;
         if (!$driver) {
             throw new \InvalidArgumentException("DB_DRIVER is not set.");
         }
@@ -100,6 +102,112 @@ class DatabaseManager
         $this->mapperClass = $this->resolveMapperClass($design, $driver);
     }
 
+    // /**
+    //  * Create a table.
+    //  *
+    //  * @param string $table
+    //  * @param array $columns associative array of column => definition
+    //  * @param array $options ['if_not_exists' => true]
+    //  * @return bool
+    //  */
+    // public function createTable(string $table, array $columns, array $options = []): bool
+    // {
+    //     if (empty($columns)) {
+    //         throw new \InvalidArgumentException('Columns definition cannot be empty.');
+    //     }
+
+    //     $ifNotExists = $options['if_not_exists'] ?? true;
+
+    //     $driver = (string) ($this->driver ?? env('DB_DRIVER'));
+
+    //     $cols = [];
+    //     foreach ($columns as $name => $def) {
+    //         // Allow numeric keys where full definition is provided as string
+    //         if (is_int($name)) {
+    //             $cols[] = $def;
+    //             continue;
+    //         }
+
+    //         $definition = (string) $def;
+
+    //         // Normalize AUTO_INCREMENT between MySQL and SQLite
+    //         if (str_contains($driver, 'sqlite') && str_contains(strtoupper($definition), 'AUTO_INCREMENT')) {
+    //             // SQLite requires INTEGER PRIMARY KEY AUTOINCREMENT
+    //             $definition = 'INTEGER PRIMARY KEY AUTOINCREMENT';
+    //         }
+
+    //         $cols[] = "`$name` $definition";
+    //     }
+
+    //     $sql = 'CREATE TABLE ' . ($ifNotExists ? 'IF NOT EXISTS ' : '') . $table . ' (' . implode(', ', $cols) . ')';
+
+    //     $this->adapter->query($sql);
+    //     return true;
+    // }
+
+    // /**
+    //  * Alter a table. Supported operations: add, drop. Modify is available for MySQL only.
+    //  *
+    //  * @param string $table
+    //  * @param array $changes ['add' => ['col' => 'DEF', ...], 'drop' => ['col1','col2'], 'modify' => ['col' => 'DEF']]
+    //  * @return bool
+    //  */
+    // public function alterTable(string $table, array $changes): bool
+    // {
+    //     $driver = (string) ($this->driver ?? env('DB_DRIVER'));
+
+    //     $stmts = [];
+
+    //     if (!empty($changes['add']) && is_array($changes['add'])) {
+    //         foreach ($changes['add'] as $col => $def) {
+    //             if (is_int($col)) {
+    //                 $stmts[] = "ALTER TABLE $table ADD COLUMN $def";
+    //             } else {
+    //                 $stmts[] = "ALTER TABLE $table ADD COLUMN `$col` $def";
+    //             }
+    //         }
+    //     }
+
+    //     if (!empty($changes['drop']) && is_array($changes['drop'])) {
+    //         foreach ($changes['drop'] as $col) {
+    //             // SQLite supports DROP COLUMN only starting with 3.35.0; many versions do not.
+    //             if (str_contains($driver, 'sqlite')) {
+    //                 throw new \Exception('Dropping columns on SQLite is not supported by this helper.');
+    //             }
+    //             $stmts[] = "ALTER TABLE $table DROP COLUMN `$col`";
+    //         }
+    //     }
+
+    //     if (!empty($changes['modify']) && is_array($changes['modify'])) {
+    //         if (str_contains($driver, 'sqlite')) {
+    //             throw new \Exception('Modifying columns on SQLite is not supported by this helper.');
+    //         }
+    //         foreach ($changes['modify'] as $col => $def) {
+    //             $stmts[] = "ALTER TABLE $table MODIFY COLUMN `$col` $def";
+    //         }
+    //     }
+
+    //     foreach ($stmts as $sql) {
+    //         $this->adapter->query($sql);
+    //     }
+
+    //     return true;
+    // }
+
+    // /**
+    //  * Drop a table.
+    //  *
+    //  * @param string $table
+    //  * @param bool $ifExists
+    //  * @return bool
+    //  */
+    // public function dropTable(string $table, bool $ifExists = true): bool
+    // {
+    //     $sql = 'DROP TABLE ' . ($ifExists ? 'IF EXISTS ' : '') . $table;
+    //     $this->adapter->query($sql);
+    //     return true;
+    // }
+
     /**
      * Resolve mapper/builder class from design and driver.
      */
@@ -125,6 +233,8 @@ class DatabaseManager
 
     /**
      * Switch current instance database design dynamically.
+     * @param string $design The design to switch to ('mapper' or 'builder')
+     * @return self Returns the current instance for chaining
      */
     public function switchDesign(string $design): self
     {

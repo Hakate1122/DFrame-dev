@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Middleware;
 
-use DFrame\Application\Middleware;
+use DLight\Application\Middleware;
 
 /**
  * **User Authentication Middleware**
@@ -17,7 +17,7 @@ class UserAuthencation extends Middleware
     {
         Middleware::register('needed', function () {
             // Implement your authentication logic here
-            if (!isset($_SESSION['dframe_user'])) {
+            if (!isset($_SESSION['dlight_user'])) {
                 http_response_code(401);
                 return 'Unauthorized Access';
             }

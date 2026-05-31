@@ -2,8 +2,8 @@
 
 namespace App\Command;
 
-use DFrame\Command\Helper\ConsoleInput as Input;
-use DFrame\Command\Helper\ConsoleOutput as Output;
+use DLight\Command\Helper\ConsoleInput as Input;
+use DLight\Command\Helper\ConsoleOutput as Output;
 
 class Sample
 {

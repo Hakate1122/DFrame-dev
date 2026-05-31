@@ -1,5 +1,5 @@
 {
-    "name": "datahihi1/dframe",
+    "name": "datahihi1/dlight",
     "description": "This is a PHP framework created by Datahihi1.",
     "type": "project",
     "license": "MIT",
@@ -9,13 +9,19 @@
         "ext-pdo": "*",
         "ext-mbstring": "*",
         "ext-sockets": "*",
-        "datahihi1/tiny-env": "^1",
-        "psr/log": "^3"
+        "psr/log": "^3",
+        "datahihi1/tiny-env": "*",
+        "datahihi1/raknet": "dev-main"
+    },
+    "require-dev": {
+        "rector/rector": ">=2.4",
+        "phpstan/phpstan": ">=2.1",
+        "phpunit/phpunit": ">=9.6"
     },
     "autoload": {
         "psr-4": {
             "App\\": "app/",
-            "DFrame\\": "src/"
+            "DLight\\": "src/"
         },
         "files": [
             "src/Helper/cli.php",
@@ -36,10 +42,5 @@
         "post-create-project-cmd": [
             "@CopyEnv"
         ]
-    },
-    "require-dev": {
-        "rector/rector": ">=2.4",
-        "phpstan/phpstan": ">=2.1",
-        "phpunit/phpunit": ">=9.6"
     }
 }

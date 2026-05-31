@@ -1,5 +1,5 @@
 <?php
-namespace DFrame\Database\Traits;
+namespace DLight\Database\Traits;
 
 /**
  * **Authenticatable Trait**

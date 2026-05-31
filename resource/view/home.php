@@ -1,6 +1,7 @@
 <?php
 function formatBytes($bytes)
 {
+    if (!$bytes) return '0 MB';
     return round($bytes / 1024 / 1024, 2) . ' MB';
 }
 ?>
@@ -11,87 +12,89 @@ function formatBytes($bytes)
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>Welcome to DLight Framework</title>
     <style>
+        /* Khai báo biến màu sắc hiện đại */
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --border-color: #e5e7eb;
+        }
+
+        /* Reset & Căn giữa toàn màn hình bằng Flexbox */
         body {
             margin: 0;
             padding: 0;
-            background: #f4f4f4;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 14px;
-            color: #333;
+            background-color: var(--bg-body);
+            background-image: radial-gradient(circle at top right, #e0e7ff, transparent 40%),
+                              radial-gradient(circle at bottom left, #f3e8ff, transparent 40%);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            line-height: 1.6;
         }
 
+        /* Khung hiển thị dạng Card bo góc */
         .wrapper {
-            width: 960px;
-            margin: 30px auto;
-            background: #fff;
-            border: 1px solid #ddd;
+            width: 100%;
+            max-width: 800px;
+            margin: 20px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
         }
 
-        @media screen and (max-width: 980px) {
-            .wrapper {
-                width: auto;
-                margin: 10px;
-            }
-        }
-
-        @media screen and (max-width: 600px) {
-            body {
-                font-size: 13px;
-            }
-
-            .header {
-                font-size: 18px;
-                padding: 15px;
-            }
-
-            .content {
-                padding: 15px;
-            }
-        }
-
-        @media screen and (max-width: 320px) {
-            body {
-                font-size: 12px;
-            }
-
-            .content {
-                padding: 10px;
-            }
-        }
-
-        @media screen and (max-width: 200px) {
-            body {
-                font-size: 11px;
-            }
-
-            .header,
-            .content,
-            .footer {
-                padding: 5px;
-            }
-        }
-
+        /* Header phong cách tối giản, chữ Gradient */
         .header {
-            background: #2c3e50;
-            color: #fff;
-            padding: 20px;
-            font-size: 22px;
+            padding: 40px 40px 20px;
+            text-align: center;
         }
 
-        .content {
-            padding: 20px;
+        .logo {
+            font-size: 36px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
         }
 
         h1 {
-            margin-top: 0;
-            font-size: 24px;
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin: 0;
         }
 
-        h3 {
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 5px;
+        .content {
+            padding: 0 40px 30px;
+        }
+
+        /* Bảng thông tin Server dạng Grid/Flexbox */
+        .card {
+            background: #f9fafb;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: #f3f4f6;
+            padding: 12px 20px;
+            font-weight: 600;
+            font-size: 15px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
         }
 
         ul {
@@ -101,25 +104,93 @@ function formatBytes($bytes)
         }
 
         ul li {
-            padding: 6px 0;
-            border-bottom: 1px dotted #ccc;
-            word-wrap: break-word;
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+        }
+
+        ul li:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .value {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* Giao diện hiển thị đường dẫn (Routes/Controllers) */
+        .paths {
+            margin-top: 30px;
+        }
+
+        .path-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .path-label {
+            width: 100px;
+            font-weight: 600;
+            color: var(--text-muted);
         }
 
         code {
-            background: #eee;
-            padding: 2px 4px;
-            font-family: Consolas, monospace;
+            background: #1e293b;
+            color: #38bdf8;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-family: "Fira Code", Consolas, Monaco, monospace;
             font-size: 13px;
-            word-wrap: break-word;
+            flex-grow: 1;
+            word-break: break-all;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
+        }
+
+        /* Gợi ý chỉnh sửa */
+        .edit-hint {
+            margin-top: 30px;
+            padding: 16px;
+            background: #eef2ff;
+            border-left: 4px solid var(--primary);
+            border-radius: 0 8px 8px 0;
+            color: #4338ca;
+            font-size: 14px;
+            font-weight: 500;
         }
 
         .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border-color);
             background: #fafafa;
-            padding: 10px 20px;
-            border-top: 1px solid #ddd;
-            font-size: 12px;
-            color: #777;
+        }
+
+        /* Responsive cho Mobile & Tablet */
+        @media screen and (max-width: 600px) {
+            .header { padding: 30px 20px 15px; }
+            .content { padding: 0 20px 20px; }
+            ul li { 
+                flex-direction: column; 
+                gap: 6px; 
+            }
+            .path-item { 
+                flex-direction: column; 
+                align-items: flex-start; 
+                gap: 8px; 
+            }
+            .path-label { width: auto; }
+            code { width: 100%; box-sizing: border-box; }
         }
     </style>
 
@@ -128,36 +199,57 @@ function formatBytes($bytes)
 <body>
     <div class="wrapper">
         <div class="header">
-            DFrame Framework
+            <div class="logo">DLight Framework</div>
+            <h1>Congratulations! Your application has started successfully.</h1>
         </div>
 
         <div class="content">
-            <h1>Congratulations! DFrame Framework has started successfully.</h1>
+            <!-- Khu vực thông tin hệ thống -->
+            <div class="card">
+                <div class="card-header">Server Information</div>
+                <ul>
+                    <li>
+                        <span class="label">PHP Version</span> 
+                        <span class="value"><?= $phpVersion ?? 'Unknown' ?></span>
+                    </li>
+                    <li>
+                        <span class="label">DLight Version</span> 
+                        <span class="value"><?= $dlightVersion ?? 'Unknown' ?></span>
+                    </li>
+                    <li>
+                        <span class="label">Operating System</span> 
+                        <span class="value"><?= $os ?? 'Unknown' ?></span>
+                    </li>
+                    <li>
+                        <span class="label">Web Server</span> 
+                        <span class="value"><?= $server ?? 'Unknown' ?></span>
+                    </li>
+                    <li>
+                        <span class="label">Memory Usage</span> 
+                        <span class="value"><?= isset($memory) ? formatBytes($memory) : '0 MB' ?> / <?= $memoryLimit ?? 'Unknown' ?></span>
+                    </li>
+                </ul>
+            </div>
 
-            <h3>Server Information</h3>
+            <!-- Khu vực định tuyến và xử lý -->
+            <div class="paths">
+                <div class="path-item">
+                    <span class="path-label">Controller</span>
+                    <code>app/Controller/HomeController.php</code>
+                </div>
+                <div class="path-item">
+                    <span class="path-label">Route</span>
+                    <code>app/Route/web/web.php</code>
+                </div>
+            </div>
 
-            <ul>
-                <li>PHP Version: <?= $phpVersion ?></li>
-                <li>DFrame Version: <?= $dframeVersion ?></li>
-                <li>Operating System: <?= $os ?></li>
-                <li>Web Server: <?= $server ?></li>
-                <li>Memory Usage: <?= formatBytes($memory) ?> / <?= $memoryLimit ?></li>
-            </ul>
-
-            <p>
-                Edit <code>resource/view/home.php</code> to change this page.
-            </p>
-
-            <p>
-                Controller: <code>app/Controller/HomeController.php</code><br>
-            </p>
-            <p>
-                Route: <code>app/Route/web/web.php</code>
-            </p>
+            <div class="edit-hint">
+                Edit <strong>resource/view/home.php</strong> to change this page.
+            </div>
         </div>
 
         <div class="footer">
-            DFrame &copy; 2025 - <?= date('Y') ?>
+            DLight Framework &copy; 2025 - <?= date('Y') ?> | Built with performance in mind.
         </div>
     </div>
 </body>

@@ -1,5 +1,7 @@
 <?php
 
+// $cli = new DLight\Application\Command();
+
 use App\Chat\Chat;
 
 $cli->register('hello', [\App\Command\Hello::class, 'handle']);
@@ -13,10 +15,10 @@ $cli->register('try-connect-db', [\App\Command\Sample::class, 'tryConnectDB']);
 
 $cli->register('send:mail', function () {
     try {
-        $mail = new DFrame\Application\Mail();
+        $mail = new DLight\Application\Mail();
         $mail->to(email: 'datd5400@gmail.com')
-            ->subject(subject: 'Test Email from DFrame Mailer 2.0')
-            ->body('This is a test email sent from DFrame Mailer 2.0.');
+            ->subject(subject: 'Test Email from DLight Mailer 2.0')
+            ->body('This is a test email sent from DLight Mailer 2.0.');
         $mail->send();
         echo cli_green("Email sent successfully.\n");
     } catch (Exception $e) {

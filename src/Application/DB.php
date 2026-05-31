@@ -1,13 +1,13 @@
 <?php
 
-namespace DFrame\Application;
+namespace DLight\Application;
 
-use DFrame\Database\Adapter\MysqliAdapter;
-use DFrame\Database\Adapter\Sqlite3Adapter;
-use DFrame\Database\Adapter\PdoMysqlAdapter;
-use DFrame\Database\Adapter\PdoSqliteAdapter;
-use DFrame\Database\DatabaseManager;
-use DFrame\Database\Exception\CallWrongMethodOnDbDesign;
+use DLight\Database\Adapter\MysqliAdapter;
+use DLight\Database\Adapter\Sqlite3Adapter;
+use DLight\Database\Adapter\PdoMysqlAdapter;
+use DLight\Database\Adapter\PdoSqliteAdapter;
+use DLight\Database\DatabaseManager;
+use DLight\Database\Exception\CallWrongMethodOnDbDesign;
 
 /**
  * **Database Handler**
@@ -41,6 +41,9 @@ use DFrame\Database\Exception\CallWrongMethodOnDbDesign;
  * @method \Craft\Database\Interfaces\MapperInterface insertGetId(array $data)
  * @method \Craft\Database\Interfaces\MapperInterface executeUpdate(array $data)
  * @method \Craft\Database\Interfaces\MapperInterface executeDelete()
+ * 
+ * @method mapper() Switch to Mapper design
+ * @method builder() Switch to Builder design
  */
 class DB extends DatabaseManager
 {
@@ -63,7 +66,7 @@ class DB extends DatabaseManager
     protected function usesSoftDelete(): bool
     {
         $class = static::class;
-        $softDeleteTrait = \DFrame\Database\Traits\SoftDelete::class;
+        $softDeleteTrait = \DLight\Database\Traits\SoftDelete::class;
         
         // Check traits in this class and parent classes
         do {

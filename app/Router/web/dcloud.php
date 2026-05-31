@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Middleware\UserAuthencation;
-use DFrame\Application\Router;
+use DLight\Application\Router;
 
 UserAuthencation::sign();
 
@@ -15,3 +15,11 @@ Router::group('/dcloud')::action(function (Router $router) {
     $router->sign('POST /api/delete', [\App\Controller\DCloudController::class, 'delete'])->name('dcloud.delete');
     $router->sign('POST /api/rename', [\App\Controller\DCloudController::class, 'rename'])->name('dcloud.rename');
 });
+
+// DImage - simple image hosting UI + API
+
+// DMedia - simple media hosting UI + API
+
+// DMusic - simple music hosting UI + API
+
+// DPod - simple podcast hosting UI + API

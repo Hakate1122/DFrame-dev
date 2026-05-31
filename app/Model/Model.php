@@ -2,12 +2,12 @@
 
 namespace App\Model;
 
-use DFrame\Database\Adapter\MysqliAdapter;
-use DFrame\Database\Adapter\Sqlite3Adapter;
-use DFrame\Database\Adapter\PdoMysqlAdapter;
-use DFrame\Database\Adapter\PdoSqliteAdapter;
-use DFrame\Database\DatabaseManager;
-use DFrame\Database\Exception\CallWrongMethodOnDbDesign;
+use DLight\Database\Adapter\MysqliAdapter;
+use DLight\Database\Adapter\Sqlite3Adapter;
+use DLight\Database\Adapter\PdoMysqlAdapter;
+use DLight\Database\Adapter\PdoSqliteAdapter;
+use DLight\Database\DatabaseManager;
+use DLight\Database\Exception\CallWrongMethodOnDbDesign;
 
 /**
  * #### Database handler
@@ -28,6 +28,8 @@ use DFrame\Database\Exception\CallWrongMethodOnDbDesign;
  * @method mixed fetch(string $type = 'assoc')
  * @method mixed first(string $type = 'assoc')
  * @method array get()
+ * @method array mapper()
+ * @method array builder()
  *
  * @method array|null find($id)
  * @method array all()
@@ -38,6 +40,9 @@ use DFrame\Database\Exception\CallWrongMethodOnDbDesign;
  * @method mixed insertGetId(array $data)
  * @method bool executeUpdate(array $data)
  * @method bool executeDelete()
+ * 
+ * @method mixed mapper()
+ * @method mixed builder()
  */
 class Model extends DatabaseManager
 {
@@ -57,7 +62,7 @@ class Model extends DatabaseManager
     protected function usesSoftDelete(): bool
     {
         $class = static::class;
-        $softDeleteTrait = \DFrame\Database\Traits\SoftDelete::class;
+        $softDeleteTrait = \DLight\Database\Traits\SoftDelete::class;
         
         // Check traits in this class and parent classes
         do {
@@ -93,6 +98,23 @@ class Model extends DatabaseManager
         $selectable = property_exists($instance, 'selectable') ? $instance->selectable : null;
         $instance->mapper = $instance->getMapper($table, $instance->usesSoftDelete(), $selectable);
         return $instance;
+    }
+
+    /**
+     * Create a mapper-based model instance regardless of env DB_DESIGN.
+     */
+    public static function mapper(): self
+    {
+        $instance = new static();
+        return $instance->switchDesign('mapper');
+    }
+
+    /**
+     * Switch current model instance to builder design.
+     */
+    public function builder(): self
+    {
+        return $this->switchDesign('builder');
     }
 
     /**

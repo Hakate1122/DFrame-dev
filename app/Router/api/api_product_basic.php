@@ -1,10 +1,10 @@
 <?php
 
-$router = new DFrame\Application\Router();
+$router = new DLight\Application\Router();
 
 $router->signApi('GET /products', function(){
     $products = new App\Model\Products();
-    $allProducts = $products->fetchAll();
+    $allProducts = $products::all();
     return ([
         'ok' => true,
         'products' => $allProducts
@@ -13,7 +13,7 @@ $router->signApi('GET /products', function(){
 
 $router->signApi('GET /products/{id}', function($id){
     $products = new App\Model\Products();
-    $product = $products->where('id', $id)->first();
+    $product = $products::findOrFail($id);
     if(!$product){
         http_response_code(404);
         return ([

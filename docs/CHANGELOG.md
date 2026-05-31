@@ -1,3 +1,44 @@
+## `2026.5.31-dev` (2026-05-31)
+
+### Changed
+- Router: ensure API routes include group prefixes and normalize API paths when registering static API routes; improve route naming and group context handling to avoid duplicate prefixes and incorrect path joins.
+- Source helper: safer URL/path generation and metadata handling in `src/Helper/source.php` (normalize extensions, sanitize paths, robust `meta` read/write and MIME detection fallback). Update Source::check now have more information of the file.
+
+## `2026.5.26-dev` (2026-05-26)
+### Added
+- Add test for `php dli test` command in `tests/Unit/ExampleTest.php` to verify that the testing framework is correctly set up and can run basic assertions. This serves as a sanity check for the testing environment and ensures that future tests can be added and executed successfully.
+
+Run:
+```bash
+php dli test tests/Unit
+```
+
+### Changed
+
+- Update CLI error output to use bright highlight for better visibility and distinction from regular output. This enhances the user experience by making errors more noticeable in the terminal, especially when mixed with other output.
+
+- Update PHPDoc in Validator, View.
+
+## `2026.5.20-dev` (2026-05-20)
+# Large change
+- Rename the framework from "DFrame" to "DLight" to better reflect its lightweight and dynamic nature. This includes updating namespaces, class names, documentation, and branding across the codebase and website.
+
+## `2026.5.11-dev` (2026-05-11)
+### Fixed
+- Fix development server command now correctly detects dynamic PHP binary path using `PHP_BINARY` constant instead of hardcoding `php`, ensuring it runs with the same PHP version as the CLI environment. This resolves issues where `php` in PATH might point to a different version than expected, especially in environments with multiple PHP installations (e.g. Laragon, XAMPP, etc.).
+
+Before v2026.5.11:
+```bash
+php dli server # run on PHP versions in PATH
+C:\laragon\bin\php\php-8.2.0\php.exe dli server # still run on PHP versions in PATH, ignoring PHP_BINARY 
+```
+After v2026.5.11:
+```bash
+php dli server # runs on the same PHP version as the CLI environment (PHP_BINARY)
+C:\laragon\bin\php\php-8.2.0\php.exe dli server # runs on the same PHP version as the CLI environment (PHP_BINARY)
+\home\user\php-8.1.0\php.exe dli server # runs on the same PHP version as the CLI environment (PHP_BINARY)
+```
+
 ## `2026.5.4-dev` (2026-05-04)
 
 ### Changed
@@ -10,13 +51,13 @@
 - Add Docker runtime notice in `src/Command/Core.php` help output, so `dli` now explicitly informs users when commands are executed inside a container.
 
 ### Changed
-- Update `docker-compose.yml` to set `DOCKER_RUNNING=true` for the `dframe-app` service, providing an explicit runtime flag that complements filesystem/cgroup detection in containerized environments.
+- Update `docker-compose.yml` to set `DOCKER_RUNNING=true` for the `dlight-app` service, providing an explicit runtime flag that complements filesystem/cgroup detection in containerized environments.
 - Class `Mail` now supports multiple SMTP providers via `SERVICE_PRESETS` constant, allowing easy configuration of different mail services (e.g. Gmail, Outlook, Yahoo, etc.).
 
 ## `2026.5.2-dev` (2026-05-02)
 
 ### Added
-- Add `CallWrongMethodOnDbDesign` runtime guard for dynamic model/database proxy calls. When a method is called on the wrong DB design (`mapper` vs `builder`), DFrame now throws a clear domain exception instead of PHP callback errors from `call_user_func_array`.
+- Add `CallWrongMethodOnDbDesign` runtime guard for dynamic model/database proxy calls. When a method is called on the wrong DB design (`mapper` vs `builder`), DLight now throws a clear domain exception instead of PHP callback errors from `call_user_func_array`.
 - Add explicit design-switching APIs in `src/Application/DB.php`: `DB::mapper()` to force mapper mode and `DB->builder()` to switch the current instance to builder mode without changing `.env` `DB_DESIGN`.
 
 ### Changed
@@ -87,6 +128,6 @@ php dli add -h
 
 ### Changed
 
-- Running DFrame from a **PHAR** no longer hard-requires a `.env` file to exist next to / inside the PHAR.  
+- Running DLight from a **PHAR** no longer hard-requires a `.env` file to exist next to / inside the PHAR.  
   When running from PHAR, environment loading now also checks the **current working directory** (where you execute the command), and will continue without `.env` if none is found (so CLI/report/help can run).
 

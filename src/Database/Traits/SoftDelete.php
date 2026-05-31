@@ -1,6 +1,6 @@
 <?php
 
-namespace DFrame\Database\Traits;
+namespace DLight\Database\Traits;
 
 /**
  * **SoftDelete Trait**
@@ -77,7 +77,7 @@ trait SoftDelete
      *
      * @return bool
      */
-    public function restore($id = null)
+    public function restore()
     {
         $this->checkColumns();
         if (!$this->isDeleted()) {

@@ -1,7 +1,7 @@
 <?php
-namespace DFrame\Database\QueryBuilder;
+namespace DLight\Database\QueryBuilder;
 
-use DFrame\Database\Interfaces\BuilderInterface;
+use DLight\Database\Interfaces\BuilderInterface;
 
 use function \array_keys;
 use function \is_object;

@@ -1,8 +1,8 @@
 <?php
 
-namespace DFrame\Reports\Render;
+namespace DLight\Reports\Render;
 
-use DFrame\Reports\Interface\RenderInterface;
+use DLight\Reports\Interface\RenderInterface;
 use function count;
 
 /**
@@ -19,10 +19,10 @@ class Html implements RenderInterface
 
     public function render(string $type, string $message, string $file, int $line, array $context = []): void
     {
-        /** Check DFrame version */
-        $dfver = class_exists(\DFrame\Application\App::class)
-            ? \DFrame\Application\App::version
-            : 'Non-DFrame Environment';
+        /** Check DLight version */
+        $dfver = class_exists(\DLight\Application\App::class)
+            ? \DLight\Application\App::version
+            : 'Non-DLight Environment';
 
         $config = self::$configs[$type] ?? self::$configs['error'];
 
@@ -307,7 +307,7 @@ class Html implements RenderInterface
                     <div class="title">
                         <h2><?= ucfirst($type) ?></h2>
                         <div class="message"><?= nl2br(htmlspecialchars($message)) ?></div>
-                        <div>DFrame: <?= htmlspecialchars($dfver) ?> | PHP: <?= htmlspecialchars(PHP_VERSION) ?></div>
+                        <div>DLight: <?= htmlspecialchars($dfver) ?> | PHP: <?= htmlspecialchars(PHP_VERSION) ?></div>
                     </div>
                     <?php if ($file && file_exists($file)): ?>
                         <div class="code-container">
@@ -391,7 +391,7 @@ class Html implements RenderInterface
                             document.documentElement.classList.add('theme-transition');
 
                             var isDark = document.documentElement.classList.toggle('dark');
-                            localStorage.setItem('dframe-theme', isDark ? 'dark' : 'light');
+                            localStorage.setItem('dlight-theme', isDark ? 'dark' : 'light');
                             applyTheme(isDark);
 
                             setTimeout(function(){
@@ -403,7 +403,7 @@ class Html implements RenderInterface
 
                         window.toggleTheme = toggleTheme;
 
-                        var stored = localStorage.getItem('dframe-theme');
+                        var stored = localStorage.getItem('dlight-theme');
                         var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
                         var useDark = stored ? (stored === 'dark') : prefersDark;
                         applyTheme(useDark);

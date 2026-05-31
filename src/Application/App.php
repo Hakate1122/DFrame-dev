@@ -1,10 +1,10 @@
 <?php
 
-namespace DFrame\Application;
+namespace DLight\Application;
 
-use DFrame\Application\Router;
-use DFrame\Application\Session;
-use DFrame\Command\Register;
+use DLight\Application\Router;
+use DLight\Application\Session;
+use DLight\Command\Register;
 use Datahihi1\TinyEnv\TinyEnv;
 use Exception;
 
@@ -19,10 +19,10 @@ use Exception;
 class App
 {
     /**
-     * Version of DFrame Framework.
+     * Version of DLight Framework.
      * @var string
      */
-    public const VERSION = '2026.5.4-dev';
+    public const VERSION = '2026.5.31-dev';
     /**
      * Alias for version constant
      */
@@ -554,7 +554,7 @@ class App
     }
 
     /**
-     * Starts the DFrame web application.
+     * Starts the DLight web application.
      * @return void
      */
     public function bootWeb()

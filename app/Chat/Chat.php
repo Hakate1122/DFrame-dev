@@ -1,7 +1,7 @@
 <?php
 namespace App\Chat;
 
-use DFrame\Application\WebSocket;
+use DLight\Application\WebSocket;
 
 class Chat extends WebSocket{
     protected function onOpen(\Socket $client): void

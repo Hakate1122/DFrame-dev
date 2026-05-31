@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Model;
 
-use DFrame\Database\Traits\SoftDelete;
+use DLight\Database\Traits\SoftDelete;
 
 /**
  * Users model - represents the 'users' table in the database.

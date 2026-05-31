@@ -1,6 +1,6 @@
 <?php
 
-namespace DFrame\Application;
+namespace DLight\Application;
 
 use DateTimeImmutable;
 use Psr\Log\LoggerInterface;

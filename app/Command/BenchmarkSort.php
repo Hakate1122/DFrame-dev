@@ -2,18 +2,18 @@
 
 namespace App\Command;
 
-use DFrame\Utils\Sorting\BubbleSort;
-use DFrame\Utils\Sorting\BubbleSort2;
-use DFrame\Utils\Sorting\CountSort;
-use DFrame\Utils\Sorting\GnomeSort;
-use DFrame\Utils\Sorting\HeapSort;
-use DFrame\Utils\Sorting\InsertionSort;
-use DFrame\Utils\Sorting\MergeSort;
-use DFrame\Utils\Sorting\QuickSort;
-use DFrame\Utils\Sorting\RadixSort;
-use DFrame\Utils\Sorting\SelectionSort;
-use DFrame\Utils\Sorting\ShellSort;
-use DFrame\Utils\Sorting\TimSort;
+use DLight\Utils\Sorting\BubbleSort;
+use DLight\Utils\Sorting\BubbleSort2;
+use DLight\Utils\Sorting\CountSort;
+use DLight\Utils\Sorting\GnomeSort;
+use DLight\Utils\Sorting\HeapSort;
+use DLight\Utils\Sorting\InsertionSort;
+use DLight\Utils\Sorting\MergeSort;
+use DLight\Utils\Sorting\QuickSort;
+use DLight\Utils\Sorting\RadixSort;
+use DLight\Utils\Sorting\SelectionSort;
+use DLight\Utils\Sorting\ShellSort;
+use DLight\Utils\Sorting\TimSort;
 
 class BenchmarkSort
 {

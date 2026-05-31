@@ -1,9 +1,11 @@
 <?php
 
-namespace DFrame\Database\Exception;
+namespace DLight\Database\Exception;
 
+use Exception;
 use function sprintf;
 use function strtolower;
+use function in_array;
 
 /**
  * Exception thrown when a method is called on a database design that does not support it.
@@ -89,6 +91,6 @@ class CallWrongMethodOnDbDesign extends \BadMethodCallException
             return 'builder';
         }
 
-        return 'another';
+        return Exception::class;
     }
 }

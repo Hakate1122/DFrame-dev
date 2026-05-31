@@ -1,9 +1,9 @@
 <?php
 
-namespace DFrame\Application\Drive\Cache;
+namespace DLight\Application\Drive\Cache;
 
 /**
- * A Redis-based cache driver for DFrame Framework.
+ * A Redis-based cache driver for DLight Framework.
  */
 class Redis
 {
@@ -19,7 +19,7 @@ class Redis
     private bool $compression;
 
     /**
-     * DFrame Redis Cache Driver
+     * DLight Redis Cache Driver
      *
      * Constructor for Redis cache driver. Configuration can be provided via environment variables or an optional config array.
      * @param array $config Optional configuration array with keys: host, port, timeout, auth, prefix, debug, ttl, compression.

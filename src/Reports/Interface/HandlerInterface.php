@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DFrame\Reports\Interface;
+namespace DLight\Reports\Interface;
 
 /**
  * HandlerInterface - Interface for error and exception handlers

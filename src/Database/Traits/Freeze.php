@@ -1,5 +1,5 @@
 <?php
-namespace DFrame\Database\Traits;
+namespace DLight\Database\Traits;
 
 /**
  * **Freeze Trait**
@@ -25,7 +25,7 @@ trait Freeze
      * @param bool $saveToDb If true, update frozen_at in DB; if false, only set property in object.
      * @return $this
      */
-    public function freeze($saveToDb = false)
+    public function freeze(bool $saveToDb = false)
     {
         if ($this->isFrozen()) {
             return $this;

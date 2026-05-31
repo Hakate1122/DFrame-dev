@@ -1,8 +1,8 @@
 <?php
 
-namespace DFrame\Command;
+namespace DLight\Command;
 
-use DFrame\Application\Command;
+use DLight\Application\Command;
 
 /**
  * Registers core commands to the CLI application.
@@ -11,7 +11,7 @@ class Register
 {
     public function core(Command $cli): void
     {
-        $cli->register('help', fn($argv = null) => Core::help()($argv))->info('Show help information');
+        $cli->register('help', fn($argv) => Core::help()($argv))->info('Show help information');
         $cli->register('help:add', Core::helpAdd())->info('Show detailed help for add / add:<type>');
         $cli->registerAlias('-h', 'help')->infoAlias('help');
         $cli->register('version', Core::version())->info('Show application version');
@@ -28,5 +28,6 @@ class Register
         $cli->register('add:command', Add::command())->info('Create a new command');
         $cli->register('add:middleware', Add::middleware())->info('Create a new middleware');
         $cli->register('add:mail', Add::mail())->info('Create a new mail class');
+        $cli->register('test', Test::handle())->info('Run test suite (phpunit)');
     }
 }

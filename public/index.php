@@ -5,9 +5,16 @@ declare(strict_types=1);
 /*
 | Basic Configuration
 |--------------------------------------------------------------------------
-| This file serves as the entry point for the DFrame web application.
+| This file serves as the entry point for the DLight web application.
 | It sets up the environment, handles autoloading, and initializes the application.
 */
+
+if (PHP_SAPI === 'cli') {
+    die("'index.php' is meant for web server context. Use 'cli' for command line interface.\n");
+}
+if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+    die("Required PHP 8.0.0+");
+}
 
 ob_start();
 define('D_RUN', microtime(true));
@@ -26,7 +33,7 @@ if (!defined('ROOT_DIR')) {
         http_response_code(500);
         die('Application root directory not accessible');
     }
-    /** Define the root directory constant of DFrame application */
+    /** Define the root directory constant of DLight application */
     define('ROOT_DIR', $rootDir);
 }
 
@@ -44,7 +51,7 @@ if (!defined('INDEX_DIR')) {
         http_response_code(500);
         die('Index directory not accessible');
     }
-    /** Define the index directory constant of DFrame application */
+    /** Define the index directory constant of DLight application */
     define('INDEX_DIR', $indexDir);
 }
 
@@ -70,19 +77,19 @@ require_once $autoloadFile;
 |------------------------------------------------------------------------------------------------
 */
 
-// \DFrame\Application\App::setMaintenanceMode(true);
+// \DLight\Application\App::setMaintenanceMode(true);
 
 /*
-| Initialize and boot the DFrame web application
+| Initialize and boot the DLight web application
 |------------------------------------------------------------------------------------------------
 | This sets up the application environment and prepares it for web requests.
 | After initialization, it boots the application to handle incoming requests.
 |------------------------------------------------------------------------------------------------
 */
 
-\DFrame\Reports\Report::setup(true, INDEX_DIR . 'logs/app.log', \DFrame\Reports\Report::html());
+\DLight\Reports\Report::setup(true, INDEX_DIR . 'logs/app.log', \DLight\Reports\Report::html());
 
-$app = new \DFrame\Application\App();
+$app = new \DLight\Application\App();
 $app->setUpWebRoutes(ROOT_DIR . 'app/Router/web/web.php')
     ->setUpWebRoutes(ROOT_DIR . 'app/Router/web/dcloud.php')
     ->setUpWebRoutes(ROOT_DIR . 'app/Router/web/user_basic_crud.php')

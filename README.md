@@ -1,6 +1,6 @@
-# DFrame PHP v8
+# DLight PHP v8
 
-**DFrame** is a minimalist PHP framework designed for small projects, learning, or as a foundation for personal framework development.
+**DLight** is a minimalist PHP framework designed for small projects, learning, or as a foundation for personal framework development.
 
 ## Features
 
@@ -24,24 +24,23 @@
 
 **Routing:**
 ```php
-$router = new DFrame\Application\Router();
+$router = new DLight\Application\Router();
 $router->sign('GET /', [App\Controller\HomeController::class, 'index']); // Single route
+$router->signApi('GET /data', [App\Controller\Api\DataController::class, 'fetch']); // API route
 $router->group('/api')->action(function($router) { // Grouped routes
     $router->sign('GET /users', [App\Controller\Api\UserController::class, 'list']);
     $router->sign('GET /users/{id}', [App\Controller\Api\UserController::class, 'show']);
 });
 $router->sign('GET|POST /demo', [App\Controller\DemoController::class, 'index']); // Multiple methods
-$router->signApi('GET /data', [App\Controller\Api\DataController::class, 'fetch']); // API route
 $router->all('/contact', [App\Controller\ContactController::class, 'index']); // All methods
-$router->runInstance();
 ```
 
 **Controller:**
 
 ```php
-class HomeController extends Controller {
+class HomeController {
     public function index() {
-        return $this->render('home', ['message' => 'Hello!']);
+        return DLight\Application\View::render('home', ['message' => 'Hello!']);
     }
 }
 ```
@@ -56,25 +55,25 @@ DB::table('users')->where('id', 1)->first(); // Query Builder
 
 **View:**
 ```php
-echo DFrame\Application\View::render('home', ['message' => 'Hello!']);
+echo DLight\Application\View::render('home', ['message' => 'Hello!']);
 ```
 
 **Session & Flash:**
 ```php
-DFrame\Application\Session::flash('msg', 'Success!'); // Set flash message
-echo DFrame\Application\Session::getFlash('msg'); // Get and clear flash message
+DLight\Application\Session::flash('msg', 'Success!'); // Set flash message
+echo DLight\Application\Session::getFlash('msg'); // Get and clear flash message
 ```
 
 **Hash:**
 
 ```php
-$hashedPassword = DFrame\Application\Hash::default('password123'); // Hash password
-$isValid = DFrame\Application\Hash::verify('password123', $hashedPassword); // Verify password
+$hashedPassword = DLight\Application\Hash::default('password123'); // Hash password
+$isValid = DLight\Application\Hash::verify('password123', $hashedPassword); // Verify password
 ```
 
 **Mail:**
 ```php
-$mail = new DFrame\Application\Mail();
+$mail = new DLight\Application\Mail();
 $mail->to('recipient@example.com')
     ->cc('')
     ->bcc('')
@@ -92,7 +91,7 @@ $mail->to('recipient@example.com')
 ## Installation
 
 ```bash
-git clone https://github.com/datahihi1/DFrame.git my-project
+git clone https://github.com/datahihi1/DLight.git my-project
 cd my-project
 composer install
 php dli -s

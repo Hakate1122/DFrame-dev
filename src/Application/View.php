@@ -1,6 +1,6 @@
 <?php
 
-namespace DFrame\Application;
+namespace DLight\Application;
 
 use Exception;
 
@@ -18,8 +18,8 @@ class View
     /**
      * @var string The path to the view files.
      */
-    private $viewPath;
-    private $engine;
+    private ?string $viewPath;
+    private ?string $engine;
     private $engineInstance;
 
     /**
@@ -29,7 +29,7 @@ class View
      *                    - Default: ROOT_DIR/resource/view/
      * @throws Exception If the specified view engine class does not exist.
      */
-    public function __construct($viewPath = null)
+    public function __construct(?string $viewPath = null)
     {
         $configPath = ROOT_DIR . 'config/view.php';
         $config = file_exists($configPath) ? require $configPath : [];
@@ -60,7 +60,7 @@ class View
      * @param string|null $viewPath The custom view path to use. If null, uses the instance's view path.
      * @return string
      */
-    public static function render($view, $data = [], $viewPath = null)
+    public static function render(string $view, array $data = [], ?string $viewPath = null)
     {
         $instance = new self($viewPath);
         $data['title'] ??= '<title>Default Title</title>';
@@ -74,7 +74,7 @@ class View
      * @param array $data Data to be passed to the view.
      * @return string
      */
-    public function view($view, $data = [])
+    public function view(string $view, array $data = [])
     {
         if ($this->engine === 'php' || !$this->engineInstance) {
             $view = str_replace(['..', '\\'], '', $view);
@@ -108,7 +108,7 @@ class View
      * Abort the request with a given status code and optional custom error template.
      * @param int $statusCode The HTTP status code to abort with.
      */
-    public static function abort($statusCode): bool|int
+    public static function abort(int $statusCode): bool|int
     {
         return http_response_code($statusCode);
     }
@@ -119,7 +119,7 @@ class View
      * @param array $data Optional data to pass to the partial
      * @return string
      */
-    public static function include($view, $data = [])
+    public static function include(string $view, array $data = [])
     {
         $instance = new self();
         return $instance->view($view, $data);

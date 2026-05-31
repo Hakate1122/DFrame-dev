@@ -3,22 +3,23 @@
 namespace App\Controller;
 
 use App\Model\Users;
-use DFrame\Application\Validator;
+use DLight\Application\Validator;
+use DLight\Application\View;
 
-class UserController extends Controller
+class UserController
 {
     public function __construct(private Users $users)
     {
     }
     public function listUsers()
     {
-        $allUsers = $this->users->fetchAll();
-        return $this->render('user1/list', ['users' => $allUsers]);
+        $allUsers = $this->users::mapper()::all();
+        return View::render('user1/list', ['users' => $allUsers]);
     }
 
     public function addUser()
     {
-        return $this->render('user1/add');
+        return View::render('user1/add');
     }
 
     public function storeUser(Validator $validator)
@@ -46,7 +47,7 @@ class UserController extends Controller
         );
 
         if ($validator->fails()) {
-            return $this->render('user1/add', ['error' => $validator->first()]);
+            return View::render('user1/add', ['error' => $validator->first()]);
         }
 
         $this->users
@@ -60,7 +61,7 @@ class UserController extends Controller
 
     public function editUser($id)
     {
-        return $this->render('user1/edit', ['user' => $this->users->where('id', $id)->first()]);
+        return View::render('user1/edit', ['user' => $this->users->where('id', $id)->first()]);
     }
 
     public function updateUser(Validator $validator, $id)
@@ -90,7 +91,7 @@ class UserController extends Controller
         );
 
         if ($validator->fails()) {
-            return $this->render('user1/edit', ['error' => $validator->errors(), 'user' => $user]);
+            return View::render('user1/edit', ['error' => $validator->errors(), 'user' => $user]);
         }
 
         $this->users

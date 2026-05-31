@@ -1,6 +1,6 @@
 <?php
 
-namespace DFrame\Application;
+namespace DLight\Application;
 
 use Attribute;
 use Closure;
@@ -9,8 +9,8 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionFunction;
 use ReflectionNamedType;
-use DFrame\Application\Middleware;
-use DFrame\Attribute\Deprecated;
+use DLight\Application\Middleware;
+use DLight\Attribute\Deprecated;
 
 /**
  * **HTTP Router**
@@ -132,14 +132,26 @@ class Router
     private static function registerStaticApiRoute(string $spec, mixed $handler, array $middleware = []): void
     {
         $parsed = self::parseRouteSpec($spec);
-        $path = self::normalizeApiPath($parsed['path']);
+        // Build API path so that `/api` comes after any group prefix.
+        $rawPath = trim($parsed['path'], '/');
+        $prefix = rtrim(self::$groupContext['prefix'], '/');
+        if ($prefix !== '') {
+            $path = $prefix . '/api/' . $rawPath;
+        } else {
+            $path = '/api/' . $rawPath;
+        }
+
+        // Ensure path starts with a single slash
+        $path = '/' . ltrim($path, '/');
+
+        $fullMw = array_merge(self::$groupContext['middleware'], $middleware);
 
         foreach ($parsed['methods'] as $method) {
             $store = &self::$staticApiRoutes[$method];
             if (isset($store[$path])) {
                 throw new Exception("Duplicate API route: $method $path");
             }
-            $store[$path] = ['handler' => $handler, 'middleware' => $middleware];
+            $store[$path] = ['handler' => $handler, 'middleware' => $fullMw];
         }
 
         self::$lastRegisteredRoute = [
@@ -306,7 +318,7 @@ class Router
             foreach ($ref->getMethods(ReflectionMethod::IS_PUBLIC) as $m) {
                 foreach ($m->getAttributes() as $attr) {
                     $attrClass = $attr->getName();
-                    if ($attrClass !== self::class && $attrClass !== \DFrame\Attribute\Route::class) {
+                    if ($attrClass !== self::class && $attrClass !== \DLight\Attribute\Route::class) {
                         continue;
                     }
                     $args = $attr->getArguments();
@@ -504,17 +516,19 @@ class Router
         }
 
         $result = $this->invokeHandler($handler, $params);
-        if ($isApi) {
-            header('Content-Type: application/json');
-            $code = is_array($result) && isset($result['code']) ? $result['code'] : 200;
-            http_response_code($code);
-            if (isset($result['code'])) {
-                unset($result['code']);
+            if ($isApi) {
+                header('Content-Type: application/json');
+                $code = is_array($result) && isset($result['code']) ? $result['code'] : 200;
+                http_response_code($code);
+                // Only output JSON when the handler returns something non-null.
+                if ($result !== null) {
+                    echo json_encode($result, JSON_UNESCAPED_UNICODE);
+                }
+            } else {
+                if ($result !== null) {
+                    echo $result;
+                }
             }
-            echo json_encode($result, JSON_UNESCAPED_UNICODE);
-        } else {
-            echo $result;
-        }
     }
 
     private function invokeHandler(mixed $handler, array $params): mixed

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace DFrame\Application\Interfaces;
+namespace DLight\Application\Interfaces;
 
 /**
  * **ViewEngine interface**
  *
- * This interface defines the contract for view engines in the DFrame application.
+ * This interface defines the contract for view engines in the DLight application.
  */
 interface ViewEngine
 {

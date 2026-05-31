@@ -1,7 +1,7 @@
 <?php
-namespace DFrame\Database\Mapper;
+namespace DLight\Database\Mapper;
 
-use DFrame\Database\Interfaces\MapperInterface;
+use DLight\Database\Interfaces\MapperInterface;
 
 abstract class BaseMapper implements MapperInterface {
     protected ?bool $hasDeletedAt = null;

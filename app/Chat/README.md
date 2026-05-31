@@ -54,7 +54,7 @@ WebSocket server started at ws://0.0.0.0:9501
 <?php
 namespace App\Chat;
 
-use DFrame\Application\WebSocket;
+use DLight\Application\WebSocket;
 
 class Chat extends WebSocket
 {

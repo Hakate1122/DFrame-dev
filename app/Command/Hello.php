@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
-use DFrame\Command\Helper\ConsoleInput;
+use DLight\Command\Helper\ConsoleInput;
 
 class Hello
 {
