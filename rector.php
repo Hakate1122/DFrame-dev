@@ -8,9 +8,18 @@ use Rector\Set\ValueObject\SetList;
 
 return static function (RectorConfig $rectorConfig): void {
     $rectorConfig->paths([
-        __DIR__ . '/src',
         __DIR__ . '/app',
+        __DIR__ . '/config',
         __DIR__ . '/public',
+        __DIR__ . '/resource',
+        __DIR__ . '/src',
+        __DIR__ . '/tests',
+        __DIR__ . '/build-phar.php',
+        __DIR__ . '/dli',
+    ]);
+    
+    $rectorConfig->skip([
+        __DIR__ . '/vendor',
     ]);
 
     $rectorConfig->sets([

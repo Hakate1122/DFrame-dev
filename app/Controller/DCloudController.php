@@ -30,7 +30,10 @@ class DCloudController extends Controller
         $list = [];
         $items = scandir($path);
         foreach ($items as $it) {
-            if ($it === '.' || $it === '..') {
+            if ($it === '.') {
+                continue;
+            }
+            if ($it === '..') {
                 continue;
             }
             $full = $path . '/' . $it;

@@ -22,11 +22,9 @@ class Validator
     private ?string $firstError = null;
 
     /* ----- BASIC RULES ----- */
-
     /**
      * Check if a value is present and not empty (except for '0').
      * @param mixed $value The value to check.
-     * @return bool
      */
     public static function required($value): bool
     {
@@ -36,7 +34,6 @@ class Validator
     /**
      * Check if a value is a valid email address.
      * @param mixed $value The value to check.
-     * @return bool
      */
     public static function email($value): bool
     {
@@ -47,7 +44,6 @@ class Validator
      * Check if a string has a minimum length.
      * @param mixed $value The value to check.
      * @param int $min The minimum length.
-     * @return bool
      */
     public static function minLength($value, int $min): bool
     {
@@ -58,7 +54,6 @@ class Validator
      * Check if a string does not exceed a maximum length.
      * @param mixed $value The value to check.
      * @param int $max The maximum length.
-     * @return bool
      */
     public static function maxLength($value, int $max): bool
     {
@@ -68,7 +63,6 @@ class Validator
     /**
      * Check if a value is numeric.
      * @param mixed $value The value to check.
-     * @return bool
      */
     public static function numeric($value): bool
     {
@@ -78,7 +72,6 @@ class Validator
     /**
      * Check if a value is an integer.
      * @param mixed $value The value to check.
-     * @return bool
      */
     public static function integer($value): bool
     {
@@ -88,7 +81,6 @@ class Validator
     /**
      * Check if a value is a boolean.
      * @param mixed $value The value to check.
-     * @return bool
      */
     public static function boolean($value): bool
     {
@@ -101,7 +93,6 @@ class Validator
     /**
      * Check if a value is a string containing only alphabetic characters.
      * @param mixed $value The value to check.
-     * @return bool
      */
     public static function alpha($value): bool
     {
@@ -111,7 +102,6 @@ class Validator
     /**
      * Check if a value is a string containing only alphanumeric characters.
      * @param mixed $value The value to check.
-     * @return bool
      */
     public static function alphaNum($value): bool
     {
@@ -122,7 +112,6 @@ class Validator
      * Check if a value is in a comma-separated list of allowed values.
      * @param mixed $value The value to check.
      * @param string $param Comma-separated list of allowed values.
-     * @return bool
      */
     public static function inList($value, string $param): bool
     {
@@ -133,7 +122,6 @@ class Validator
      * Check if a value is not in a comma-separated list of disallowed values.
      * @param mixed $value The value to check.
      * @param string $param Comma-separated list of disallowed values.
-     * @return bool
      */
     public static function notInList($value, string $param): bool
     {
@@ -143,7 +131,6 @@ class Validator
     /**
      * Check if a value is a valid URL.
      * @param mixed $value The value to check.
-     * @return bool
      */
     public static function url($value): bool
     {
@@ -153,7 +140,6 @@ class Validator
     /**
      * Check if a value is a valid date.
      * @param mixed $value The value to check.
-     * @return bool
      */
     public static function date($value): bool
     {
@@ -161,11 +147,9 @@ class Validator
     }
 
     /* ----- FILE UPLOAD RULES ----- */
-
     /**
      * Check if a value is a valid uploaded file.
      * @param mixed $value The value to check.
-     * @return bool
      */
     public static function isFile($value): bool
     {
@@ -178,7 +162,6 @@ class Validator
     /**
      * Check if a file is an image based on MIME type.
      * @param mixed $value The value to check.
-     * @return bool
      */
     public static function isImage($value): bool
     {
@@ -201,7 +184,6 @@ class Validator
      * Check if a file has an allowed extension.
      * @param mixed $value The value to check.
      * @param string $param Comma-separated list of allowed extensions (without dot).
-     * @return bool
      */
     public static function mimes($value, string $param): bool
     {
@@ -219,7 +201,6 @@ class Validator
      * Check if a file has an allowed MIME type.
      * @param mixed $value The value to check.
      * @param string $param Comma-separated list of allowed MIME types.
-     * @return bool
      */
     public static function mimeTypes($value, string $param): bool
     {
@@ -237,7 +218,6 @@ class Validator
      * Check if a file does not exceed a maximum size in kilobytes.
      * @param mixed $value The value to check.
      * @param int $maxKB The maximum file size in kilobytes.
-     * @return bool
      */
     public static function maxFile($value, int $maxKB): bool
     {
@@ -252,7 +232,6 @@ class Validator
      * Check if a file size is between a minimum and maximum in kilobytes.
      * @param mixed $value The value to check.
      * @param string $param Comma-separated min and max file size in kilobytes (e.g. "100,500").
-     * @return bool
      */
     public static function betweenFile($value, string $param): bool
     {
@@ -342,10 +321,8 @@ class Validator
     }
 
     /* ----- RESULTS ----- */
-
     /**
      * Check if validation failed.
-     * @return bool
      */
     public function fails(): bool
     {
@@ -363,7 +340,6 @@ class Validator
 
     /**
      * Get the first validation error message.
-     * @return string|null
      */
     public function first(): ?string
     {

@@ -11,7 +11,7 @@
     <?php if (!empty($error)): ?>
         <div style="color: red;">
             <?php if (is_array($error)): ?>
-                <?php foreach ($error as $field => $messages): ?>
+                <?php foreach ($error as $messages): ?>
                     <?php if (is_array($messages)): ?>
                         <?php foreach ($messages as $msg): ?>
                             <p><?= htmlspecialchars((string)$msg) ?></p>

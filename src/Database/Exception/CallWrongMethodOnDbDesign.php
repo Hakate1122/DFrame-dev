@@ -78,7 +78,7 @@ class CallWrongMethodOnDbDesign extends \BadMethodCallException
 
     private static function detectExpectedLayer(string $method): string
     {
-        if ($method === 'where' || $method === 'update' || $method === 'delete') {
+        if (in_array($method, ['where', 'update', 'delete'], true)) {
             return 'mapper or builder';
         }
 

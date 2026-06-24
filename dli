@@ -14,9 +14,6 @@ define('INDEX_DIR', __DIR__ . '/public/');
 if (php_sapi_name() !== 'cli') {
 	die("This script can only be run from the command line.");
 }
-if (version_compare(PHP_VERSION, '8.0.0', '<')) {
-	die("\033[31mPHP 8.0 or higher is required to run this application.\033[0m");
-}
 if (!file_exists(ROOT_DIR . 'vendor/autoload.php')) {
 	die("\033[31mAutoloader not found. Please run 'composer install' in the project root.\033[0m");
 }

@@ -88,7 +88,7 @@ class Test
             // If user didn't provide any non-option arguments, run the default `tests` directory
             $hasNonOptionArg = false;
             foreach ($args as $a) {
-                if (strlen($a) > 0 && $a[0] !== '-') {
+                if ((string) $a !== '' && $a[0] !== '-') {
                     $hasNonOptionArg = true;
                     break;
                 }
@@ -135,10 +135,8 @@ class Test
                 $puVersion = $lines[0] ?? trim($verOutput);
             }
             // Fallback: try to extract from PHPUnit stdout captured earlier
-            if (empty($puVersion) && is_string($phpunitOutput)) {
-                if (preg_match('/PHPUnit\s+([0-9\.]+)/i', $phpunitOutput, $pp)) {
-                    $puVersion = 'PHPUnit ' . $pp[1];
-                }
+            if (empty($puVersion) && is_string($phpunitOutput) && preg_match('/PHPUnit\s+([0-9\.]+)/i', $phpunitOutput, $pp)) {
+                $puVersion = 'PHPUnit ' . $pp[1];
             }
                     
 
@@ -154,7 +152,9 @@ class Test
                 if ($xml !== false) {
                     // Find all testcase nodes anywhere in document
                     $testcases = $xml->xpath('//testcase');
-                    if ($testcases === false) $testcases = [];
+                    if ($testcases === false) {
+                        $testcases = [];
+                    }
 
                     foreach ($testcases as $tc) {
                         $tcAttrs = $tc->attributes();
@@ -166,9 +166,9 @@ class Test
                         }
                         $status = 'Pass';
                         $message = '';
-                        if (isset($tc->failure) || isset($tc->error)) {
+                        if (property_exists($tc, 'failure') && $tc->failure !== null || property_exists($tc, 'error') && $tc->error !== null) {
                             $status = 'Fail';
-                            $node = isset($tc->failure) ? $tc->failure : $tc->error;
+                            $node = $tc->failure ?? $tc->error;
                             $message = trim((string)$node->message ?: (string)$node);
                             $failures[] = [
                                 'test' => $display,
@@ -192,11 +192,7 @@ class Test
                     // Print concise summary format requested by user
                     // Header
                     $puShort = $puVersion ?? '';
-                    if (preg_match('/PHPUnit\s+([0-9\.]+)/i', $puShort, $m)) {
-                        $puShort = $m[1];
-                    } else {
-                        $puShort = trim($puShort);
-                    }
+                    $puShort = preg_match('/PHPUnit\s+([0-9\.]+)/i', $puShort, $m) ? $m[1] : trim($puShort);
 
                     echo "DLight Framework - Test Suite" . PHP_EOL;
                     echo "PHPUnit {$puShort} | DLight " . App::version . " | PHP " . PHP_VERSION . PHP_EOL . PHP_EOL;
@@ -230,7 +226,7 @@ class Test
                             } else {
                                 // try to find line that looks like file:line anywhere
                                 foreach (array_reverse($lines) as $ln) {
-                                    if (preg_match('/\\.php:\d+$/', $ln) || preg_match('/:[0-9]+$/', $ln)) {
+                                    if (preg_match('/\\.php:\d+$/', $ln) || preg_match('/:\d+$/', $ln)) {
                                         $fileLine = $ln;
                                         break;
                                     }
@@ -243,14 +239,18 @@ class Test
                                         break;
                                     }
                                 }
-                                if ($reason === '' && isset($lines[1])) $reason = $lines[1];
-                                if ($reason === '' && isset($lines[0])) $reason = $lines[0];
+                                if ($reason === '' && isset($lines[1])) {
+                                    $reason = $lines[1];
+                                }
+                                if ($reason === '' && isset($lines[0])) {
+                                    $reason = $lines[0];
+                                }
                             }
                         }
 
                         $filePart = $fileLine ? " On {$fileLine}" : '';
                         $reasonPart = $reason ? " - {$reason}" : '';
-                        echo "  {$mark} {$c['name']} =>" . (cli_yellow($filePart . $reasonPart) ? cli_yellow("{$filePart}{$reasonPart}") : '') . PHP_EOL;
+                        echo "  {$mark} {$c['name']} =>" . (cli_yellow($filePart . $reasonPart) !== '' && cli_yellow($filePart . $reasonPart) !== '0' ? cli_yellow("{$filePart}{$reasonPart}") : '') . PHP_EOL;
                     }
 
                     echo PHP_EOL;
@@ -266,14 +266,12 @@ class Test
                         $mins = (int)(array_pop($parts) ?? 0);
                         $hours = (int)(array_pop($parts) ?? 0);
                         $timeSeconds = (float)$sec + $mins * 60 + $hours * 3600;
-                    } else {
-                        if ($xml !== false) {
-                            $suites = $xml->xpath('//testsuite');
-                            if ($suites !== false) {
-                                foreach ($suites as $s) {
-                                    $attrs = $s->attributes();
-                                    $timeSeconds += (float)($attrs['time'] ?? 0);
-                                }
+                    } elseif ($xml !== false) {
+                        $suites = $xml->xpath('//testsuite');
+                        if ($suites !== false) {
+                            foreach ($suites as $s) {
+                                $attrs = $s->attributes();
+                                $timeSeconds += (float)($attrs['time'] ?? 0);
                             }
                         }
                     }

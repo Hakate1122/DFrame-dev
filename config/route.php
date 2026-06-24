@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 return [
     'route_path' => ROOT_DIR . 'app/Router',
     'route_file' => [

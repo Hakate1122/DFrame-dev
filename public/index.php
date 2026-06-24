@@ -12,9 +12,6 @@ declare(strict_types=1);
 if (PHP_SAPI === 'cli') {
     die("'index.php' is meant for web server context. Use 'cli' for command line interface.\n");
 }
-if (version_compare(PHP_VERSION, '8.0.0', '<')) {
-    die("Required PHP 8.0.0+");
-}
 
 ob_start();
 define('D_RUN', microtime(true));

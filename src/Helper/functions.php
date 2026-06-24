@@ -170,7 +170,9 @@ function craft_custom_var_dump($var, $indent = 0, &$references = []): string
     $isCli = (PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg');
 
     $ansi = function(string $text, string $color) use ($isCli): string {
-        if (!$isCli) return $text;
+        if (!$isCli) {
+            return $text;
+        }
         $map = [
             'gray' => "\033[0;37m",
             'magenta' => "\033[0;35m",
@@ -185,7 +187,9 @@ function craft_custom_var_dump($var, $indent = 0, &$references = []): string
     };
 
     $htmlWrap = function(string $text, string $color) use ($isCli): string {
-        if ($isCli) return $text;
+        if ($isCli) {
+            return $text;
+        }
         $map = [
             'gray' => '#888888',
             'magenta' => '#b14c9c',
@@ -199,9 +203,7 @@ function craft_custom_var_dump($var, $indent = 0, &$references = []): string
         return '<span style="color: ' . ($map[$color] ?? '#000') . '">' . $esc . '</span>';
     };
 
-    $colorize = function(string $text, string $color) use ($isCli, $ansi, $htmlWrap): string {
-        return $isCli ? $ansi($text, $color) : $htmlWrap($text, $color);
-    };
+    $colorize = (fn(string $text, string $color): string => $isCli ? $ansi($text, $color) : $htmlWrap($text, $color));
     if (is_object($var)) {
         $varKey = spl_object_hash($var);
     } elseif (is_array($var)) {

@@ -243,7 +243,7 @@ class DatabaseManager
 
         if (!empty($this->table)) {
             $selectable = property_exists($this, 'selectable') ? $this->selectable : null;
-            $useSoftDelete = method_exists($this, 'usesSoftDelete') ? (bool) $this->usesSoftDelete() : false;
+            $useSoftDelete = method_exists($this, 'usesSoftDelete') && (bool) $this->usesSoftDelete();
             $this->mapper = $this->getMapper($this->table, $useSoftDelete, $selectable);
         }
 

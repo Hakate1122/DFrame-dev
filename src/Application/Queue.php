@@ -1,13 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace DLight\Application;
 
 abstract class Queue
 {
-    public function __construct()
-    {
-    }
-
     /**
      * Optional: install/prepare queue storage (table, index, etc.).
      */

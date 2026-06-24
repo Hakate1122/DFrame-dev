@@ -22,7 +22,7 @@ class App
      * Version of DLight Framework.
      * @var string
      */
-    public const VERSION = '2026.5.31-dev';
+    public const VERSION = '2026.6.24-dev';
     /**
      * Alias for version constant
      */

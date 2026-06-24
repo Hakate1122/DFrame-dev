@@ -84,11 +84,9 @@ function extract_phar(array $opts)
 
     $baseName = pathinfo($pharPath, PATHINFO_FILENAME);
     $dest = $opts['output'] ?? ($baseName . '-extracted');
-    if (!is_dir($dest)) {
-        if (!mkdir($dest, 0777, true)) {
-            echo "ERROR: Failed to create destination directory: {$dest}\n";
-            return;
-        }
+    if (!is_dir($dest) && !mkdir($dest, 0777, true)) {
+        echo "ERROR: Failed to create destination directory: {$dest}\n";
+        return;
     }
 
     try {
@@ -115,8 +113,7 @@ function extract_phar(array $opts)
 function prompt($text)
 {
     echo $text;
-    $line = trim(fgets(STDIN));
-    return $line;
+    return trim(fgets(STDIN));
 }
 
 function normalize_rel($path)
@@ -141,7 +138,7 @@ function collect_files(array $includes, $baseDir, array $ignores = [])
                 if ($ig === '') {
                     continue;
                 }
-                if (strpos($rel, rtrim($ig, '/')) === 0) {
+                if (str_starts_with($rel, rtrim($ig, '/'))) {
                     $skip = true;
                     break;
                 }
@@ -163,7 +160,7 @@ function collect_files(array $includes, $baseDir, array $ignores = [])
                         if ($ig === '') {
                             continue;
                         }
-                        if (strpos($rel, rtrim($ig, '/')) === 0) {
+                        if (str_starts_with($rel, rtrim($ig, '/'))) {
                             $skip = true;
                             break;
                         }
@@ -210,7 +207,7 @@ function build_phar(array $opts)
                 echo "Filename cannot be empty.\n";
                 continue;
             }
-            if (strpos($outInput, '/') !== false || strpos($outInput, '\\') !== false || strpos($outInput, DIRECTORY_SEPARATOR) !== false) {
+            if (str_contains($outInput, '/') || str_contains($outInput, '\\') || str_contains($outInput, DIRECTORY_SEPARATOR)) {
                 echo "Do not include directory separators. Enter only a filename.\n";
                 continue;
             }
@@ -359,7 +356,7 @@ function build_phar(array $opts)
         }
 
         // If the stub does not contain __HALT_COMPILER(), we can wrap it (when we have a stub file inside the PHAR)
-        if (strpos($stub, '__HALT_COMPILER') === false) {
+        if (!str_contains($stub, '__HALT_COMPILER')) {
             if ($stubFileRel !== null) {
                 $wrapper = "#!/usr/bin/env php\r\n";
                 $wrapper .= "<?php Phar::mapPhar('{$output}'); require 'phar://{$output}/{$stubFileRel}'; __HALT_COMPILER();";
@@ -391,13 +388,12 @@ if (in_array($cmd, ['-h', '--help', 'help'])) {
 }
 
 if ($cmd === 'build') {
-
     if (!extension_loaded('phar')) {
         exit("ERROR: phar extension is not loaded — cannot build PHAR files.\n");
-    } elseif (ini_get('phar.readonly')) {
+    }
+    if (ini_get('phar.readonly')) {
         exit("ERROR: phar.readonly is enabled in php.ini — disable it to build PHAR files.\n");
     }
-
     $opts = [];
     $baseDir = __DIR__;
     $jsonPath = $baseDir . DIRECTORY_SEPARATOR . 'build-phar.json';
@@ -411,7 +407,7 @@ if ($cmd === 'build') {
             // Parse config
             // Output name
             if (!empty($jsonConfig['name'][0])) {
-                $opts['output'] = $jsonConfig['name'][0] . (substr($jsonConfig['name'][0], -5) === '.phar' ? '' : '.phar');
+                $opts['output'] = $jsonConfig['name'][0] . (str_ends_with($jsonConfig['name'][0], '.phar') ? '' : '.phar');
             }
             // Overwrite
             if (isset($jsonConfig['override'])) {
@@ -431,7 +427,7 @@ if ($cmd === 'build') {
             // Stub
             if (!empty($jsonConfig['stub'][0])) {
                 $stubVal = $jsonConfig['stub'][0];
-                if (strpos($stubVal, '<?php') === 0) {
+                if (str_starts_with($stubVal, '<?php')) {
                     $opts['stub-string'] = $stubVal;
                 } else {
                     $opts['stub-file'] = $stubVal;
@@ -441,11 +437,10 @@ if ($cmd === 'build') {
             echo "build-phar.json exists but is not valid JSON.\n";
         }
     }
-
     // parse remaining CLI args (override json if present)
     for ($i = 2; $i < $argc; $i++) {
         $arg = $argv[$i];
-        if (strpos($arg, '--') === 0) {
+        if (str_starts_with($arg, '--')) {
             $pair = substr($arg, 2);
             $parts = explode('=', $pair, 2);
             $key = $parts[0];
@@ -474,7 +469,6 @@ if ($cmd === 'build') {
             }
         }
     }
-
     // Nếu phát hiện config, hỏi người dùng muốn build tự động hay thủ công
     if ($configDetected) {
         echo "\nPhát hiện file cấu hình build-phar.json.\n";
@@ -484,13 +478,13 @@ if ($cmd === 'build') {
         if ($choice === 'q') {
             echo "Đã hủy.\n";
             exit(0);
-        } elseif ($choice === 'm') {
+        }
+        if ($choice === 'm') {
             // Xóa các tùy chọn lấy từ config để buộc build thủ công
             $opts = [];
         }
         // Nếu chọn 'a' hoặc bất kỳ phím nào khác thì giữ nguyên opts
     }
-
     build_phar($opts);
     exit(0);
 }
@@ -499,7 +493,7 @@ if ($cmd === 'extract') {
     $opts = [];
     for ($i = 2; $i < $argc; $i++) {
         $arg = $argv[$i];
-        if (strpos($arg, '--') === 0) {
+        if (str_starts_with($arg, '--')) {
             $pair = substr($arg, 2);
             $parts = explode('=', $pair, 2);
             $key = $parts[0];

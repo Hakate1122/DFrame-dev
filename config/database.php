@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 return [
     'db_driver' => 'mysqli',
     'db_design' => 'builder',

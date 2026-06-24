@@ -167,11 +167,9 @@ class WebSocket
     // ─────────────────────────────────────────────
     // FRAME PARSING
     // ─────────────────────────────────────────────
-
     /**
      * Read exactly $length bytes from a socket (TCP may deliver partial reads).
      *
-     * @param \Socket $client
      * @return string|null Full buffer or null on EOF/error.
      */
     private function readBytes(\Socket $client, int $length): ?string
@@ -359,7 +357,7 @@ class WebSocket
      */
     protected function broadcast(string $message, ?\Socket $except = null): void
     {
-        $exceptId = $except ? spl_object_id($except) : null;
+        $exceptId = $except instanceof \Socket ? spl_object_id($except) : null;
 
         foreach ($this->clients as $client) {
             $clientId = spl_object_id($client);

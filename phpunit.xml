@@ -7,7 +7,6 @@
     </testsuites>
 
     <logging>
-        <!-- Default JUnit log file (Test command will override when needed) -->
         <log type="junit" target="phpunit-report.xml"/>
     </logging>
 

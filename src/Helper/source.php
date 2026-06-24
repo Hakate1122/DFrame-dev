@@ -91,16 +91,17 @@ class Source
 
     /**
      * Read metadata JSON for a file if exists.
-     * @return array|null
      */
     public static function getMeta(string $file): ?array
     {
         $mp = self::metaPath($file);
-        if (!file_exists($mp))
+        if (!file_exists($mp)) {
             return null;
+        }
         $s = file_get_contents($mp);
-        if ($s === false)
+        if ($s === false) {
             return null;
+        }
         $j = json_decode($s, true);
         return is_array($j) ? $j : null;
     }
@@ -156,8 +157,9 @@ class Source
                 $res = @shell_exec("ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 $esc 2>&1");
                 if ($res) {
                     $res = trim($res);
-                    if ($res !== '')
+                    if ($res !== '') {
                         $info['resolution'] = $res;
+                    }
                 }
                 $dur = @shell_exec("ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $esc 2>&1");
                 if ($dur) {
@@ -182,8 +184,9 @@ class Source
                 $info['meta'] = $meta;
                 // merge specific keys if present
                 foreach (['name', 'extension', 'mime', 'category', 'resolution', 'duration'] as $k) {
-                    if (isset($meta[$k]))
+                    if (isset($meta[$k])) {
                         $info[$k] = $meta[$k];
+                    }
                 }
             }
 
@@ -238,8 +241,9 @@ class Source
                 $res = @shell_exec("ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 $esc 2>&1");
                 if ($res) {
                     $res = trim($res);
-                    if ($res !== '')
+                    if ($res !== '') {
                         $meta['resolution'] = $res;
+                    }
                 }
                 $dur = @shell_exec("ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $esc 2>&1");
                 if ($dur) {
@@ -296,8 +300,9 @@ class Source
         $newMeta = self::metaPath($newFile);
         if (file_exists($oldMeta)) {
             $mdir = dirname($newMeta);
-            if (!is_dir($mdir))
+            if (!is_dir($mdir)) {
                 mkdir($mdir, 0755, true);
+            }
             @rename($oldMeta, $newMeta);
         }
 
@@ -314,8 +319,9 @@ class Source
         $filePath = rtrim(INDEX_DIR, '/\\') . self::url($file);
         $ok = file_exists($filePath) && unlink($filePath);
         $meta = self::metaPath($file);
-        if (file_exists($meta))
+        if (file_exists($meta)) {
             @unlink($meta);
+        }
         return $ok;
     }
 

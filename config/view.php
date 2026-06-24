@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 return [
     'view_path' => ROOT_DIR . 'resource/view/',
     'engine' => 'twig', // Access default view engine: 'php', 'bladeone', 'twig', etc.

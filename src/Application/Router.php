@@ -135,11 +135,7 @@ class Router
         // Build API path so that `/api` comes after any group prefix.
         $rawPath = trim($parsed['path'], '/');
         $prefix = rtrim(self::$groupContext['prefix'], '/');
-        if ($prefix !== '') {
-            $path = $prefix . '/api/' . $rawPath;
-        } else {
-            $path = '/api/' . $rawPath;
-        }
+        $path = $prefix !== '' ? $prefix . '/api/' . $rawPath : '/api/' . $rawPath;
 
         // Ensure path starts with a single slash
         $path = '/' . ltrim($path, '/');
@@ -524,10 +520,8 @@ class Router
                 if ($result !== null) {
                     echo json_encode($result, JSON_UNESCAPED_UNICODE);
                 }
-            } else {
-                if ($result !== null) {
-                    echo $result;
-                }
+            } elseif ($result !== null) {
+                echo $result;
             }
     }
 
@@ -656,12 +650,6 @@ class Router
     private static function buildGroupPath(string $path): string
     {
         return '/' . trim(rtrim(self::$groupContext['prefix'], '/') . '/' . ltrim($path, '/'), '/');
-    }
-
-    private static function normalizeApiPath(string $path): string
-    {
-        $p = trim($path, '/');
-        return str_starts_with($p, 'api/') ? '/' . $p : '/api/' . $p;
     }
 
     /* ----- URL GENERATOR ----- */
